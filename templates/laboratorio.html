@@ -12,29 +12,38 @@
             <a href="/dashboard" class="btn btn-secondary">Panel de Control</a>
         </div>
 
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} shadow-sm fw-bold">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
         <div class="card shadow border-0">
             <div class="card-body p-0">
-                <table class="table table-hover mb-0">
+                <table class="table table-hover align-middle mb-0">
                     <thead class="table-dark">
                         <tr>
                             <th class="ps-4">Ticket</th>
                             <th>Equipo</th>
                             <th>Estado</th>
-                            <th class="text-center">Acciones</th>
+                            <th class="text-center pe-4">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for t in trabajos %}
-                        <tr class="align-middle">
+                        <tr>
                             <td class="ps-4"><span class="badge bg-secondary">{{ t.codigo }}</span></td>
-                            <td>{{ t.equipo }}</td>
+                            <td class="fw-bold">{{ t.equipo }}</td>
                             <td>
-                                <span class="badge {{ 'bg-danger' if t.estado == 'Para Revisión' else 'bg-info' }}">
-                                    {{ t.estado }}
-                                </span>
+                                {% if t.estado == 'Para Revisión' %}
+                                    <span class="badge bg-danger">{{ t.estado }}</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">{{ t.estado }}</span>
+                                {% endif %}
                             </td>
-                            <td class="text-center">
-                                <button class="btn btn-sm btn-success px-4">Gestionar</button>
+                            <td class="text-center pe-4">
                                 <a href="/gestionar_orden/{{ t.id_orden }}" class="btn btn-sm btn-success px-4">Gestionar</a>
                             </td>
                         </tr>
@@ -42,7 +51,9 @@
                     </tbody>
                 </table>
                 {% if not trabajos %}
-                    <div class="p-5 text-center text-muted">No hay trabajos pendientes de diagnóstico o reparación.</div>
+                    <div class="p-5 text-center text-muted">
+                        No hay trabajos pendientes de diagnóstico o reparación.
+                    </div>
                 {% endif %}
             </div>
         </div>

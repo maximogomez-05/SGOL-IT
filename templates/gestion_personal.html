@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Personal | SGOL-IT</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold">👥 Gestión de Personal</h2>
+            <a href="/dashboard" class="btn btn-secondary">Volver al Panel</a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} shadow-sm fw-bold">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card shadow border-0">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary mb-3 fw-bold">Registrar Empleado</h5>
+                        <form action="/gestion_personal" method="POST">
+                            <div class="mb-3">
+                                <label class="form-label">Nombre Completo</label>
+                                <input type="text" class="form-control" name="nombre" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Usuario (Login)</label>
+                                <input type="text" class="form-control" name="usuario" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Contraseña</label>
+                                <input type="password" class="form-control" name="password" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label">Rol del Sistema</label>
+                                <select class="form-select" name="rol_id" required>
+                                    <option value="1">Administrador</option>
+                                    <option value="2">Recepcionista</option>
+                                    <option value="3">Técnico de Laboratorio</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 fw-bold">REGISTRAR USUARIO</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="card shadow border-0">
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th class="ps-4">ID</th>
+                                    <th>Nombre</th>
+                                    <th>Usuario</th>
+                                    <th>Rol</th>
+                                    <th class="text-center pe-4">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for emp in empleados %}
+                                <tr>
+                                    <td class="ps-4 fw-bold">{{ emp.id }}</td>
+                                    <td>{{ emp.nombre }}</td>
+                                    <td class="text-muted">@{{ emp.usuario }}</td>
+                                    <td>
+                                        {% if emp.rol_id == 1 %}
+                                            <span class="badge bg-primary">Administrador</span>
+                                        {% elif emp.rol_id == 2 %}
+                                            <span class="badge bg-info text-dark">Recepcionista</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark">Técnico</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center pe-4">
+                                        <form action="/eliminar_empleado/{{ emp.id }}" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este empleado del sistema?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Borrar</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

@@ -25,18 +25,34 @@
                 <form action="/ingreso_equipo" method="POST" class="bg-white p-4 shadow rounded">
                     <h5 class="mb-3 text-primary">Información del Cliente</h5>
                     <div class="row g-3 mb-4">
-                        <div class="col-md-4"><input type="text" name="dni" class="form-control" placeholder="DNI" required></div>
-                        <div class="col-md-8"><input type="text" name="nombre" class="form-control" placeholder="Nombre Completo" required></div>
-                        <div class="col-md-6"><input type="email" name="email" class="form-control" placeholder="Correo Electrónico" required></div>
-                        <div class="col-md-6"><input type="text" name="telefono" class="form-control" placeholder="Teléfono" required></div>
-                        <div class="col-md-12"><input type="password" name="password_web" class="form-control" placeholder="Clave de seguimiento web" required></div>
+                        <div class="col-md-4">
+                            <input type="text" name="dni" class="form-control" placeholder="DNI" pattern="^[0-9]+$" title="Solo se permiten números" required>
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" name="nombre" class="form-control" placeholder="Nombre Completo" pattern="^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$" title="Solo se permiten letras y espacios" required>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="email" name="email" class="form-control" placeholder="Correo Electrónico" required>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" name="telefono" class="form-control" placeholder="Teléfono" pattern="^[0-9]+$" title="Solo se permiten números" required>
+                        </div>
+                        <div class="col-md-12">
+                            <input type="password" name="password_web" class="form-control" placeholder="Clave de seguimiento web" required>
+                        </div>
                     </div>
 
                     <h5 class="mb-3 text-primary border-top pt-4">Información del Equipo</h5>
                     <div class="row g-3 mb-4">
-                        <div class="col-md-4"><input type="text" name="nro_serie" class="form-control" placeholder="Nro de Serie" required></div>
-                        <div class="col-md-4"><input type="text" name="modelo" class="form-control" placeholder="Marca y Modelo" required></div>
-                        <div class="col-md-4"><input type="text" name="tipo" class="form-control" placeholder="Tipo (Notebook, PC, etc)" required></div>
+                        <div class="col-md-4">
+                            <input type="text" name="nro_serie" class="form-control" placeholder="Nro de Serie" required>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" name="modelo" class="form-control" placeholder="Marca y Modelo" required>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" name="tipo" class="form-control" placeholder="Tipo (Notebook, PC, etc)" required>
+                        </div>
                     </div>
 
                     <button type="submit" class="btn btn-primary btn-lg w-100">GENERAR ORDEN Y ENVIAR A REVISIÓN</button>

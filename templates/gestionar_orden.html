@@ -8,29 +8,86 @@
 <body class="bg-light">
     <div class="container py-5">
         <div class="row justify-content-center">
-            <div class="col-lg-8">
+            <div class="col-lg-10">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2 class="fw-bold">👨‍🔧 Diagnóstico Técnico</h2>
-                    <a href="/laboratorio" class="btn btn-secondary btn-sm">Volver al Laboratorio</a>
+                    <h2 class="fw-bold">🛠️ Gestión de Orden #{{ orden.id_orden }}</h2>
+                    <a href="/laboratorio" class="btn btn-secondary">Volver al Listado</a>
                 </div>
 
-                <div class="card shadow border-0">
-                    <div class="card-body p-4">
-                        <div class="alert alert-info mb-4">
-                            <strong>Orden #{{ orden.id_orden }}</strong> | Ticket: <span class="badge bg-dark">{{ orden.codigo }}</span><br>
-                            <strong>Equipo:</strong> {{ orden.equipo }}<br>
-                            <strong>Estado Actual:</strong> {{ orden.estado }}
-                        </div>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                  {% if messages %}
+                    {% for category, message in messages %}
+                      <div class="alert alert-{{ category }} shadow-sm">{{ message }}</div>
+                    {% endfor %}
+                  {% endif %}
+                {% endwith %}
 
-                        <form action="/gestionar_orden/{{ orden.id_orden }}" method="POST">
-                            
-                            <div class="mb-4">
-                                <label class="form-label fw-bold text-primary">Informe Técnico y Repuestos Necesarios:</label>
-                                <textarea class="form-control" name="diagnostico" rows="5" placeholder="Escriba el diagnóstico detallado para que Recepción pueda armar el presupuesto..." required></textarea>
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="card shadow-sm border-0 mb-4">
+                            <div class="card-body">
+                                <h5 class="fw-bold text-primary mb-3">📦 Repuestos y Servicios</h5>
+                                
+                                <form action="/agregar_repuesto/{{ orden.id_orden }}" method="POST" class="row g-2 mb-4">
+                                    <div class="col-8">
+                                        <select class="form-select" name="id_item" required>
+                                            <option value="" selected disabled>Seleccionar ítem...</option>
+                                            {% for item in inventario %}
+                                            <option value="{{ item.id }}">
+                                                {{ item.descripcion }} - ${{ item.precio }} (Stock: {{ item.stock }})
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-2">
+                                        <input type="number" class="form-control" name="cantidad" value="1" min="1" required>
+                                    </div>
+                                    <div class="col-2">
+                                        <button type="submit" class="btn btn-primary w-100">+</button>
+                                    </div>
+                                </form>
+
+                                <table class="table table-sm align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Descripción</th>
+                                            <th>Cant.</th>
+                                            <th>Subtotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for det in detalles %}
+                                        <tr>
+                                            <td>{{ det.descripcion }}</td>
+                                            <td>{{ det.cantidad }}</td>
+                                            <td class="fw-bold">${{ det.subtotal }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                {% if not detalles %}
+                                    <p class="text-center text-muted small">No se han cargado materiales aún.</p>
+                                {% endif %}
                             </div>
+                        </div>
+                    </div>
 
-                            <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold">ENVIAR INFORME A RECEPCIÓN</button>
-                        </form>
+                    <div class="col-md-6">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body">
+                                <h5 class="fw-bold text-danger mb-3">📋 Informe Técnico</h5>
+                                <div class="alert alert-info py-2">
+                                    <strong>Equipo:</strong> {{ orden.equipo }}
+                                </div>
+                                <form action="/gestionar_orden/{{ orden.id_orden }}" method="POST">
+                                    <div class="mb-3">
+                                        <label class="form-label">Diagnóstico Detallado:</label>
+                                        <textarea class="form-control" name="diagnostico" rows="6" placeholder="Escriba aquí los detalles técnicos de la falla y la solución aplicada..." required></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-danger w-100 fw-bold">FINALIZAR Y ENVIAR A RECEPCIÓN</button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
