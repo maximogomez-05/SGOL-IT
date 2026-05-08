@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard | SGOL-IT</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f4f7f6; }
+        .card-menu { transition: transform 0.2s; border: none; }
+        .card-menu:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark mb-5 shadow">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">SGOL-IT</a>
+            <div class="text-white">
+                <span class="me-3">👤 {{ session['nombre'] }} ({{ session['nombre_rol'] }})</span>
+                <a href="/logout" class="btn btn-outline-danger btn-sm">Cerrar Sesión</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2 class="mb-4">Panel Principal</h2>
+        <div class="row">
+            {% if session['rol_id'] == 1 %}
+            <div class="col-md-4">
+                <div class="card card-menu mb-4 p-3 border-start border-primary border-4">
+                    <div class="card-body text-center">
+                        <h5 class="fw-bold">Gestión de Personal</h5>
+                        <p class="text-muted small">Administrar usuarios y roles.</p>
+                        <button class="btn btn-primary w-100">Entrar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card card-menu mb-4 p-3 border-start border-success border-4">
+                    <div class="card-body text-center">
+                        <h5 class="fw-bold text-success">Inventario</h5>
+                        <p class="text-muted small">Control de repuestos y servicios.</p>
+                        <a href="/inventario" class="btn btn-success w-100">Ingresar</a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if session['rol_id'] == 2 %}
+            <div class="col-md-4">
+                <div class="card card-menu mb-4 p-3 border-start border-primary border-4">
+                    <div class="card-body text-center">
+                        <h5 class="fw-bold text-primary">Ingreso de Equipos</h5>
+                        <p class="text-muted small">Cargar clientes y generar OTs.</p>
+                        <a href="/ingreso_equipo" class="btn btn-primary w-100">Cargar Orden</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card card-menu mb-4 p-3 border-start border-success border-4">
+                    <div class="card-body text-center">
+                        <h5 class="fw-bold text-success">Presupuestos</h5>
+                        <p class="text-muted small">Cotizar según diagnóstico técnico.</p>
+                        <a href="/presupuestos_pendientes" class="btn btn-success w-100">Ver Pendientes</a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if session['rol_id'] == 3 %}
+            <div class="col-md-4">
+                <div class="card card-menu mb-4 p-3 border-start border-warning border-4">
+                    <div class="card-body text-center">
+                        <h5 class="fw-bold text-warning">Laboratorio</h5>
+                        <p class="text-muted small">Ver y gestionar reparaciones.</p>
+                        <a href="/laboratorio" class="btn btn-warning w-100 fw-bold text-dark">Ver Pendientes</a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
