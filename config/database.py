@@ -1,41 +1,33 @@
 import mysql.connector
-from mysql.connector import Error
 
-class ConexionBD:
+class ConectorDB:
     def __init__(self):
-        # credenciales defecto.
-        self.host = 'localhost'
-        self.database = 'sgol_it' 
-        self.user = 'root'
-        self.password = '' 
-        self.conexion = None
+        self.host = "localhost"
+        self.user = "root"
+        self.password = ""
+        self.database = "sgol_it"
+        self.conexion = self._conectar()
 
-    def conectar(self):
-        """Establece la conexión con la base de datos."""
-        try:
-            self.conexion = mysql.connector.connect(
-                host=self.host,
-                database=self.database,
-                user=self.user,
-                password=self.password
-            )
-            if self.conexion.is_connected():
-                print("Conexión exitosa a la base de datos SGOL-IT.")
-                return self.conexion
-        except Error as e:
-            print(f"Error al conectar a MySQL: {e}")
-            return None
+    def _conectar(self):
+        return mysql.connector.connect(
+            host=self.host,
+            user=self.user,
+            password=self.password,
+            database=self.database
+        )
 
-    def desconectar(self):
-        """Cierra la conexión para liberar recursos."""
-        if self.conexion and self.conexion.is_connected():
+    def cursor(self, dictionary=False):
+        # Verificamos que la conexión siga viva antes de devolver el cursor
+        if not self.conexion.is_connected():
+            self.conexion = self._conectar()
+        return self.conexion.cursor(dictionary=dictionary)
+
+    def commit(self):
+        self.conexion.commit()
+        
+    def close(self):
+        if self.conexion.is_connected():
             self.conexion.close()
-            print("Conexión cerrada.")
 
-# test
-# probar conexion ejecutando el archivo
-if __name__ == "__main__":
-    db = ConexionBD()
-    con = db.conectar()
-    if con:
-        db.desconectar()
+# Instanciamos el objeto DB que están esperando importar el resto de los archivos
+DB = ConectorDB()

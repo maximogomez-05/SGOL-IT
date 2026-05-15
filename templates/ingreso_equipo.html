@@ -2,60 +2,76 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Recepción | SGOL-IT</title>
+    <title>Nueva Orden | SGOL-IT</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
     <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2 class="fw-bold">Nueva Orden de Trabajo</h2>
-                    <a href="/dashboard" class="btn btn-secondary btn-sm">Volver al Inicio</a>
-                </div>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold">🛠️ Nueva Orden de Trabajo</h2>
+            <a href="/dashboard" class="btn btn-secondary">Volver al Inicio</a>
+        </div>
 
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                  {% if messages %}
-                    {% for category, message in messages %}
-                      <div class="alert alert-{{ category }} shadow">{{ message }}</div>
-                    {% endfor %}
-                  {% endif %}
-                {% endwith %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} shadow-sm fw-bold">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
 
-                <form action="/ingreso_equipo" method="POST" class="bg-white p-4 shadow rounded">
-                    <h5 class="mb-3 text-primary">Información del Cliente</h5>
+        <div class="card shadow border-0">
+            <div class="card-body p-4">
+                <form action="/ingreso_equipo" method="POST">
+                    
+                    <h5 class="text-primary fw-bold mb-3">Información del Cliente</h5>
                     <div class="row g-3 mb-4">
                         <div class="col-md-4">
-                            <input type="text" name="dni" class="form-control" placeholder="DNI" pattern="^[0-9]+$" title="Solo se permiten números" required>
+                            <label class="form-label text-muted small">DNI / CUIL</label>
+                            <input type="text" name="dni" class="form-control" placeholder="Ej: 35123456" pattern="\d{7,11}" title="Ingrese solo números (entre 7 y 11 dígitos)" required>
                         </div>
                         <div class="col-md-8">
-                            <input type="text" name="nombre" class="form-control" placeholder="Nombre Completo" pattern="^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$" title="Solo se permiten letras y espacios" required>
+                            <label class="form-label text-muted small">Nombre Completo</label>
+                            <input type="text" name="nombre" class="form-control" placeholder="Ej: Juan Pérez" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" title="El nombre no puede contener números ni símbolos" required>
                         </div>
                         <div class="col-md-6">
-                            <input type="email" name="email" class="form-control" placeholder="Correo Electrónico" required>
+                            <label class="form-label text-muted small">Email</label>
+                            <input type="email" name="email" class="form-control" placeholder="ejemplo@correo.com" required>
                         </div>
                         <div class="col-md-6">
-                            <input type="text" name="telefono" class="form-control" placeholder="Teléfono" pattern="^[0-9]+$" title="Solo se permiten números" required>
+                            <label class="form-label text-muted small">Teléfono</label>
+                            <input type="text" name="telefono" class="form-control" placeholder="Ej: 3704123456" pattern="\d{8,15}" title="Ingrese código de área y número, sin espacios ni guiones" required>
                         </div>
                         <div class="col-md-12">
-                            <input type="password" name="password_web" class="form-control" placeholder="Clave de seguimiento web" required>
+                            <label class="form-label text-muted small">Contraseña Web (Para que el cliente siga su trámite)</label>
+                            <input type="password" name="password_web" class="form-control" placeholder="Cree una contraseña temporal..." minlength="6" required>
                         </div>
                     </div>
 
-                    <h5 class="mb-3 text-primary border-top pt-4">Información del Equipo</h5>
+                    <h5 class="text-primary fw-bold mb-3">Información del Equipo</h5>
                     <div class="row g-3 mb-4">
                         <div class="col-md-4">
-                            <input type="text" name="nro_serie" class="form-control" placeholder="Nro de Serie" required>
+                            <label class="form-label text-muted small">Número de Serie</label>
+                            <input type="text" name="nro_serie" class="form-control" placeholder="Ej: SN-987654321" required>
                         </div>
                         <div class="col-md-4">
-                            <input type="text" name="modelo" class="form-control" placeholder="Marca y Modelo" required>
+                            <label class="form-label text-muted small">Marca y Modelo</label>
+                            <input type="text" name="modelo" class="form-control" placeholder="Ej: Dell Inspiron 3000" required>
                         </div>
                         <div class="col-md-4">
-                            <input type="text" name="tipo" class="form-control" placeholder="Tipo (Notebook, PC, etc)" required>
+                            <label class="form-label text-muted small">Tipo de Dispositivo</label>
+                            <select name="tipo" class="form-select" required>
+                                <option value="" disabled selected>Seleccione...</option>
+                                <option value="Notebook">Notebook</option>
+                                <option value="PC de Escritorio">PC de Escritorio</option>
+                                <option value="All-in-One">All-in-One</option>
+                                <option value="Impresora">Impresora</option>
+                                <option value="Otro">Otro</option>
+                            </select>
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary btn-lg w-100">GENERAR ORDEN Y ENVIAR A REVISIÓN</button>
+                    <button type="submit" class="btn btn-primary w-100 fw-bold py-2">GENERAR ORDEN Y ENVIAR A REVISIÓN</button>
                 </form>
             </div>
         </div>

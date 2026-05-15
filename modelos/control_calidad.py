@@ -1,46 +1,26 @@
-from config.database import ConexionBD
+from config.database import DB
 
 class ControlCalidad:
-    def __init__(self, id_ot, software, temperaturas, aprobado=1):
-        self.id_ot = id_ot
-        self.software = software
+    def __init__(self, id_orden, id_empleado, temperaturas, software, observaciones):
+        self.id_orden = id_orden
+        self.id_empleado = id_empleado
         self.temperaturas = temperaturas
-        self.aprobado = aprobado
+        self.software = software
+        self.observaciones = observaciones
 
-    def registrar_prueba(self):
-        """Registra los resultados técnicos de la reparación (RF-3.3)."""
-        db = ConexionBD()
-        conexion = db.conectar()
-        if conexion:
-            try:
-                cursor = conexion.cursor()
-                sql = """INSERT INTO Control_Calidad 
-                         (Aprobado_Entrega, Software_Benchmark_Utilizado, Temperaturas_Registradas, Orden_Trabajo_ID_OT) 
-                         VALUES (%s, %s, %s, %s)"""
-                cursor.execute(sql, (self.aprobado, self.software, self.temperaturas, self.id_ot))
-                conexion.commit()
-                return True
-            except Exception as e:
-                print(f"Error al registrar control de calidad: {e}")
-                return False
-            finally:
-                cursor.close()
-                db.desconectar()
-        return False
-
-    @staticmethod
-    def verificar_aprobacion(id_ot):
-        """Verifica si la OT ya tiene una prueba de calidad aprobada."""
-        db = ConexionBD()
-        conexion = db.conectar()
-        if conexion:
-            try:
-                cursor = conexion.cursor()
-                sql = "SELECT Aprobado_Entrega FROM Control_Calidad WHERE Orden_Trabajo_ID_OT = %s"
-                cursor.execute(sql, (id_ot,))
-                resultado = cursor.fetchone()
-                return resultado is not None and resultado[0] == 1
-            finally:
-                cursor.close()
-                db.desconectar()
-        return False
+    def registrar(self):
+        cursor = DB.cursor()
+        # Nombres de columnas sincronizados con el SQL de arriba
+        sql = """INSERT INTO control_calidad 
+                 (Temperaturas_Registradas, Software_Benchmark, Observaciones, Orden_Trabajo_ID_OT, Empleado_ID_Empleado) 
+                 VALUES (%s, %s, %s, %s, %s)"""
+        val = (self.temperaturas, self.software, self.observaciones, self.id_orden, self.id_empleado)
+        
+        try:
+            cursor.execute(sql, val)
+            DB.commit()
+        except Exception as e:
+            print(f"Error en BD ControlCalidad: {e}")
+            raise e
+        finally:
+            cursor.close()

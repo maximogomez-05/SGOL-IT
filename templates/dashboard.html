@@ -23,6 +23,15 @@
 
     <div class="container">
         <h2 class="mb-4">Panel Principal</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} shadow-sm fw-bold">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
         <div class="row">
             {% if session['rol_id'] == 1 %}
             <div class="col-md-4">
@@ -56,11 +65,25 @@
                 </div>
             </div>
             <div class="col-md-4">
+                <div class="card card-menu mb-4 p-3 border-start border-warning border-4">
+                    <div class="card-body text-center">
+                        <h5 class="fw-bold text-warning">Presupuestos</h5>
+                        <p class="text-muted small">Cotizar según diagnóstico técnico.</p>
+                        <a href="/presupuestos_pendientes" class="btn btn-warning text-dark fw-bold w-100">Ver Pendientes</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
                 <div class="card card-menu mb-4 p-3 border-start border-success border-4">
                     <div class="card-body text-center">
-                        <h5 class="fw-bold text-success">Presupuestos</h5>
-                        <p class="text-muted small">Cotizar según diagnóstico técnico.</p>
-                        <a href="/presupuestos_pendientes" class="btn btn-success w-100">Ver Pendientes</a>
+                        <h5 class="fw-bold text-success">Entregas y Cobros</h5>
+                        <p class="text-muted small">Facturar y entregar equipos listos.</p>
+                        <a href="/entregas_pendientes" class="btn btn-success w-100 fw-bold">
+                            Ver Entregas
+                            {% if listos_entrega and listos_entrega > 0 %}
+                                <span class="badge bg-danger ms-2">{{ listos_entrega }}</span>
+                            {% endif %}
+                        </a>
                     </div>
                 </div>
             </div>
@@ -68,11 +91,11 @@
 
             {% if session['rol_id'] == 3 %}
             <div class="col-md-4">
-                <div class="card card-menu mb-4 p-3 border-start border-warning border-4">
+                <div class="card card-menu mb-4 p-3 border-start border-danger border-4">
                     <div class="card-body text-center">
-                        <h5 class="fw-bold text-warning">Laboratorio</h5>
-                        <p class="text-muted small">Ver y gestionar reparaciones.</p>
-                        <a href="/laboratorio" class="btn btn-warning w-100 fw-bold text-dark">Ver Pendientes</a>
+                        <h5 class="fw-bold text-danger">Laboratorio</h5>
+                        <p class="text-muted small">Ver y gestionar reparaciones (QA).</p>
+                        <a href="/laboratorio" class="btn btn-danger w-100 fw-bold text-white">Ver Pendientes</a>
                     </div>
                 </div>
             </div>
