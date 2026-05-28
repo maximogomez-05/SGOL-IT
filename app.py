@@ -143,7 +143,7 @@ def dashboard():
             stats['tecnico_labels'].append(row['tecnico'])
             stats['tecnico_valores'].append(int(row['cantidad']))
         
-    if session['rol_id'] == 2:
+    if session['rol_id'] in (1, 2):
         cursor.execute("SELECT COUNT(*) as cant FROM orden_trabajo WHERE Estado_General = 'Listo para Entregar'")
         res = cursor.fetchone()
         listos_count = res['cant'] if res else 0
@@ -267,11 +267,31 @@ def eliminar_item(id_item):
 
 @app.route('/turnos')
 def gestionar_turnos():
-    if 'usuario_id' not in session or session['rol_id'] != 2: 
+    if 'usuario_id' not in session or session['rol_id'] not in (1, 2): 
         return redirect(url_for('inicio'))
     
     q = request.args.get('q', '').strip()
     cursor = DB.cursor(dictionary=True)
+    
+    # Asegurar que existe la tabla de turnos para evitar errores de base de datos
+    try:
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS turno (
+                ID_Turno INT AUTO_INCREMENT PRIMARY KEY,
+                DNI_CUIL VARCHAR(15),
+                Nombre_Completo VARCHAR(100),
+                Email VARCHAR(100),
+                Telefono VARCHAR(20),
+                Servicio VARCHAR(100),
+                Presupuesto_Estimado DECIMAL(10,2),
+                Fecha_Solicitud DATETIME,
+                Estado VARCHAR(50) DEFAULT 'Pendiente'
+            )
+        """)
+        DB.commit()
+    except Exception as e:
+        print(f"Error al verificar/crear tabla turno: {e}")
+        
     if q:
         sql = """SELECT * FROM turno 
                  WHERE Estado = 'Pendiente' AND (DNI_CUIL LIKE %s OR ID_Turno = %s OR Nombre_Completo LIKE %s)
@@ -288,7 +308,7 @@ def gestionar_turnos():
 
 @app.route('/procesar_turno/<int:id_turno>', methods=['POST'])
 def procesar_turno(id_turno):
-    if 'usuario_id' not in session or session['rol_id'] != 2: 
+    if 'usuario_id' not in session or session['rol_id'] not in (1, 2): 
         return redirect(url_for('inicio'))
     
     cursor = DB.cursor(dictionary=True)
@@ -308,7 +328,7 @@ def procesar_turno(id_turno):
 
 @app.route('/ingreso_equipo', methods=['GET', 'POST'])
 def ingreso_equipo():
-    if 'usuario_id' not in session or session['rol_id'] != 2: 
+    if 'usuario_id' not in session or session['rol_id'] not in (1, 2): 
         return redirect(url_for('inicio'))
         
     if request.method == 'POST':
@@ -355,14 +375,14 @@ def ingreso_equipo():
 
 @app.route('/presupuestos_pendientes')
 def presupuestos_pendientes():
-    if 'usuario_id' not in session or session['rol_id'] != 2: 
+    if 'usuario_id' not in session or session['rol_id'] not in (1, 2): 
         return redirect(url_for('inicio'))
     ordenes = [o for o in OrdenTrabajo.buscar_pendientes() if o['estado'] == 'Esperando Aprobación']
     return render_template('presupuestos_pendientes.html', trabajos=ordenes)
 
 @app.route('/cotizar_orden/<int:id_orden>', methods=['GET', 'POST'])
 def cotizar_orden(id_orden):
-    if 'usuario_id' not in session or session['rol_id'] != 2: 
+    if 'usuario_id' not in session or session['rol_id'] not in (1, 2): 
         return redirect(url_for('inicio'))
     cursor = DB.cursor(dictionary=True)
     cursor.execute("""SELECT d.Cantidad * i.Precio_Actual as subtotal FROM detalle_orden d 
@@ -371,6 +391,11 @@ def cotizar_orden(id_orden):
     total = sum(d['subtotal'] for d in cursor.fetchall())
     
     if request.method == 'POST':
+        if total <= 0:
+            flash("Error: El total del presupuesto debe ser mayor a $0. Agregue al menos un repuesto o servicio antes de generar la cotización.", "danger")
+            cursor.close()
+            return redirect(url_for('cotizar_orden', id_orden=id_orden))
+            
         cursor.execute("SELECT Equipo_ID_Equipo FROM orden_trabajo WHERE ID_OT = %s", (id_orden,))
         id_eq = cursor.fetchone()['Equipo_ID_Equipo']
         id_pres = Presupuesto(total, id_eq).registrar()
@@ -393,20 +418,22 @@ def cotizar_orden(id_orden):
 
 @app.route('/entregas_pendientes')
 def entregas_pendientes():
-    if 'usuario_id' not in session or session['rol_id'] != 2: 
+    if 'usuario_id' not in session or session['rol_id'] not in (1, 2): 
         return redirect(url_for('inicio'))
     listos = OrdenTrabajo.buscar_listos_para_entregar()
     return render_template('entregas_pendientes.html', trabajos=listos)
 
 @app.route('/facturar/<int:id_orden>')
 def facturar_orden(id_orden):
-    if 'usuario_id' not in session or session['rol_id'] != 2: 
+    if 'usuario_id' not in session or session['rol_id'] not in (1, 2): 
         return redirect(url_for('inicio'))
     orden = OrdenTrabajo.buscar_por_id(id_orden)
     return render_template('facturar_orden.html', orden=orden)
 
 @app.route('/procesar_pago/<int:id_orden>', methods=['POST'])
 def procesar_pago(id_orden):
+    if 'usuario_id' not in session or session['rol_id'] not in (1, 2): 
+        return redirect(url_for('inicio'))
     metodo = request.form.get('metodo_pago')
     orden = OrdenTrabajo.buscar_por_id(id_orden)
     monto = orden['costo'] if orden and orden['costo'] else 0.0
@@ -427,14 +454,14 @@ def procesar_pago(id_orden):
 
 @app.route('/laboratorio')
 def laboratorio():
-    if 'usuario_id' not in session or session['rol_id'] != 3: 
+    if 'usuario_id' not in session or session['rol_id'] not in (1, 3): 
         return redirect(url_for('inicio'))
     ordenes = [o for o in OrdenTrabajo.buscar_pendientes() if o['estado'] in ('Para Revisión', 'En Reparación', 'En Diagnóstico', 'Esperando Repuestos', 'Reparando', 'En Testing')]
     return render_template('laboratorio.html', trabajos=ordenes)
 
 @app.route('/historial_equipo', methods=['POST'])
 def historial_equipo():
-    if 'usuario_id' not in session or session['rol_id'] != 3: 
+    if 'usuario_id' not in session or session['rol_id'] not in (1, 3): 
         return redirect(url_for('inicio'))
     nro_serie = request.form.get('nro_serie')
     historial = OrdenTrabajo.buscar_historial_por_nro_serie(nro_serie)
@@ -461,7 +488,7 @@ def detalle_historial(id_orden):
 
 @app.route('/gestionar_orden/<int:id_orden>', methods=['GET', 'POST'])
 def gestionar_orden(id_orden):
-    if 'usuario_id' not in session or session['rol_id'] != 3: 
+    if 'usuario_id' not in session or session['rol_id'] not in (1, 3): 
         return redirect(url_for('inicio'))
     
     orden = OrdenTrabajo.buscar_detalle_completo(id_orden)
@@ -528,15 +555,18 @@ def gestionar_orden(id_orden):
 
 @app.route('/agregar_repuesto/<int:id_orden>', methods=['POST'])
 def agregar_repuesto(id_orden):
-    if 'usuario_id' not in session or session['rol_id'] != 3: 
+    if 'usuario_id' not in session or session['rol_id'] not in (1, 3): 
         return redirect(url_for('inicio'))
     id_i = request.form.get('id_item')
     cant = int(request.form.get('cantidad'))
     
     it = Inventario.buscar_por_id(id_i)
     if it and (it['tipo_item'] != 'Repuesto_Fisico' or cant <= it['stock']):
-        DetalleOrden(cant, it['precio'], id_orden, id_i).registrar()
-        flash("Ítem añadido.", "info")
+        res_reg = DetalleOrden(cant, it['precio'], id_orden, id_i).registrar()
+        if res_reg:
+            flash("Ítem añadido.", "info")
+        else:
+            flash("Error al registrar el repuesto en la orden de trabajo.", "danger")
     else: 
         flash("Error: Stock insuficiente.", "danger")
         
@@ -544,7 +574,7 @@ def agregar_repuesto(id_orden):
 
 @app.route('/eliminar_repuesto_ot/<int:id_orden>/<int:id_item>', methods=['POST'])
 def eliminar_repuesto_ot(id_orden, id_item):
-    if 'usuario_id' not in session or session['rol_id'] != 3: 
+    if 'usuario_id' not in session or session['rol_id'] not in (1, 3): 
         return redirect(url_for('inicio'))
     if DetalleOrden.eliminar_item_ot(id_orden, id_item):
         flash("Ítem removido.", "success")
@@ -620,6 +650,8 @@ def portal_cliente():
 
 @app.route('/responder_presupuesto/<int:id_orden>/<respuesta>')
 def responder_presupuesto(id_orden, respuesta):
+    if 'cliente_id' not in session:
+        return redirect(url_for('inicio'))
     est = "En Reparación" if respuesta == 'aprobar' else "Rechazado"
     est_presupuesto = "Aprobado" if respuesta == 'aprobar' else "Rechazado"
     

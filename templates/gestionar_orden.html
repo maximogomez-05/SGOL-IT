@@ -28,7 +28,7 @@
                     <div class="card-body">
                         <h5 class="fw-bold text-primary mb-3">📦 Repuestos y Servicios</h5>
                         
-                        {% if orden.estado == 'Para Revisión' %}
+                        {% if orden.estado in ('Para Revisión', 'En Diagnóstico') %}
                         <form action="/agregar_repuesto/{{ orden.id_orden }}" method="POST" class="d-flex gap-2 mb-4">
                             <select name="id_item" class="form-select" required>
                                 <option value="" disabled selected>Seleccionar ítem...</option>
@@ -51,7 +51,7 @@
                                     <th>Descripción</th>
                                     <th class="text-center">Cant.</th>
                                     <th class="text-end">Subtotal</th>
-                                    {% if orden.estado == 'Para Revisión' %}
+                                    {% if orden.estado in ('Para Revisión', 'En Diagnóstico') %}
                                         <th class="text-center">Acción</th>
                                     {% endif %}
                                 </tr>
@@ -63,7 +63,7 @@
                                         <td>{{ d.descripcion }}</td>
                                         <td class="text-center fw-bold">{{ d.cantidad }}</td>
                                         <td class="text-end fw-bold" style="color: var(--accent-emerald);">${{ d.subtotal }}</td>
-                                        {% if orden.estado == 'Para Revisión' %}
+                                        {% if orden.estado in ('Para Revisión', 'En Diagnóstico') %}
                                         <td class="text-center">
                                             <form action="/eliminar_repuesto_ot/{{ orden.id_orden }}/{{ d.id_item }}" method="POST" class="d-inline">
                                                 <button type="submit" class="btn btn-sm btn-danger py-0 px-2">🗑️</button>
