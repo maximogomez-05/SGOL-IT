@@ -1,3 +1,5 @@
+
+# pyrefly: ignore [missing-import]
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import datetime
 from auth.login import Autenticacion  
@@ -64,6 +66,7 @@ def dashboard():
     
     listos_count = 0
     alertas_stock = []
+    stats = {}
     
     cursor = DB.cursor(dictionary=True)
     
@@ -75,6 +78,71 @@ def dashboard():
         cursor.execute("SELECT Descripcion, Stock_Disponible, Stock_Minimo FROM catalogo_inventario WHERE Tipo_Item = 'Repuesto_Fisico' AND Stock_Disponible <= Stock_Minimo")
         alertas_stock = cursor.fetchall()
         
+        # 1. Total ingresos
+        cursor.execute("SELECT SUM(Monto_Total) as total FROM factura")
+        total_res = cursor.fetchone()
+        stats['total_ingresos'] = float(total_res['total'] or 0.0) if total_res else 0.0
+
+        # 2. Cantidad de OTs finalizadas
+        cursor.execute("SELECT COUNT(*) as total FROM orden_trabajo WHERE Estado_General = 'Finalizado'")
+        finalizados_res = cursor.fetchone()
+        stats['total_finalizados'] = finalizados_res['total'] if finalizados_res else 0
+
+        # 3. Facturación mensual
+        cursor.execute("""
+            SELECT DATE_FORMAT(Fecha_Emision, '%Y-%m') as mes, SUM(Monto_Total) as total 
+            FROM factura 
+            GROUP BY mes 
+            ORDER BY mes ASC
+        """)
+        stats['mensual_labels'] = []
+        stats['mensual_valores'] = []
+        for row in cursor.fetchall():
+            stats['mensual_labels'].append(row['mes'])
+            stats['mensual_valores'].append(float(row['total']))
+
+        # 4. Métodos de pago
+        cursor.execute("""
+            SELECT Metodo_Pago as metodo, SUM(Monto_Total) as total 
+            FROM factura 
+            GROUP BY Metodo_Pago
+        """)
+        stats['metodo_labels'] = []
+        stats['metodo_valores'] = []
+        for row in cursor.fetchall():
+            stats['metodo_labels'].append(row['metodo'])
+            stats['metodo_valores'].append(float(row['total']))
+
+        # 5. Repuestos vs Mano de Obra
+        cursor.execute("""
+            SELECT ci.Tipo_Item as tipo, SUM(do.Cantidad * do.Precio_Unitario_Congelado) as total
+            FROM detalle_orden do
+            JOIN catalogo_inventario ci ON do.Catalogo_Inventario_ID_Item = ci.ID_Item
+            JOIN orden_trabajo ot ON do.Orden_Trabajo_ID_OT = ot.ID_OT
+            WHERE ot.Estado_General = 'Finalizado'
+            GROUP BY ci.Tipo_Item
+        """)
+        stats['tipo_labels'] = []
+        stats['tipo_valores'] = []
+        for row in cursor.fetchall():
+            tipo_bonito = "Repuestos" if row['tipo'] == 'Repuesto_Fisico' else "Mano de Obra"
+            stats['tipo_labels'].append(tipo_bonito)
+            stats['tipo_valores'].append(float(row['total']))
+
+        # 6. Desempeño de Técnicos
+        cursor.execute("""
+            SELECT e.Nombre_Completo as tecnico, COUNT(ot.ID_OT) as cantidad
+            FROM orden_trabajo ot
+            JOIN empleado e ON ot.Empleado_ID_Empleado = e.ID_Empleado
+            WHERE ot.Estado_General = 'Finalizado'
+            GROUP BY e.Nombre_Completo
+        """)
+        stats['tecnico_labels'] = []
+        stats['tecnico_valores'] = []
+        for row in cursor.fetchall():
+            stats['tecnico_labels'].append(row['tecnico'])
+            stats['tecnico_valores'].append(int(row['cantidad']))
+        
     if session['rol_id'] == 2:
         cursor.execute("SELECT COUNT(*) as cant FROM orden_trabajo WHERE Estado_General = 'Listo para Entregar'")
         res = cursor.fetchone()
@@ -82,7 +150,8 @@ def dashboard():
         
     cursor.close()
         
-    return render_template('dashboard.html', listos_entrega=listos_count, alertas_stock=alertas_stock)
+    return render_template('dashboard.html', listos_entrega=listos_count, alertas_stock=alertas_stock, stats=stats)
+
 
 @app.route('/solicitar_turno', methods=['GET', 'POST'])
 def solicitar_turno():

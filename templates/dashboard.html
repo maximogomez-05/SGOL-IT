@@ -5,6 +5,7 @@
     <title>Dashboard | SGOL-IT</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <nav class="navbar navbar-dark mb-5">
@@ -41,6 +42,7 @@
 
         <div class="row">
             {% if session['rol_id'] == 1 %}
+            <!-- Tarjetas de Navegación Rápida -->
             <div class="col-md-4">
                 <div class="card card-menu mb-4 p-3 border-start border-primary border-4">
                     <div class="card-body text-center">
@@ -65,6 +67,64 @@
                         <h5 class="fw-bold text-secondary">Historial General</h5>
                         <p class="text-muted small">Todos los equipos ingresados.</p>
                         <a href="/historial_general" class="btn btn-secondary w-100 fw-bold text-white">Ver Historial</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Métricas Financieras Clave -->
+            <div class="col-md-6 mb-4 mt-3">
+                <div class="card glass-panel p-4 text-center border-start border-4 border-info">
+                    <h6 class="text-muted small fw-bold text-uppercase" style="color: #9ca3af !important;">Ingresos Totales Registrados</h6>
+                    <h1 class="display-6 fw-bold text-white mb-0" style="font-family: 'Outfit';">${{ "{:,.2f}".format(stats.total_ingresos) }}</h1>
+                    <p class="text-muted small mt-2 mb-0">Total acumulado de facturas cobradas</p>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4 mt-3">
+                <div class="card glass-panel p-4 text-center border-start border-4 border-success">
+                    <h6 class="text-muted small fw-bold text-uppercase" style="color: #9ca3af !important;">Órdenes Finalizadas y Cobradas</h6>
+                    <h1 class="display-6 fw-bold text-white mb-0" style="font-family: 'Outfit';">{{ stats.total_finalizados }}</h1>
+                    <p class="text-muted small mt-2 mb-0">Equipos entregados satisfactoriamente</p>
+                </div>
+            </div>
+
+            <!-- Gráficos Estadísticos del Administrador -->
+            <div class="col-md-12 mt-2 mb-4">
+                <h3 class="text-info fw-bold mb-1" style="font-family: 'Outfit';">📊 Estadísticas del Ciber-Laboratorio</h3>
+            </div>
+            
+            <!-- 1. Facturación Mensual -->
+            <div class="col-md-6 mb-4">
+                <div class="card glass-panel p-4 h-100">
+                    <h5 class="fw-bold text-white mb-3" style="font-family: 'Outfit';">📈 Facturación Mensual</h5>
+                    <div style="position: relative; height:280px; width:100%">
+                        <canvas id="chartMensual"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- 2. Repuestos vs Mano de Obra -->
+            <div class="col-md-6 mb-4">
+                <div class="card glass-panel p-4 h-100">
+                    <h5 class="fw-bold text-white mb-3" style="font-family: 'Outfit';">⚙️ Repuestos vs. Mano de Obra</h5>
+                    <div style="position: relative; height:280px; width:100%">
+                        <canvas id="chartTipo"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- 3. Métodos de Pago -->
+            <div class="col-md-6 mb-4">
+                <div class="card glass-panel p-4 h-100">
+                    <h5 class="fw-bold text-white mb-3" style="font-family: 'Outfit';">💳 Métodos de Pago</h5>
+                    <div style="position: relative; height:280px; width:100%">
+                        <canvas id="chartMetodo"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- 4. Desempeño de Técnicos -->
+            <div class="col-md-6 mb-4">
+                <div class="card glass-panel p-4 h-100">
+                    <h5 class="fw-bold text-white mb-3" style="font-family: 'Outfit';">👨‍🔧 Eficiencia de Técnicos (Equipos Listos)</h5>
+                    <div style="position: relative; height:280px; width:100%">
+                        <canvas id="chartTecnicos"></canvas>
                     </div>
                 </div>
             </div>
@@ -145,5 +205,156 @@
             {% endif %}
         </div>
     </div>
+    {% if session['rol_id'] == 1 %}
+    <!-- Contenedor oculto de datos para pasar información a JS de forma válida para el linter -->
+    <div id="stats-data" style="display: none;"
+         data-mensual-labels='{{ stats.mensual_labels | tojson }}'
+         data-mensual-valores='{{ stats.mensual_valores | tojson }}'
+         data-tipo-labels='{{ stats.tipo_labels | tojson }}'
+         data-tipo-valores='{{ stats.tipo_valores | tojson }}'
+         data-metodo-labels='{{ stats.metodo_labels | tojson }}'
+         data-metodo-valores='{{ stats.metodo_valores | tojson }}'
+         data-tecnico-labels='{{ stats.tecnico_labels | tojson }}'
+         data-tecnico-valores='{{ stats.tecnico_valores | tojson }}'>
+    </div>
+
+    <script>
+        // Obtener datos del contenedor HTML para evitar errores de sintaxis del linter
+        const statsData = document.getElementById('stats-data').dataset;
+        const mensualLabels = JSON.parse(statsData.mensualLabels);
+        const mensualValores = JSON.parse(statsData.mensualValores);
+        const tipoLabels = JSON.parse(statsData.tipoLabels);
+        const tipoValores = JSON.parse(statsData.tipoValores);
+        const metodoLabels = JSON.parse(statsData.metodoLabels);
+        const metodoValores = JSON.parse(statsData.metodoValores);
+        const tecnicoLabels = JSON.parse(statsData.tecnicoLabels);
+        const tecnicoValores = JSON.parse(statsData.tecnicoValores);
+
+        // Configuración global para que Chart.js use colores legibles en tema oscuro
+        Chart.defaults.color = '#9ca3af';
+        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.08)';
+        Chart.defaults.font.family = "'Inter', sans-serif";
+
+        // 1. Facturación Mensual (Línea / Área)
+        const ctxMensual = document.getElementById('chartMensual').getContext('2d');
+        const gradientBlue = ctxMensual.createLinearGradient(0, 0, 0, 200);
+        gradientBlue.addColorStop(0, 'rgba(79, 172, 254, 0.4)');
+        gradientBlue.addColorStop(1, 'rgba(0, 242, 254, 0.0)');
+
+        new Chart(ctxMensual, {
+            type: 'line',
+            data: {
+                labels: mensualLabels,
+                datasets: [{
+                    label: 'Ingresos ($)',
+                    data: mensualValores,
+                    borderColor: '#00f2fe',
+                    borderWidth: 3,
+                    backgroundColor: gradientBlue,
+                    fill: true,
+                    tension: 0.3,
+                    pointBackgroundColor: '#4facfe',
+                    pointBorderColor: '#fff',
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { callback: function(val) { return '$' + val; } }
+                    }
+                }
+            }
+        });
+
+        // 2. Repuestos vs Mano de Obra (Dona)
+        const ctxTipo = document.getElementById('chartTipo').getContext('2d');
+        new Chart(ctxTipo, {
+            type: 'doughnut',
+            data: {
+                labels: tipoLabels,
+                datasets: [{
+                    data: tipoValores,
+                    backgroundColor: ['#ff4a6b', '#00ff9d'],
+                    borderColor: '#131b2e',
+                    borderWidth: 2,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 20 }
+                    }
+                }
+            }
+        });
+
+        // 3. Métodos de Pago (Dona)
+        const ctxMetodo = document.getElementById('chartMetodo').getContext('2d');
+        new Chart(ctxMetodo, {
+            type: 'doughnut',
+            data: {
+                labels: metodoLabels,
+                datasets: [{
+                    data: metodoValores,
+                    backgroundColor: ['#9d4edd', '#ffb703', '#4facfe', '#00ff9d'],
+                    borderColor: '#131b2e',
+                    borderWidth: 2,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 20 }
+                    }
+                }
+            }
+        });
+
+        // 4. Productividad de Técnicos (Barras Horizontales)
+        const ctxTecnicos = document.getElementById('chartTecnicos').getContext('2d');
+        new Chart(ctxTecnicos, {
+            type: 'bar',
+            data: {
+                labels: tecnicoLabels,
+                datasets: [{
+                    data: tecnicoValores,
+                    backgroundColor: 'rgba(0, 242, 254, 0.25)',
+                    borderColor: '#00f2fe',
+                    borderWidth: 2,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                }
+            }
+        });
+    </script>
+    {% endif %}
 </body>
 </html>
