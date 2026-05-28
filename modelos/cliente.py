@@ -1,4 +1,5 @@
 from config.database import DB
+from werkzeug.security import generate_password_hash, check_password_hash
 
 class Cliente:
     def __init__(self, dni, nombre, email, telefono, password_web, id_cliente=None):
@@ -12,8 +13,9 @@ class Cliente:
     def registrar(self):
         cursor = DB.cursor()
         try:
+            hashed_pwd = generate_password_hash(self.password_web)
             sql = "INSERT INTO cliente (DNI_CUIL, Nombre_Completo, Email, Telefono, Password_web) VALUES (%s, %s, %s, %s, %s)"
-            val = (self.dni, self.nombre, self.email, self.telefono, self.password_web)
+            val = (self.dni, self.nombre, self.email, self.telefono, hashed_pwd)
             cursor.execute(sql, val)
             DB.commit()
             self.id_cliente = cursor.lastrowid
@@ -44,8 +46,11 @@ class Cliente:
     def buscar_por_credenciales(dni, password_web):
         cursor = DB.cursor(dictionary=True)
         try:
-            cursor.execute("SELECT ID_Cliente as id, Nombre_Completo as nombre FROM cliente WHERE DNI_CUIL = %s AND Password_web = %s", (dni, password_web))
-            return cursor.fetchone()
+            cursor.execute("SELECT ID_Cliente as id, Nombre_Completo as nombre, Password_web FROM cliente WHERE DNI_CUIL = %s", (dni,))
+            client = cursor.fetchone()
+            if client and check_password_hash(client['Password_web'], password_web):
+                return {'id': client['id'], 'nombre': client['nombre']}
+            return None
         except Exception as e:
             print(f"Error al buscar cliente por credenciales: {e}")
             return None
@@ -56,7 +61,8 @@ class Cliente:
     def actualizar_password(id_cliente, nueva_password):
         cursor = DB.cursor()
         try:
-            cursor.execute("UPDATE cliente SET Password_web = %s WHERE ID_Cliente = %s", (nueva_password, id_cliente))
+            hashed_pwd = generate_password_hash(nueva_password)
+            cursor.execute("UPDATE cliente SET Password_web = %s WHERE ID_Cliente = %s", (hashed_pwd, id_cliente))
             DB.commit()
             return True
         except Exception as e:

@@ -224,6 +224,25 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .brand {
     transition: all 0.3s ease;
 }
 
+.form-select option {
+    background-color: var(--bg-secondary) !important;
+    color: #fff !important;
+}
+
+/* Overriding Chrome Autofill background color */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+    -webkit-text-fill-color: #fff !important;
+    -webkit-box-shadow: 0 0 0px 1000px var(--bg-secondary) inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+
+
 .form-control:focus, .form-select:focus {
     background-color: rgba(255, 255, 255, 0.06) !important;
     border-color: var(--accent-cyan) !important;
@@ -405,4 +424,14 @@ label.form-label {
 .btn-close {
     filter: invert(1) grayscale(100%) brightness(200%);
 }
+
+/* Accessibility & Color contrast overrides */
+.text-muted {
+    color: #9ca3af !important; /* Lighter gray for readability against dark background */
+}
+.text-muted-cyan {
+    color: var(--accent-cyan) !important;
+    opacity: 0.8;
+}
+
 

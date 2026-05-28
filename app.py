@@ -16,6 +16,15 @@ from modelos.factura import Factura
 app = Flask(__name__)
 app.secret_key = "sgol_it_key_2024_university_project"
 
+@app.before_request
+def check_forced_password_change():
+    # Rutas permitidas durante el cambio obligatorio de contraseña
+    allowed_routes = ['cambiar_password_obligatorio', 'logout', 'logout_cliente', 'inicio', 'login', 'tracking_login', 'static']
+    if request.endpoint and request.endpoint not in allowed_routes:
+        if session.get('force_password_change'):
+            flash("Debes personalizar tu contraseña antes de continuar.", "warning")
+            return redirect(url_for('cambiar_password_obligatorio'))
+
 @app.route('/')
 def inicio():
     if 'usuario_id' in session: 
@@ -34,8 +43,14 @@ def login():
             'rol_id': res['rol_id'], 
             'nombre_rol': res['nombre_rol']
         })
+        
+        # Verificar si la clave ingresada es una de las contraseñas por defecto
+        if pw in ('admin123', 'recep123', 'tecnico123', '123'):
+            session['force_password_change'] = True
+            return redirect(url_for('cambiar_password_obligatorio'))
+            
         return redirect(url_for('dashboard'))
-    return render_template('login.html', error="Credenciales inválidas.")
+    return render_template('login.html', error="Credenciales inválidas o cuenta desactivada.")
 
 @app.route('/logout')
 def logout():
@@ -123,17 +138,23 @@ def gestion_personal():
     empleados = Empleado.listar_todos()
     return render_template('gestion_personal.html', empleados=empleados)
 
-@app.route('/eliminar_empleado/<int:id_emp>', methods=['POST'])
-def eliminar_empleado(id_emp):
+@app.route('/toggle_empleado/<int:id_emp>/<accion>', methods=['POST'])
+def toggle_empleado(id_emp, accion):
     if 'usuario_id' not in session or session['rol_id'] != 1: 
         return redirect(url_for('inicio'))
     if id_emp == session['usuario_id']:
-        flash("No puedes eliminar tu propia cuenta.", "danger")
+        flash("No puedes modificar tu propia cuenta.", "danger")
     else:
-        if Empleado.eliminar(id_emp):
-            flash("Empleado eliminado del sistema.", "success")
-        else:
-            flash("Error al eliminar el empleado.", "danger")
+        if accion == 'desactivar':
+            if Empleado.eliminar(id_emp): # deactivation logic
+                flash("Empleado desactivado exitosamente.", "success")
+            else:
+                flash("Error al desactivar el empleado.", "danger")
+        elif accion == 'activar':
+            if Empleado.activar(id_emp):
+                flash("Empleado reactivado exitosamente.", "success")
+            else:
+                flash("Error al activar el empleado.", "danger")
     return redirect(url_for('gestion_personal'))
 
 @app.route('/inventario', methods=['GET', 'POST'])
@@ -236,13 +257,13 @@ def ingreso_equipo():
             return redirect(url_for('ingreso_equipo'))
 
         try:
-            cursor = DB.cursor(dictionary=True)
-            cursor.execute("SELECT ID_Cliente FROM cliente WHERE DNI_CUIL = %s", (dni,))
-            cl = cursor.fetchone()
-            id_c = cl['ID_Cliente'] if cl else None
+            # Buscar o registrar cliente usando el modelo OOP
+            cl = Cliente.buscar_por_dni(dni)
+            id_c = cl['id'] if cl else None
             if not id_c:
-                cursor.execute("INSERT INTO cliente (DNI_CUIL, Nombre_Completo, Email, Telefono, Password_web) VALUES (%s,%s,%s,%s,%s)", (dni,nom,em,tel,pw))
-                id_c = cursor.lastrowid
+                id_c = Cliente(dni, nom, em, tel, pw).registrar()
+                
+            cursor = DB.cursor(dictionary=True)
             cursor.execute("INSERT INTO equipo (Numero_Serie, Marca_Modelo, Tipo_Dispositivo, Cliente_ID_Cliente) VALUES (%s,%s,%s,%s)", (ns,mod,tip,id_c))
             id_eq = cursor.lastrowid
             cursor.execute("INSERT INTO orden_trabajo (Estado_General, Fecha_Creacion, Equipo_ID_Equipo, Empleado_ID_Empleado) VALUES (%s,%s,%s,%s)", ('Para Revisión', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), id_eq, session['usuario_id']))
@@ -470,9 +491,54 @@ def tracking_login():
         cl = Cliente.buscar_por_credenciales(dni, pw)
         if cl: 
             session.update({'cliente_id': cl['id'], 'cliente_nombre': cl['nombre']})
+            # Verificar si la clave ingresada es una contraseña por defecto
+            if pw in ('1234', '123'):
+                session['force_password_change'] = True
+                return redirect(url_for('cambiar_password_obligatorio'))
             return redirect(url_for('portal_cliente'))
         flash("Datos incorrectos.", "danger")
     return render_template('login.html')
+
+@app.route('/cambiar_password_obligatorio', methods=['GET', 'POST'])
+def cambiar_password_obligatorio():
+    # Validar que exista sesión activa (empleado o cliente)
+    if 'usuario_id' not in session and 'cliente_id' not in session:
+        return redirect(url_for('inicio'))
+
+    if request.method == 'POST':
+        nueva = request.form.get('nueva_password')
+        confirmar = request.form.get('confirmar_password')
+
+        if not nueva or not confirmar:
+            flash("Todos los campos son obligatorios.", "danger")
+            return render_template('cambiar_password_obligatorio.html')
+
+        if nueva != confirmar:
+            flash("Las contraseñas no coinciden.", "danger")
+            return render_template('cambiar_password_obligatorio.html')
+
+        # No permitir volver a usar una clave por defecto
+        if nueva in ('123', '1234', 'admin123', 'recep123', 'tecnico123'):
+            flash("Por favor, ingrese una contraseña personalizada que no sea por defecto.", "danger")
+            return render_template('cambiar_password_obligatorio.html')
+
+        exito = False
+        if 'usuario_id' in session:
+            exito = Empleado.actualizar_password(session['usuario_id'], nueva)
+        elif 'cliente_id' in session:
+            exito = Cliente.actualizar_password(session['cliente_id'], nueva)
+
+        if exito:
+            session.pop('force_password_change', None)
+            flash("Contraseña actualizada exitosamente. ¡Bienvenido/a!", "success")
+            if 'usuario_id' in session:
+                return redirect(url_for('dashboard'))
+            else:
+                return redirect(url_for('portal_cliente'))
+        else:
+            flash("Error al actualizar la contraseña.", "danger")
+
+    return render_template('cambiar_password_obligatorio.html')
 
 @app.route('/portal_cliente')
 def portal_cliente():

@@ -26,18 +26,18 @@
                 <div class="card glass-panel">
                     <div class="card-body">
                         <h5 class="card-title text-info mb-3 fw-bold">Registrar Empleado</h5>
-                        <form action="/gestion_personal" method="POST">
+                        <form action="/gestion_personal" method="POST" autocomplete="off">
                             <div class="mb-3">
                                 <label class="form-label text-muted small">Nombre Completo</label>
-                                <input type="text" class="form-control" name="nombre" required>
+                                <input type="text" class="form-control" name="nombre" autocomplete="off" required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label text-muted small">Usuario (Login)</label>
-                                <input type="text" class="form-control" name="usuario" required>
+                                <input type="text" class="form-control" name="usuario" autocomplete="off" required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label text-muted small">Contraseña</label>
-                                <input type="password" class="form-control" name="password" required>
+                                <input type="password" class="form-control" name="password" autocomplete="new-password" required>
                             </div>
                             <div class="mb-4">
                                 <label class="form-label text-muted small">Rol del Sistema</label>
@@ -49,6 +49,7 @@
                             </div>
                             <button type="submit" class="btn btn-primary w-100 fw-bold text-black">REGISTRAR USUARIO</button>
                         </form>
+
                     </div>
                 </div>
             </div>
@@ -63,6 +64,7 @@
                                     <th>Nombre</th>
                                     <th>Usuario</th>
                                     <th>Rol</th>
+                                    <th>Estado</th>
                                     <th class="text-center pe-4">Acciones</th>
                                 </tr>
                             </thead>
@@ -81,10 +83,27 @@
                                             <span class="badge bg-warning text-dark">Técnico</span>
                                         {% endif %}
                                     </td>
+                                    <td>
+                                        {% if emp.activo == 1 %}
+                                            <span class="badge bg-success">Activo</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inactivo</span>
+                                        {% endif %}
+                                    </td>
                                     <td class="text-center pe-4">
-                                        <form action="/eliminar_empleado/{{ emp.id }}" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este empleado del sistema?');">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger fw-bold">Borrar</button>
-                                        </form>
+                                        {% if emp.id == session['usuario_id'] %}
+                                            <span class="text-muted small">Tu Cuenta</span>
+                                        {% else %}
+                                            {% if emp.activo == 1 %}
+                                                <form action="/toggle_empleado/{{ emp.id }}/desactivar" method="POST" class="d-inline" onsubmit="return confirm('¿Estás seguro de desactivar este empleado?');">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger fw-bold">Desactivar</button>
+                                                </form>
+                                            {% else %}
+                                                <form action="/toggle_empleado/{{ emp.id }}/activar" method="POST" class="d-inline" onsubmit="return confirm('¿Estás seguro de reactivar este empleado?');">
+                                                    <button type="submit" class="btn btn-sm btn-outline-success fw-bold">Activar</button>
+                                                </form>
+                                            {% endif %}
+                                        {% endif %}
                                     </td>
                                 </tr>
                                 {% endfor %}
