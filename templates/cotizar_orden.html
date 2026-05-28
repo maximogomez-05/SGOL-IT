@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <title>Generar Presupuesto | SGOL-IT</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body class="bg-light">
+<body>
     <div class="container py-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold">📄 Revisión y Presupuesto Final</h2>
-            <a href="/presupuestos_pendientes" class="btn btn-secondary">Volver al Listado</a>
+            <h2 class="fw-bold text-white">📄 Revisión y Presupuesto Final</h2>
+            <a href="/presupuestos_pendientes" class="btn btn-outline-primary fw-bold">Volver al Listado</a>
         </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -22,26 +23,26 @@
 
         <div class="row">
             <div class="col-md-4 mb-4">
-                <div class="card shadow border-0 mb-3 h-100">
-                    <div class="card-header bg-dark text-white fw-bold">Informe del Técnico</div>
+                <div class="card glass-panel h-100">
+                    <div class="card-header border-0 bg-transparent pt-4 pb-0 fw-bold fs-5 text-info">Informe del Técnico</div>
                     <div class="card-body">
                         <p><strong>Ticket:</strong> <span class="badge bg-secondary">#{{ orden.codigo }}</span></p>
-                        <p><strong>Equipo:</strong> {{ orden.equipo }}</p>
-                        <hr>
-                        <h6 class="fw-bold text-primary">Diagnóstico Técnico:</h6>
-                        <p class="fst-italic text-muted">{{ orden.diagnostico_final | default('Sin comentarios.', true) }}</p>
+                        <p><strong>Equipo:</strong> <span class="text-white fw-bold">{{ orden.equipo }}</span></p>
+                        <hr style="border-color: var(--border-glass);">
+                        <h6 class="fw-bold text-info">Diagnóstico Técnico:</h6>
+                        <p class="fst-italic text-light small">{{ orden.diagnostico_final | default('Sin comentarios.', true) }}</p>
                     </div>
                 </div>
             </div>
 
             <div class="col-md-8">
-                <div class="card shadow border-0 h-100">
+                <div class="card glass-panel h-100">
                     <div class="card-body">
-                        <h5 class="fw-bold mb-3">Repuestos y Servicios Requeridos</h5>
+                        <h5 class="fw-bold mb-3 text-info">Repuestos y Servicios Requeridos</h5>
                         <p class="text-muted small">Esta es la lista de ítems solicitados por el técnico en laboratorio. Confirme el total para generar el presupuesto oficial para el cliente.</p>
                         
-                        <table class="table table-hover align-middle border">
-                            <thead class="table-light">
+                        <table class="table table-hover align-middle">
+                            <thead>
                                 <tr>
                                     <th>Descripción del Ítem</th>
                                     <th>Precio Unit.</th>
@@ -52,20 +53,20 @@
                             <tbody>
                                 {% if detalles %}
                                     {% for d in detalles %}
-                                    <tr>
-                                        <td class="fw-bold">{{ d.descripcion }}</td>
+                                    <tr style="background: transparent;">
+                                        <td class="fw-bold text-white">{{ d.descripcion }}</td>
                                         <td class="text-muted">${{ d.precio_unit }}</td>
-                                        <td class="text-center">{{ d.cantidad }}</td>
-                                        <td class="text-end fw-bold text-dark">${{ d.subtotal }}</td>
+                                        <td class="text-center text-light">{{ d.cantidad }}</td>
+                                        <td class="text-end fw-bold text-light">${{ d.subtotal }}</td>
                                     </tr>
                                     {% endfor %}
-                                    <tr class="table-dark">
-                                        <td colspan="3" class="text-end fw-bold fs-5">TOTAL A PRESUPUESTAR:</td>
-                                        <td class="text-end fw-bold text-success fs-5">${{ total }}</td>
+                                    <tr style="background: rgba(255,255,255,0.02);">
+                                        <td colspan="3" class="text-end fw-bold fs-5 text-white" style="border-top: 2px solid var(--border-glass) !important;">TOTAL A PRESUPUESTAR:</td>
+                                        <td class="text-end fw-bold fs-5" style="color: var(--accent-emerald); border-top: 2px solid var(--border-glass) !important;">${{ total }}</td>
                                     </tr>
                                 {% else %}
                                     <tr>
-                                        <td colspan="4" class="text-center text-danger fw-bold py-4">El técnico no cargó ningún repuesto ni servicio (Revisión gratuita).</td>
+                                        <td colspan="4" class="text-center text-danger fw-bold py-4" style="background: transparent; border: none;">El técnico no cargó ningún repuesto ni servicio (Revisión gratuita).</td>
                                     </tr>
                                 {% endif %}
                             </tbody>
@@ -73,7 +74,7 @@
 
                         <form action="/cotizar_orden/{{ orden.id_orden }}" method="POST" class="mt-4">
                             {% if detalles %}
-                                <button type="submit" class="btn btn-success w-100 fw-bold py-2 fs-5">CONFIRMAR Y ENVIAR AL CLIENTE</button>
+                                <button type="submit" class="btn btn-success w-100 fw-bold py-2 fs-5 text-black">CONFIRMAR Y ENVIAR AL CLIENTE</button>
                             {% else %}
                                 <button type="submit" class="btn btn-warning w-100 fw-bold py-2" disabled>NO SE PUEDE PRESUPUESTAR SIN ÍTEMS</button>
                             {% endif %}

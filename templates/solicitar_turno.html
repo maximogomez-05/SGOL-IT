@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Solicitar Turno | SGOL-IT</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container py-5">
+        <h2 class="fw-bold mb-4 text-center text-white" style="font-family: 'Outfit';">Solicitar Turno y Cotización</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card glass-panel p-4">
+                    <form action="/solicitar_turno" method="POST">
+                        <h5 class="fw-bold text-info mb-3">1. Diagnóstico Preliminar</h5>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-bold">Seleccione el síntoma o servicio</label>
+                            <select name="servicio" id="servicio" class="form-select" required>
+                                <option value="" data-precio="0" selected disabled>Seleccione una opción...</option>
+                                <option value="Limpieza y Mantenimiento" data-precio="15000">Limpieza Física y Cambio de Pasta Térmica</option>
+                                <option value="Formateo e Instalación OS" data-precio="20000">Formateo e Instalación de Windows</option>
+                                <option value="No enciende" data-precio="5000">El equipo no enciende (Revisión técnica)</option>
+                                <option value="Lentitud extrema" data-precio="25000">Lentitud extrema (Revisión + Optimizacion)</option>
+                                <option value="Otro" data-precio="0">Otro problema (A cotizar en local)</option>
+                            </select>
+                        </div>
+                        <div class="alert bg-secondary text-white border-0 text-center mb-4 p-3">
+                            <span class="fs-5">Presupuesto Estimado: </span>
+                            <span class="fs-3 fw-bold" id="precio_display" style="color: var(--accent-emerald); font-family: 'Outfit'; font-weight: 800;">$0.00</span>
+                            <input type="hidden" name="presupuesto_estimado" id="presupuesto_estimado" value="0">
+                        </div>
+
+                        <h5 class="fw-bold text-info mb-3">2. Datos Personales</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small">DNI / CUIL</label>
+                                <input type="text" name="dni" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small">Nombre Completo</label>
+                                <input type="text" name="nombre" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small">Teléfono</label>
+                                <input type="text" name="telefono" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small">Email</label>
+                                <input type="email" name="email" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary w-100 fw-bold py-2 text-black">CONFIRMAR TURNO</button>
+                            <a href="/" class="btn btn-outline-danger w-100 mt-3 fw-bold">Volver al Inicio</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.getElementById('servicio').addEventListener('change', function() {
+            var precio = this.options[this.selectedIndex].getAttribute('data-precio');
+            document.getElementById('precio_display').innerText = '$' + parseFloat(precio).toFixed(2);
+            document.getElementById('presupuesto_estimado').value = precio;
+        });
+    </script>
+</body>
+</html>

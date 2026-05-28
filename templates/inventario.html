@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <title>Inventario | SGOL-IT</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body class="bg-light">
+<body>
     <div class="container py-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold">📦 Catálogo e Inventario</h2>
-            <a href="/dashboard" class="btn btn-secondary">Volver al Panel</a>
+            <h2 class="fw-bold text-white">📦 Catálogo e Inventario</h2>
+            <a href="/dashboard" class="btn btn-outline-primary fw-bold">Volver al Panel</a>
         </div>
-
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
             {% for category, message in messages %}
@@ -22,42 +22,46 @@
 
         <div class="row">
             <div class="col-md-4 mb-4">
-                <div class="card shadow border-0">
+                <div class="card glass-panel">
                     <div class="card-body">
-                        <h5 class="card-title text-success mb-3 fw-bold">Agregar Nuevo Ítem</h5>
+                        <h5 class="card-title text-info mb-3 fw-bold">Agregar Nuevo Ítem</h5>
                         <form action="/inventario" method="POST">
                             <div class="mb-3">
-                                <label class="form-label">Tipo de Ítem</label>
+                                <label class="form-label text-muted small">Tipo de Ítem</label>
                                 <select class="form-select" name="tipo" id="tipo_item" required>
                                     <option value="Repuesto_Fisico">Repuesto Físico</option>
                                     <option value="Servicio_ManoObra">Servicio / Mano de Obra</option>
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Descripción</label>
+                                <label class="form-label text-muted small">Descripción</label>
                                 <input type="text" class="form-control" name="descripcion" placeholder="Ej: Memoria RAM 8GB" required>
                             </div>
                             <div class="row">
-                                <div class="col-6 mb-3">
-                                    <label class="form-label">Precio ($)</label>
+                                <div class="col-12 mb-3">
+                                    <label class="form-label text-muted small">Precio ($)</label>
                                     <input type="number" step="0.01" min="0" class="form-control" name="precio" required>
                                 </div>
                                 <div class="col-6 mb-3" id="stock_container">
-                                    <label class="form-label">Stock</label>
+                                    <label class="form-label text-muted small">Stock Actual</label>
                                     <input type="number" min="0" class="form-control" name="stock" id="stock_input" value="0">
                                 </div>
+                                <div class="col-6 mb-3" id="stock_minimo_container">
+                                    <label class="form-label text-muted small">Stock Mínimo</label>
+                                    <input type="number" min="0" class="form-control" name="stock_minimo" id="stock_minimo_input" value="0">
+                                </div>
                             </div>
-                            <button type="submit" class="btn btn-success w-100 fw-bold">GUARDAR EN CATÁLOGO</button>
+                            <button type="submit" class="btn btn-success w-100 fw-bold text-black">GUARDAR EN CATÁLOGO</button>
                         </form>
                     </div>
                 </div>
             </div>
 
             <div class="col-md-8">
-                <div class="card shadow border-0">
-                    <div class="card-body p-0">
+                <div class="card glass-panel">
+                    <div class="card-body">
                         <table class="table table-hover align-middle mb-0">
-                            <thead class="table-dark">
+                            <thead>
                                 <tr>
                                     <th class="ps-4">ID</th>
                                     <th>Descripción</th>
@@ -69,24 +73,70 @@
                             </thead>
                             <tbody>
                                 {% for item in items %}
-                                <tr>
+                                <tr {% if item.tipo_item == 'Repuesto_Fisico' and item.stock <= item.stock_minimo %}style="background: rgba(255, 74, 107, 0.05) !important;"{% else %}style="background: transparent;"{% endif %}>
                                     <td class="ps-4">{{ item.id }}</td>
-                                    <td class="fw-bold">{{ item.descripcion }}</td>
+                                    <td class="fw-bold text-white">{{ item.descripcion }}</td>
                                     <td><span class="badge bg-secondary">{{ item.tipo_item }}</span></td>
-                                    <td class="text-success fw-bold">${{ item.precio }}</td>
+                                    <td class="fw-bold" style="color: var(--accent-emerald);">${{ item.precio }}</td>
                                     <td>
                                         {% if item.tipo_item == 'Repuesto_Fisico' %}
-                                            <span class="badge {{ 'bg-danger' if item.stock == 0 else 'bg-primary' }}">{{ item.stock }} unid.</span>
+                                            <span class="badge {{ 'bg-danger' if item.stock <= item.stock_minimo else 'bg-info text-dark' }}">{{ item.stock }} unid.</span>
+                                            {% if item.stock <= item.stock_minimo %}
+                                                <i class="text-danger fw-bold small d-block">¡Stock Bajo! (Min: {{ item.stock_minimo }})</i>
+                                            {% endif %}
                                         {% else %}
                                             <span class="text-muted">N/A</span>
                                         {% endif %}
                                     </td>
                                     <td class="text-center pe-4">
-                                        <form action="/eliminar_item/{{ item.id }}" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este ítem del catálogo?');">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger">Borrar</button>
+                                        <button class="btn btn-sm btn-outline-primary fw-bold" data-bs-toggle="modal" data-bs-target="#modalEditar{{ item.id }}">Editar</button>
+                                        <form action="/eliminar_item/{{ item.id }}" method="POST" class="d-inline" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este ítem del catálogo?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger fw-bold">Borrar</button>
                                         </form>
                                     </td>
                                 </tr>
+
+                                <div class="modal fade" id="modalEditar{{ item.id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <form action="/editar_item/{{ item.id }}" method="POST">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title fw-bold text-white">Editar Ítem #{{ item.id }}</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body text-start">
+                                                    <div class="mb-3">
+                                                        <label class="form-label text-muted small">Descripción</label>
+                                                        <input type="text" class="form-control" name="descripcion" value="{{ item.descripcion }}" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label text-muted small">Precio ($)</label>
+                                                        <input type="number" step="0.01" min="0" class="form-control" name="precio" value="{{ item.precio }}" required>
+                                                    </div>
+                                                    {% if item.tipo_item == 'Repuesto_Fisico' %}
+                                                    <div class="row">
+                                                        <div class="col-6 mb-3">
+                                                            <label class="form-label text-muted small">Stock Disponible</label>
+                                                            <input type="number" min="0" class="form-control" name="stock" value="{{ item.stock }}" required>
+                                                        </div>
+                                                        <div class="col-6 mb-3">
+                                                            <label class="form-label text-muted small">Stock Mínimo</label>
+                                                            <input type="number" min="0" class="form-control" name="stock_minimo" value="{{ item.stock_minimo }}" required>
+                                                        </div>
+                                                    </div>
+                                                    {% else %}
+                                                        <input type="hidden" name="stock" value="0">
+                                                        <input type="hidden" name="stock_minimo" value="0">
+                                                    {% endif %}
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-outline-danger fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                                                    <button type="submit" class="btn btn-primary fw-bold text-black">Guardar Cambios</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -96,18 +146,24 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const tipoSelect = document.getElementById("tipo_item");
             const stockContainer = document.getElementById("stock_container");
             const stockInput = document.getElementById("stock_input");
+            const stockMinContainer = document.getElementById("stock_minimo_container");
+            const stockMinInput = document.getElementById("stock_minimo_input");
 
             tipoSelect.addEventListener("change", function() {
                 if (this.value === "Servicio_ManoObra") {
                     stockContainer.style.display = "none";
+                    stockMinContainer.style.display = "none";
                     stockInput.value = "0"; 
+                    stockMinInput.value = "0"; 
                 } else {
                     stockContainer.style.display = "block";
+                    stockMinContainer.style.display = "block";
                 }
             });
         });

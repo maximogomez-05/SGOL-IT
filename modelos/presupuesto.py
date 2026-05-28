@@ -22,3 +22,20 @@ class Presupuesto:
         id_generado = cursor.lastrowid 
         cursor.close()
         return id_generado
+
+    @staticmethod
+    def actualizar_estado(id_presupuesto, estado):
+        cursor = DB.cursor()
+        try:
+            cursor.execute("UPDATE presupuesto SET Estado_Presupuesto = %s WHERE ID_Presupuesto = %s", (estado, id_presupuesto))
+            DB.commit()
+            return True
+        except Exception as e:
+            print(f"Error al actualizar estado del presupuesto: {e}")
+            try:
+                DB.conexion.rollback()
+            except:
+                pass
+            return False
+        finally:
+            cursor.close()

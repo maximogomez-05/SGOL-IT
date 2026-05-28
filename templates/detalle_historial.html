@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle Histórico | SGOL-IT</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container py-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold text-white">📄 Ficha Técnica: Orden #{{ orden.id_orden }}</h2>
+            <a href="/historial_general" class="btn btn-outline-primary fw-bold">Volver al Registro</a>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card glass-panel h-100">
+                    <div class="card-header border-0 bg-transparent pt-4 pb-0 fw-bold fs-5 text-info">Datos del Cliente</div>
+                    <div class="card-body">
+                        <p class="mb-1"><strong>Nombre:</strong> <span class="text-white fw-bold">{{ orden.cliente }}</span></p>
+                        <p class="mb-1"><strong>DNI / CUIL:</strong> <span class="text-light">{{ orden.dni }}</span></p>
+                        <p class="mb-1"><strong>Teléfono:</strong> <span class="text-light">{{ orden.telefono }}</span></p>
+                        <p class="mb-0"><strong>Email:</strong> <span class="text-light">{{ orden.email }}</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card glass-panel h-100">
+                    <div class="card-header border-0 bg-transparent pt-4 pb-0 fw-bold fs-5 text-info">Información del Equipo</div>
+                    <div class="card-body">
+                        <p class="mb-1"><strong>Equipo:</strong> <span class="text-white fw-bold">{{ orden.equipo }}</span></p>
+                        <p class="mb-1"><strong>Nro. Serie:</strong> <span class="text-light">{{ orden.nro_serie }}</span></p>
+                        <p class="mb-1"><strong>Estado Actual:</strong> <span class="badge bg-secondary">{{ orden.estado }}</span></p>
+                        <p class="mb-0"><strong>Fecha de Ingreso:</strong> <span class="text-light">{{ orden.fecha }}</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-12">
+                <div class="card glass-panel">
+                    <div class="card-header border-0 bg-transparent pt-4 pb-0 fw-bold fs-5 text-info">Diagnóstico y Presupuesto</div>
+                    <div class="card-body">
+                        <p class="text-white fw-bold">Diagnóstico Final del Técnico:</p>
+                        <p class="fst-italic text-light border-start border-4 border-secondary ps-3" style="border-color: var(--accent-cyan) !important;">{{ orden.diagnostico | default('Sin diagnóstico registrado.', true) }}</p>
+                        <hr style="border-color: var(--border-glass);">
+                        <h6 class="fw-bold mb-3 text-white">Repuestos y Servicios Empleados:</h6>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Descripción</th>
+                                    <th class="text-center">Cantidad</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if detalles %}
+                                    {% for d in detalles %}
+                                    <tr style="background: transparent;">
+                                        <td class="text-white">{{ d.Descripcion }}</td>
+                                        <td class="text-center text-light">{{ d.Cantidad }}</td>
+                                        <td class="text-end text-light">${{ d.subtotal }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted" style="background: transparent; border: none;">No se utilizaron repuestos ni servicios adicionales.</td>
+                                    </tr>
+                                {% endif %}
+                                <tr style="background: rgba(255,255,255,0.02);">
+                                    <td colspan="2" class="text-end fw-bold text-white" style="border-top: 2px solid var(--border-glass) !important;">TOTAL PRESUPUESTADO:</td>
+                                    <td class="text-end fw-bold fs-5" style="color: var(--accent-emerald); border-top: 2px solid var(--border-glass) !important;">${{ orden.presupuesto | default('0.00', true) }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-12">
+                <div class="card glass-panel">
+                    <div class="card-header border-0 bg-transparent pt-4 pb-0 fw-bold fs-5 text-info">Línea de Tiempo Operativa</div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            {% for hito in hitos %}
+                            <li class="list-group-item px-0 py-3 border-0 border-bottom" style="background: transparent; border-color: var(--border-glass) !important; color: var(--text-primary);">
+                                <small class="text-muted fw-bold d-block mb-1">{{ hito.Fecha_Actualizacion }}</small>
+                                <span class="fw-bold text-white">{{ hito.Estado_Alcanzado }}:</span> 
+                                <span class="text-light">{{ hito.Comentario_Frontal }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <title>Presupuestos | SGOL-IT</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body class="bg-light">
+<body>
     <div class="container py-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold">💰 Gestionar Presupuestos</h2>
-            <a href="/dashboard" class="btn btn-secondary">Volver al Panel</a>
+            <h2 class="fw-bold text-white">💰 Gestionar Presupuestos</h2>
+            <a href="/dashboard" class="btn btn-outline-primary fw-bold">Volver al Panel</a>
         </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -20,13 +21,13 @@
           {% endif %}
         {% endwith %}
 
-        <div class="card shadow border-0">
-            <div class="card-body p-0">
-                <div class="p-4 bg-white border-bottom">
+        <div class="card glass-panel">
+            <div class="card-body">
+                <div class="pb-3 border-bottom mb-3" style="border-color: var(--border-glass) !important;">
                     <p class="text-muted mb-0">Equipos que fueron diagnosticados y esperan cotización para el cliente.</p>
                 </div>
                 <table class="table table-hover align-middle mb-0">
-                    <thead class="table-dark">
+                    <thead>
                         <tr>
                             <th class="ps-4">Ticket</th>
                             <th>Equipo</th>
@@ -36,12 +37,12 @@
                     </thead>
                     <tbody>
                         {% for t in trabajos %}
-                        <tr>
+                        <tr style="background: transparent;">
                             <td class="ps-4"><span class="badge bg-secondary">{{ t.codigo }}</span></td>
-                            <td class="fw-bold">{{ t.equipo }}</td>
+                            <td class="fw-bold text-white">{{ t.equipo }}</td>
                             <td class="text-muted fst-italic">Ver informe en gestión...</td>
                             <td class="text-center pe-4">
-                            <a href="/cotizar_orden/{{ t.id_orden }}" class="btn btn-sm btn-success px-3">Cotizar Orden</a>
+                                <a href="/cotizar_orden/{{ t.id_orden }}" class="btn btn-sm btn-success px-3 text-black fw-bold">Cotizar Orden</a>
                             </td>
                         </tr>
                         {% endfor %}

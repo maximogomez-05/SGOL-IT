@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seguimiento de Orden | SGOL-IT</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-dark mb-4">
+        <div class="container">
+            <span class="navbar-brand fw-bold fs-3" style="background: var(--grad-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">SGOL-IT | Seguimiento Público</span>
+            <a href="/" class="btn btn-outline-primary btn-sm fw-bold">Volver al Inicio</a>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <div class="card glass-panel mb-4">
+            <div class="card-header border-0 bg-transparent pt-4 pb-0 d-flex justify-content-between align-items-center">
+                <span class="fw-bold fs-4">Orden #{{ orden.id_orden }}</span>
+                <span class="badge bg-info fs-6">{{ orden.estado }}</span>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6 border-end" style="border-color: var(--border-glass) !important;">
+                        <h6 class="text-muted text-uppercase fw-bold small">Detalles del Equipo</h6>
+                        <h4 class="fw-bold text-white">{{ orden.equipo }}</h4>
+                        <p class="text-muted mb-0"><strong>Fecha de Ingreso:</strong> {{ orden.fecha }}</p>
+                    </div>
+                    <div class="col-md-6 ps-md-4">
+                        <h6 class="text-muted text-uppercase fw-bold small">Estado del Presupuesto</h6>
+                        {% if orden.costo %}
+                            <h3 class="fw-bold" style="color: var(--accent-emerald); font-family: 'Outfit'; font-weight: 700;">${{ orden.costo }}</h3>
+                            <span class="text-muted small">Monto final congelado y acordado.</span>
+                        {% else %}
+                            <h4 class="fw-bold text-muted">Pendiente de Diagnóstico</h4>
+                            <span class="text-muted small">Nuestros técnicos están revisando su equipo.</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <hr style="border-color: var(--border-glass);">
+
+                <!-- Línea de tiempo visual (RNF-1.1, RF-1.3) -->
+                <h5 class="fw-bold text-info mb-3">Progreso de Reparación</h5>
+                
+                {% set states = ['Ingresado', 'En Diagnóstico', 'Esperando Aprobación', 'En Reparación', 'Listo', 'Finalizado'] %}
+                
+                {# Determinamos qué pasos están completados basados en el estado actual de la orden #}
+                {% set current_idx = 0 %}
+                {% if orden.estado == 'Para Revisión' or orden.estado == 'Ingresado' %}
+                    {% set current_idx = 0 %}
+                {% elif orden.estado == 'En Diagnóstico' %}
+                    {% set current_idx = 1 %}
+                {% elif orden.estado == 'Esperando Aprobación' or orden.estado == 'Esperando Respuesta' %}
+                    {% set current_idx = 2 %}
+                {% elif orden.estado == 'En Reparación' or orden.estado == 'Esperando Repuestos' or orden.estado == 'Reparando' or orden.estado == 'En Testing' %}
+                    {% set current_idx = 3 %}
+                {% elif orden.estado == 'Listo para Entregar' %}
+                    {% set current_idx = 4 %}
+                {% elif orden.estado == 'Finalizado' %}
+                    {% set current_idx = 5 %}
+                {% endif %}
+
+                <div class="tracking-timeline px-2">
+                    <div class="tracking-progress-line" style="width: {{ current_idx * 16 }}%;"></div>
+                    {% for st in states %}
+                        <div class="timeline-step {% if loop.index0 < current_idx %}completed{% elif loop.index0 == current_idx %}active{% endif %}">
+                            <div class="step-icon">
+                                {% if loop.index0 < current_idx %}✓{% else %}{{ loop.index }}{% endif %}
+                            </div>
+                            <div class="step-label">{{ st }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-7">
+                <div class="card glass-panel h-100">
+                    <div class="card-body">
+                        <h5 class="fw-bold text-white mb-4">📜 Historial de Estados y Comentarios</h5>
+                        <ul class="list-group list-group-flush">
+                            {% for hito in hitos %}
+                            <li class="list-group-item px-0 py-3 border-0 border-bottom" style="background: transparent; border-color: var(--border-glass) !important; color: var(--text-primary);">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="badge bg-secondary">{{ hito.Estado_Alcanzado }}</span>
+                                    <small class="text-muted fw-bold">{{ hito.Fecha_Actualizacion }}</small>
+                                </div>
+                                <p class="mb-0 text-light small">{{ hito.Comentario_Frontal }}</p>
+                            </li>
+                            {% endfor %}
+                            {% if not hitos %}
+                            <li class="list-group-item text-center text-muted py-4" style="background: transparent; border: none;">No se han registrado hitos para esta orden.</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-5">
+                <div class="card glass-panel h-100">
+                    <div class="card-body">
+                        <h5 class="fw-bold text-white mb-4">📦 Detalle de Componentes y Servicios</h5>
+                        <table class="table table-sm table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Descripción</th>
+                                    <th class="text-center">Cant.</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for d in detalles %}
+                                <tr style="background: transparent;">
+                                    <td>{{ d.descripcion }}</td>
+                                    <td class="text-center fw-bold">{{ d.cantidad }}</td>
+                                    <td class="text-end fw-bold" style="color: var(--accent-emerald);">${{ d.subtotal }}</td>
+                                </tr>
+                                {% endfor %}
+                                {% if not detalles %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted py-4 small" style="background: transparent; border: none;">No hay componentes o servicios registrados aún.</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

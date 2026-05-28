@@ -4,28 +4,29 @@
     <meta charset="UTF-8">
     <title>Facturación | SGOL-IT</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body class="bg-light">
+<body>
     <div class="container py-5">
         <div class="row justify-content-center">
             <div class="col-md-6">
-                <div class="card shadow border-0">
-                    <div class="card-header bg-success text-white py-3">
-                        <h4 class="fw-bold mb-0">🧾 Facturación y Entrega</h4>
+                <div class="card glass-panel">
+                    <div class="card-header border-0 bg-transparent pt-4 pb-0">
+                        <h4 class="fw-bold mb-0 text-info">🧾 Facturación y Entrega</h4>
                     </div>
                     <div class="card-body p-4">
-                        <h5 class="fw-bold">Ticket #{{ orden.id_orden }}</h5>
+                        <h5 class="fw-bold text-white">Ticket #{{ orden.id_orden }}</h5>
                         <p class="text-muted">{{ orden.equipo }}</p>
-                        <hr>
+                        <hr style="border-color: var(--border-glass);">
                         
-                        <div class="d-flex justify-content-between mb-4">
-                            <span class="fs-5">Total a Cobrar:</span>
-                            <span class="fs-3 fw-bold text-success">${{ orden.costo }}</span>
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <span class="fs-5 text-light">Total a Cobrar:</span>
+                            <span class="fs-3 fw-bold" style="color: var(--accent-emerald); font-family: 'Outfit'; font-weight: 800;">${{ orden.costo }}</span>
                         </div>
 
                         <form action="/procesar_pago/{{ orden.id_orden }}" method="POST">
                             <div class="mb-4">
-                                <label class="form-label fw-bold">Método de Pago del Cliente</label>
+                                <label class="form-label text-muted small fw-bold">Método de Pago del Cliente</label>
                                 <select name="metodo_pago" class="form-select form-select-lg" required>
                                     <option value="" disabled selected>Seleccione método...</option>
                                     <option value="Efectivo">💵 Efectivo</option>
@@ -35,13 +36,13 @@
                                 </select>
                             </div>
                             
-                            <div class="alert alert-warning small">
+                            <div class="alert bg-warning text-dark border-0 small p-3">
                                 Al confirmar, la orden pasará a estado <strong>Finalizado</strong> y el equipo se marcará como retirado por el cliente.
                             </div>
 
                             <div class="d-grid gap-2 mt-4">
-                                <button type="submit" class="btn btn-success btn-lg fw-bold">REGISTRAR PAGO Y ENTREGAR</button>
-                                <a href="/entregas_pendientes" class="btn btn-light text-muted border">Cancelar y volver</a>
+                                <button type="submit" class="btn btn-success btn-lg fw-bold text-black">REGISTRAR PAGO Y ENTREGAR</button>
+                                <a href="/entregas_pendientes" class="btn btn-outline-danger fw-bold mt-2">Cancelar y Volver</a>
                             </div>
                         </form>
 

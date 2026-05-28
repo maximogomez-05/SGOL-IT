@@ -4,12 +4,16 @@
     <meta charset="UTF-8">
     <title>Mi Portal | SGOL-IT</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body class="bg-light">
-    <nav class="navbar navbar-dark bg-primary shadow">
+<body>
+    <nav class="navbar navbar-dark mb-4">
         <div class="container">
-            <span class="navbar-brand fw-bold">Mi Portal | {{ session['cliente_nombre'] }}</span>
-            <a href="/logout_cliente" class="btn btn-sm btn-outline-light">Cerrar Sesión</a>
+            <span class="navbar-brand fw-bold fs-3" style="background: var(--grad-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Mi Portal | {{ session['cliente_nombre'] }}</span>
+            <div>
+                <button class="btn btn-sm btn-outline-primary me-2 fw-bold" data-bs-toggle="modal" data-bs-target="#modalPassword">Cambiar Contraseña</button>
+                <a href="/logout_cliente" class="btn btn-sm btn-outline-danger fw-bold">Cerrar Sesión</a>
+            </div>
         </div>
     </nav>
 
@@ -26,22 +30,22 @@
 
         {% if ordenes %}
             {% for o in ordenes %}
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                    <span class="fw-bold">Orden #{{ o.id_orden }} | {{ o.equipo }}</span>
+            <div class="card glass-panel mb-4">
+                <div class="card-header border-0 bg-transparent pt-4 pb-0 d-flex justify-content-between align-items-center">
+                    <span class="fw-bold fs-5">Orden #{{ o.id_orden }} | {{ o.equipo }} (Código de Tracking: {{ o.codigo }})</span>
                     <span class="badge bg-info text-dark fs-6">{{ o.estado }}</span>
                 </div>
                 <div class="card-body row">
                     
-                    <div class="col-md-7 border-end">
-                        <h5 class="fw-bold text-secondary mb-3">Línea de Tiempo</h5>
+                    <div class="col-md-7 border-end" style="border-color: var(--border-glass) !important;">
+                        <h5 class="fw-bold text-info mb-3">Línea de Tiempo</h5>
                         <ul class="list-group list-group-flush">
                             {% for hito in hitos %}
                                 {% if hito.Orden_Trabajo_ID_OT == o.id_orden %}
-                                <li class="list-group-item px-0">
+                                <li class="list-group-item px-0" style="background: transparent; border-color: var(--border-glass) !important; color: var(--text-primary);">
                                     <small class="text-muted fw-bold d-block">{{ hito.Fecha_Actualizacion }}</small>
-                                    <span class="fw-bold text-dark">{{ hito.Estado_Alcanzado }}:</span> 
-                                    <span>{{ hito.Comentario_Frontal }}</span>
+                                    <span class="fw-bold text-white">{{ hito.Estado_Alcanzado }}:</span> 
+                                    <span class="text-light">{{ hito.Comentario_Frontal }}</span>
                                 </li>
                                 {% endif %}
                             {% endfor %}
@@ -49,19 +53,25 @@
                     </div>
 
                     <div class="col-md-5 ps-md-4">
-                        <h5 class="fw-bold text-secondary mb-3">Estado Financiero</h5>
+                        <h5 class="fw-bold text-info mb-3">Estado Financiero</h5>
                         
                         {% if o.estado == 'Esperando Respuesta' %}
-                            <div class="alert alert-warning text-center">
-                                <p class="mb-1">El diagnóstico y presupuesto están listos.</p>
-                                <h2 class="fw-bold text-danger my-2">${{ o.costo }}</h2>
+                            <div class="alert bg-warning text-dark border-0 p-4">
+                                <span class="text-dark small fw-bold">Presupuesto a Responder:</span>
+                                <h2 class="fw-bold text-dark my-2" style="font-family: 'Outfit'; font-weight: 800;">${{ o.costo }}</h2>
                                 
-                                <hr>
+                                {% if o.preliminar and o.preliminar > 0 and o.costo != o.preliminar %}
+                                    <div class="alert bg-danger text-white py-2 small fw-bold mb-3 text-start">
+                                        ⚠️ Se ha detectado una diferencia respecto a su presupuesto preliminar estimado (${{ o.preliminar }}) debido a componentes agregados en el diagnóstico.
+                                    </div>
+                                {% endif %}
+                                
+                                <hr style="border-color: rgba(0,0,0,0.15);">
                                 <h6 class="fw-bold text-start mb-2 text-dark">Detalle de la Cotización:</h6>
                                 <ul class="list-group list-group-flush text-start small mb-3">
                                     {% for d in detalles %}
                                         {% if d.id_orden == o.id_orden %}
-                                            <li class="list-group-item bg-transparent px-0 py-1 d-flex justify-content-between border-0 border-bottom border-secondary">
+                                            <li class="list-group-item bg-transparent px-0 py-1 d-flex justify-content-between border-0 border-bottom border-dark text-dark" style="border-color: rgba(0,0,0,0.1) !important;">
                                                 <span>{{ d.cantidad }}x {{ d.descripcion }}</span>
                                                 <span class="fw-bold">${{ d.subtotal }}</span>
                                             </li>
@@ -70,22 +80,22 @@
                                 </ul>
 
                                 <div class="d-flex gap-2 justify-content-center">
-                                    <a href="/responder_presupuesto/{{ o.id_orden }}/aprobar" class="btn btn-success fw-bold w-50 shadow-sm">APROBAR</a>
-                                    <a href="/responder_presupuesto/{{ o.id_orden }}/rechazar" class="btn btn-outline-danger fw-bold w-50 shadow-sm">RECHAZAR</a>
+                                    <a href="/responder_presupuesto/{{ o.id_orden }}/aprobar" class="btn btn-success fw-bold w-50 shadow-sm text-black">APROBAR</a>
+                                    <a href="/responder_presupuesto/{{ o.id_orden }}/rechazar" class="btn btn-outline-danger fw-bold w-50 shadow-sm text-dark border-dark">RECHAZAR</a>
                                 </div>
                             </div>
 
                         {% elif o.estado == 'En Reparación' or o.estado == 'Listo para Entregar' %}
-                            <div class="alert alert-success text-center">
-                                <p class="mb-1">Presupuesto Aprobado por:</p>
-                                <h3 class="fw-bold text-success">${{ o.costo }}</h3>
+                            <div class="alert bg-success text-dark border-0 p-4">
+                                <p class="mb-1 text-dark small fw-bold">Presupuesto Aprobado:</p>
+                                <h2 class="fw-bold text-dark" style="font-family: 'Outfit'; font-weight: 800;">${{ o.costo }}</h2>
                                 
-                                <hr>
+                                <hr style="border-color: rgba(0,0,0,0.15);">
                                 <h6 class="fw-bold text-start mb-2 text-dark">Servicios y Repuestos Adquiridos:</h6>
                                 <ul class="list-group list-group-flush text-start small">
                                     {% for d in detalles %}
                                         {% if d.id_orden == o.id_orden %}
-                                            <li class="list-group-item bg-transparent px-0 py-1 d-flex justify-content-between border-0 border-bottom border-success">
+                                            <li class="list-group-item bg-transparent px-0 py-1 d-flex justify-content-between border-0 border-bottom border-dark text-dark" style="border-color: rgba(0,0,0,0.1) !important;">
                                                 <span>{{ d.cantidad }}x {{ d.descripcion }}</span>
                                                 <span class="fw-bold">${{ d.subtotal }}</span>
                                             </li>
@@ -95,11 +105,11 @@
                             </div>
 
                         {% elif o.estado == 'Rechazado' %}
-                            <div class="alert alert-danger text-center fw-bold">
+                            <div class="alert bg-danger text-white border-0 text-center fw-bold p-3">
                                 Presupuesto Rechazado. Puede pasar a retirar su equipo.
                             </div>
                         {% else %}
-                            <div class="alert alert-secondary text-center">
+                            <div class="alert bg-secondary text-white border-0 text-center p-3">
                                 El equipo está siendo analizado por nuestros técnicos. Pronto recibirá una cotización.
                             </div>
                         {% endif %}
@@ -108,8 +118,37 @@
             </div>
             {% endfor %}
         {% else %}
-            <div class="alert alert-info">No tenés equipos registrados actualmente.</div>
+            <div class="alert bg-secondary text-white border-0">No tenés equipos registrados actualmente.</div>
         {% endif %}
     </div>
+
+    <div class="modal fade" id="modalPassword" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Cambiar Contraseña</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/cambiar_password_cliente" method="POST">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Nueva Contraseña</label>
+                            <input type="password" name="nueva_password" class="form-control" minlength="6" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Confirmar Contraseña</label>
+                            <input type="password" name="confirmar_password" class="form-control" minlength="6" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary fw-bold">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

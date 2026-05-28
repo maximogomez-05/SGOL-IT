@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Turnos Web | SGOL-IT</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container py-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold text-white">📅 Turnos Web Pendientes</h2>
+            <a href="/dashboard" class="btn btn-outline-primary fw-bold">Volver al Panel</a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} shadow-sm fw-bold">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <!-- Formulario de búsqueda (RF-2.1) -->
+        <div class="card glass-panel mb-4 p-3">
+            <form action="/turnos" method="GET" class="d-flex gap-2">
+                <input type="text" name="q" class="form-control" placeholder="Buscar turno por DNI del cliente o número de turno..." value="{{ busqueda if busqueda else '' }}">
+                <button type="submit" class="btn btn-primary fw-bold text-black">Buscar</button>
+                {% if busqueda %}
+                    <a href="/turnos" class="btn btn-outline-danger fw-bold">Limpiar</a>
+                {% endif %}
+            </form>
+        </div>
+
+        <div class="card glass-panel">
+            <div class="card-body">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Fecha</th>
+                            <th>Cliente</th>
+                            <th>DNI / Teléfono</th>
+                            <th>Servicio Solicitado</th>
+                            <th>Presup. Estimado</th>
+                            <th class="text-center pe-4">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if turnos %}
+                            {% for t in turnos %}
+                            <tr style="background: transparent;">
+                                <td class="ps-4">{{ t.Fecha_Solicitud }}</td>
+                                <td class="fw-bold text-white">{{ t.Nombre_Completo }}</td>
+                                <td>{{ t.DNI_CUIL }} <br> <small class="text-muted">{{ t.Telefono }}</small></td>
+                                <td>{{ t.Servicio }}</td>
+                                <td class="fw-bold" style="color: var(--accent-emerald);">${{ t.Presupuesto_Estimado }}</td>
+                                <td class="text-center pe-4">
+                                    <form action="/procesar_turno/{{ t.ID_Turno }}" method="POST">
+                                        <button type="submit" class="btn btn-sm btn-primary px-3 fw-bold text-black">Recibir Equipo</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5 text-muted" style="background: transparent; border: none;">No hay turnos pendientes.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
