@@ -88,9 +88,9 @@
                         <h5 class="fw-bold text-info mb-3">Estado Financiero</h5>
                         
                         {% if o.estado == 'Esperando Respuesta' %}
-                            <div class="alert bg-warning text-dark border-0 p-4">
-                                <span class="text-dark small fw-bold">Presupuesto a Responder:</span>
-                                <h2 class="fw-bold text-dark my-2" style="font-family: 'Outfit'; font-weight: 800;">${{ o.costo }}</h2>
+                            <div class="alert bg-warning border-0 p-4 text-white">
+                                <span class="text-warning small fw-bold">Presupuesto a Responder:</span>
+                                <h2 class="fw-bold text-warning my-2" style="font-family: 'Outfit'; font-weight: 800;">${{ o.costo }}</h2>
                                 
                                 {% if o.preliminar and o.preliminar > 0 and o.costo != o.preliminar %}
                                     <div class="alert bg-danger text-white py-2 small fw-bold mb-3 text-start">
@@ -98,12 +98,12 @@
                                     </div>
                                 {% endif %}
                                 
-                                <hr style="border-color: rgba(0,0,0,0.15);">
-                                <h6 class="fw-bold text-start mb-2 text-dark">Detalle de la Cotización:</h6>
+                                <hr style="border-color: var(--border-glass);">
+                                <h6 class="fw-bold text-start mb-2 text-warning">Detalle de la Cotización:</h6>
                                 <ul class="list-group list-group-flush text-start small mb-3">
                                     {% for d in detalles %}
                                         {% if d.id_orden == o.id_orden %}
-                                            <li class="list-group-item bg-transparent px-0 py-1 d-flex justify-content-between border-0 border-bottom border-dark text-dark" style="border-color: rgba(0,0,0,0.1) !important;">
+                                            <li class="list-group-item bg-transparent px-0 py-1 d-flex justify-content-between border-0 border-bottom text-white" style="border-color: var(--border-glass) !important;">
                                                 <span>{{ d.cantidad }}x {{ d.descripcion }}</span>
                                                 <span class="fw-bold">${{ d.subtotal }}</span>
                                             </li>
@@ -113,23 +113,23 @@
 
                                 <div class="d-flex gap-2 justify-content-center">
                                     <a href="/responder_presupuesto/{{ o.id_orden }}/aprobar" class="btn btn-success fw-bold w-50 shadow-sm text-black">APROBAR</a>
-                                    <a href="/responder_presupuesto/{{ o.id_orden }}/rechazar" class="btn btn-outline-danger fw-bold w-50 shadow-sm text-dark border-dark">RECHAZAR</a>
+                                    <a href="/responder_presupuesto/{{ o.id_orden }}/rechazar" class="btn btn-outline-danger fw-bold w-50 shadow-sm">RECHAZAR</a>
                                 </div>
                             </div>
 
                         {% elif o.estado == 'En Reparación' or o.estado == 'Listo para Entregar' or o.estado == 'Finalizado' %}
-                            <div class="alert bg-success text-dark border-0 p-4">
-                                <p class="mb-1 text-dark small fw-bold">
+                            <div class="alert bg-success border-0 p-4 text-white">
+                                <p class="mb-1 text-success small fw-bold">
                                     {% if o.estado == 'Finalizado' %}
                                         Monto Abonado:
                                     {% else %}
                                         Presupuesto Aprobado:
                                     {% endif %}
                                 </p>
-                                <h2 class="fw-bold text-dark" style="font-family: 'Outfit'; font-weight: 800;">${{ o.costo }}</h2>
+                                <h2 class="fw-bold text-success" style="font-family: 'Outfit'; font-weight: 800;">${{ o.costo }}</h2>
                                 
-                                <hr style="border-color: rgba(0,0,0,0.15);">
-                                <h6 class="fw-bold text-start mb-2 text-dark">
+                                <hr style="border-color: var(--border-glass);">
+                                <h6 class="fw-bold text-start mb-2 text-success">
                                     {% if o.estado == 'Finalizado' %}
                                         Detalle del Servicio Finalizado:
                                     {% else %}
@@ -139,7 +139,7 @@
                                 <ul class="list-group list-group-flush text-start small">
                                     {% for d in detalles %}
                                         {% if d.id_orden == o.id_orden %}
-                                            <li class="list-group-item bg-transparent px-0 py-1 d-flex justify-content-between border-0 border-bottom border-dark text-dark" style="border-color: rgba(0,0,0,0.1) !important;">
+                                            <li class="list-group-item bg-transparent px-0 py-1 d-flex justify-content-between border-0 border-bottom text-white" style="border-color: var(--border-glass) !important;">
                                                 <span>{{ d.cantidad }}x {{ d.descripcion }}</span>
                                                 <span class="fw-bold">${{ d.subtotal }}</span>
                                             </li>
