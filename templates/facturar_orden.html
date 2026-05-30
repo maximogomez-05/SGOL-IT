@@ -24,7 +24,7 @@
                             <span class="fs-3 fw-bold" style="color: var(--accent-emerald); font-family: 'Outfit'; font-weight: 800;">${{ orden.costo }}</span>
                         </div>
 
-                        <form action="/procesar_pago/{{ orden.id_orden }}" method="POST">
+                        <form action="/procesar_pago_avanzado/{{ orden.id_orden }}" method="POST">
                             <div class="mb-4">
                                 <label class="form-label text-muted small fw-bold">Método de Pago del Cliente</label>
                                 <select name="metodo_pago" class="form-select form-select-lg" required>
@@ -34,6 +34,20 @@
                                     <option value="Tarjeta de Débito">💳 Tarjeta de Débito</option>
                                     <option value="Tarjeta de Crédito">💳 Tarjeta de Crédito</option>
                                 </select>
+                            </div>
+                            
+                            <div class="row mb-4">
+                                <div class="col-6">
+                                    <label class="form-label text-muted small fw-bold">Tipo de Factura</label>
+                                    <select name="tipo_factura" class="form-select" required>
+                                        <option value="B" selected>Factura B (Consumidor Final)</option>
+                                        <option value="A">Factura A (Resp. Inscripto)</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label text-muted small fw-bold">DNI o CUIT Cliente</label>
+                                    <input type="text" name="documento_cliente" class="form-control" placeholder="Obligatorio para Factura A" required>
+                                </div>
                             </div>
                             
                             <div class="alert bg-warning text-dark border-0 small p-3">

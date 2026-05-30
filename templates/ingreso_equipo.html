@@ -23,7 +23,7 @@
 
         <div class="card glass-panel">
             <div class="card-body p-4">
-                <form action="/ingreso_equipo" method="POST">
+                <form action="/ingreso_equipo" method="POST" enctype="multipart/form-data">
                     
                     <h5 class="text-info fw-bold mb-3">Información del Cliente</h5>
                     <div class="row g-3 mb-4">
@@ -70,6 +70,15 @@
                                 <option value="Otro">Otro</option>
                             </select>
                         </div>
+                        <div class="col-md-12 mt-3">
+                            <label class="form-label text-muted small">Detalles Visuales / Estado Físico de Recepción</label>
+                            <textarea name="detalles_visuales" class="form-control" rows="3" placeholder="Ej: Rayones en la tapa superior, le falta un tornillo en la base, pantalla con suciedad superficial..." pattern="[^<>]*" title="No se permiten etiquetas HTML"></textarea>
+                        </div>
+                        <div class="col-md-12 mt-3">
+                            <label class="form-label text-muted small">Adjuntar Fotos del Equipo (Máximo 4 imágenes)</label>
+                            <input type="file" name="fotos" class="form-control" accept="image/*" multiple id="fotos-input">
+                            <div class="form-text text-light-gray mt-1">Formatos permitidos: png, jpg, jpeg, webp.</div>
+                        </div>
                     </div>
 
                     <button type="submit" class="btn btn-primary w-100 fw-bold py-2 text-black">GENERAR ORDEN Y ENVIAR A REVISIÓN</button>
@@ -77,5 +86,14 @@
             </div>
         </div>
     </div>
+    
+    <script>
+        document.getElementById('fotos-input').addEventListener('change', function() {
+            if (this.files.length > 4) {
+                alert('Solo se permite subir un maximo de 4 fotos.');
+                this.value = '';
+            }
+        });
+    </script>
 </body>
 </html>

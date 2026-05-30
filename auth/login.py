@@ -1,13 +1,15 @@
+# pyrefly: ignore [missing-import]
 from config.database import DB
 from werkzeug.security import check_password_hash
 
 class Autenticacion:
+    # valida las credenciales del empleado al iniciar sesion
     def iniciar_sesion(self, usuario, password):
         try:
-            # Pedimos un cursor que nos devuelva diccionarios para manejar más fácil los datos
+            # cursor en formato diccionario para leer facil
             cursor = DB.cursor(dictionary=True)
             
-            # Consulta SQL para verificar credenciales y traer el rol del empleado
+            # query para buscar al empleado por su usuario
             sql = """
                 SELECT e.ID_Empleado as id, 
                        e.Nombre_Completo as nombre, 
@@ -26,13 +28,13 @@ class Autenticacion:
             cursor.close()
             
             if user_data:
-                # Validar que la cuenta esté activa (1) y coincida el hash de contraseña
+                # revisa que este activo y que coincida el hash de la clave
                 if user_data.get('activo', 1) == 1 and check_password_hash(user_data['password_hash'], password):
-                    # Limpiamos el hash por seguridad antes de guardarlo en la sesión
+                    # borra el hash de la password antes de retornar para no guardarlo en session
                     del user_data['password_hash']
                     return user_data
             return None
             
         except Exception as e:
-            print(f"Error en autenticación: {e}")
+            print(f"error en auth de empleado: {e}")
             return None

@@ -39,6 +39,24 @@
                         {% endif %}
                     </div>
                 </div>
+                
+                {% if orden.detalles_visuales or orden.fotos %}
+                <div class="p-3 mb-4 rounded" style="border: 1px solid var(--border-glass); background: rgba(255,255,255,0.01);">
+                    <h6 class="fw-bold text-info mb-2">🔍 Estado Físico de Recepción:</h6>
+                    <p class="text-white small mb-3">{{ orden.detalles_visuales | default('Sin detalles visuales registrados.', true) }}</p>
+                    {% if orden.fotos %}
+                        <div class="row g-2">
+                            {% for foto in orden.fotos.split(',') %}
+                                <div class="col-md-2 col-4">
+                                    <a href="{{ url_for('static', filename='uploads/equipos/' ~ foto) }}" target="_blank">
+                                        <img src="{{ url_for('static', filename='uploads/equipos/' ~ foto) }}" class="img-fluid rounded border border-secondary" style="max-height: 80px; object-fit: cover; width: 100%; cursor: pointer;" alt="Foto equipo">
+                                    </a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                {% endif %}
 
                 <hr style="border-color: var(--border-glass);">
 
@@ -64,7 +82,7 @@
                 {% endif %}
 
                 <div class="tracking-timeline px-2">
-                    <div class="tracking-progress-line" style="width: {{ current_idx * 16 }}%;"></div>
+                    <div class="tracking-progress-line" style="width: {{ current_idx * 20 }}%;"></div>
                     {% for st in states %}
                         <div class="timeline-step {% if loop.index0 < current_idx %}completed{% elif loop.index0 == current_idx %}active{% endif %}">
                             <div class="step-icon">

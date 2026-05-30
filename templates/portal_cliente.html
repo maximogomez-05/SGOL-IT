@@ -35,7 +35,39 @@
                     <span class="fw-bold fs-5">Orden #{{ o.id_orden }} | {{ o.equipo }} (Código de Tracking: {{ o.codigo }})</span>
                     <span class="badge bg-info text-dark fs-6">{{ o.estado }}</span>
                 </div>
-                <div class="card-body row">
+                <div class="card-body">
+                    <!-- Línea de tiempo visual -->
+                    {% set states = ['Ingresado', 'En Diagnóstico', 'Esperando Aprobación', 'En Reparación', 'Listo', 'Finalizado'] %}
+                    {% set current_idx = 0 %}
+                    {% if o.estado == 'Para Revisión' or o.estado == 'Ingresado' %}
+                        {% set current_idx = 0 %}
+                    {% elif o.estado == 'En Diagnóstico' %}
+                        {% set current_idx = 1 %}
+                    {% elif o.estado == 'Esperando Aprobación' or o.estado == 'Esperando Respuesta' %}
+                        {% set current_idx = 2 %}
+                    {% elif o.estado == 'En Reparación' or o.estado == 'Esperando Repuestos' or o.estado == 'Reparando' or o.estado == 'En Testing' %}
+                        {% set current_idx = 3 %}
+                    {% elif o.estado == 'Listo para Entregar' %}
+                        {% set current_idx = 4 %}
+                    {% elif o.estado == 'Finalizado' %}
+                        {% set current_idx = 5 %}
+                    {% endif %}
+
+                    <div class="tracking-timeline px-2 mb-4">
+                        <div class="tracking-progress-line" style="width: {{ current_idx * 20 }}%;"></div>
+                        {% for st in states %}
+                            <div class="timeline-step {% if loop.index0 < current_idx %}completed{% elif loop.index0 == current_idx %}active{% endif %}">
+                                <div class="step-icon">
+                                    {% if loop.index0 < current_idx %}✓{% else %}{{ loop.index }}{% endif %}
+                                </div>
+                                <div class="step-label" style="font-size: 0.8rem; font-weight: 500;">{{ st }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <hr style="border-color: var(--border-glass);">
+                    
+                    <div class="row">
                     
                     <div class="col-md-7 border-end" style="border-color: var(--border-glass) !important;">
                         <h5 class="fw-bold text-info mb-3">Línea de Tiempo</h5>
@@ -85,13 +117,25 @@
                                 </div>
                             </div>
 
-                        {% elif o.estado == 'En Reparación' or o.estado == 'Listo para Entregar' %}
+                        {% elif o.estado == 'En Reparación' or o.estado == 'Listo para Entregar' or o.estado == 'Finalizado' %}
                             <div class="alert bg-success text-dark border-0 p-4">
-                                <p class="mb-1 text-dark small fw-bold">Presupuesto Aprobado:</p>
+                                <p class="mb-1 text-dark small fw-bold">
+                                    {% if o.estado == 'Finalizado' %}
+                                        Monto Abonado:
+                                    {% else %}
+                                        Presupuesto Aprobado:
+                                    {% endif %}
+                                </p>
                                 <h2 class="fw-bold text-dark" style="font-family: 'Outfit'; font-weight: 800;">${{ o.costo }}</h2>
                                 
                                 <hr style="border-color: rgba(0,0,0,0.15);">
-                                <h6 class="fw-bold text-start mb-2 text-dark">Servicios y Repuestos Adquiridos:</h6>
+                                <h6 class="fw-bold text-start mb-2 text-dark">
+                                    {% if o.estado == 'Finalizado' %}
+                                        Detalle del Servicio Finalizado:
+                                    {% else %}
+                                        Servicios y Repuestos Adquiridos:
+                                    {% endif %}
+                                </h6>
                                 <ul class="list-group list-group-flush text-start small">
                                     {% for d in detalles %}
                                         {% if d.id_orden == o.id_orden %}
@@ -114,6 +158,7 @@
                             </div>
                         {% endif %}
                     </div>
+                </div>
                 </div>
             </div>
             {% endfor %}

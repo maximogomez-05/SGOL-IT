@@ -34,6 +34,23 @@
                         <p class="mb-1"><strong>Nro. Serie:</strong> <span class="text-light">{{ orden.nro_serie }}</span></p>
                         <p class="mb-1"><strong>Estado Actual:</strong> <span class="badge bg-secondary">{{ orden.estado }}</span></p>
                         <p class="mb-0"><strong>Fecha de Ingreso:</strong> <span class="text-light">{{ orden.fecha }}</span></p>
+                        
+                        {% if orden.detalles_visuales or orden.fotos %}
+                        <hr style="border-color: var(--border-glass);">
+                        <p class="mb-2"><strong>Detalles Físicos de Recepción:</strong></p>
+                        <p class="small text-light mb-3">{{ orden.detalles_visuales | default('Sin observaciones visuales.', true) }}</p>
+                        {% if orden.fotos %}
+                            <div class="row g-2">
+                                {% for foto in orden.fotos.split(',') %}
+                                    <div class="col-3">
+                                        <a href="{{ url_for('static', filename='uploads/equipos/' ~ foto) }}" target="_blank">
+                                            <img src="{{ url_for('static', filename='uploads/equipos/' ~ foto) }}" class="img-fluid rounded border border-secondary" style="max-height: 50px; object-fit: cover; width: 100%;" alt="Foto equipo">
+                                        </a>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        {% endif %}
                     </div>
                 </div>
             </div>

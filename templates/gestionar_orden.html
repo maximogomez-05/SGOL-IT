@@ -92,6 +92,30 @@
                             <strong>Estado Actual:</strong> <span class="badge bg-info text-dark">{{ orden.estado }}</span>
                         </div>
 
+                        <!-- detalles visuales y fotos de recepcion -->
+                        <div class="mb-4 p-3 rounded shadow-sm" style="border: 1px solid var(--border-glass); background: rgba(255,255,255,0.01);">
+                            <h6 class="fw-bold text-info mb-2">🔍 Detalles Físicos de Recepción:</h6>
+                            <p class="text-white small mb-3">
+                                {% if orden.detalles_visuales %}
+                                    {{ orden.detalles_visuales }}
+                                {% else %}
+                                    <span class="text-muted">Sin observaciones visuales cargadas al ingresar.</span>
+                                {% endif %}
+                            </p>
+                            
+                            {% if orden.fotos %}
+                                <div class="row g-2">
+                                    {% for foto in orden.fotos.split(',') %}
+                                        <div class="col-3">
+                                            <a href="{{ url_for('static', filename='uploads/equipos/' ~ foto) }}" target="_blank">
+                                                <img src="{{ url_for('static', filename='uploads/equipos/' ~ foto) }}" class="img-fluid rounded border border-secondary" style="max-height: 80px; object-fit: cover; width: 100%; cursor: pointer;" alt="Foto equipo">
+                                            </a>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
                         <!-- Formulario para cambiar a estados intermedios (RF-3.1) -->
                         {% if orden.estado in ('Para Revisión', 'En Diagnóstico', 'En Reparación', 'Esperando Repuestos', 'Reparando', 'En Testing') %}
                         <form action="/gestionar_orden/{{ orden.id_orden }}" method="POST" class="mb-4 p-3 rounded" style="border: 1px solid var(--border-glass); background: rgba(255,255,255,0.02);">

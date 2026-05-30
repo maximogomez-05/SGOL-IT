@@ -6,7 +6,7 @@
     --bg-glass: rgba(19, 27, 46, 0.75);
     --border-glass: rgba(255, 255, 255, 0.08);
     --text-primary: #f3f4f6;
-    --text-secondary: #9ca3af;
+    --text-secondary: #f1f5f9;
     
     /* Neon Accents */
     --accent-cyan: #00f2fe;
@@ -250,7 +250,11 @@ select:-webkit-autofill:focus {
 }
 
 .form-control::placeholder {
-    color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.text-muted {
+    color: #f1f5f9 !important; /* Off-white for perfect visibility */
 }
 
 label.form-label {
@@ -427,11 +431,20 @@ label.form-label {
 
 /* Accessibility & Color contrast overrides */
 .text-muted {
-    color: #9ca3af !important; /* Lighter gray for readability against dark background */
+    color: #f1f5f9 !important; /* High contrast off-white */
+}
+.text-secondary {
+    color: #f1f5f9 !important; /* High contrast off-white */
+}
+.text-body-secondary {
+    color: #f1f5f9 !important;
+}
+.text-body-tertiary {
+    color: #e2e8f0 !important;
 }
 .text-muted-cyan {
     color: var(--accent-cyan) !important;
-    opacity: 0.8;
+    opacity: 0.95;
 }
 
 
