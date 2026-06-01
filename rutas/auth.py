@@ -194,28 +194,33 @@ def solicitar_turno():
             return render_template('solicitar_turno.html')
             
         try:
+            # 1. Buscar o registrar cliente primero
+            cl = Cliente.buscar_por_dni(dni)
+            id_c = cl['id'] if cl else None
+            if not id_c:
+                # Se registra con contraseña provisional '123'
+                id_c = Cliente(dni, nombre, email, telefono, "123").registrar()
+                
             cursor = DB.cursor()
             fecha_hoy = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             
-            # crear tabla turno por las dudas
+            # crear tabla turno por las dudas con la clave ajena a cliente
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS turno (
                     ID_Turno INT AUTO_INCREMENT PRIMARY KEY,
-                    DNI_CUIL VARCHAR(15),
-                    Nombre_Completo VARCHAR(100),
-                    Email VARCHAR(100),
-                    Telefono VARCHAR(20),
+                    Cliente_ID_Cliente INT NOT NULL,
                     Servicio VARCHAR(100),
                     Presupuesto_Estimado DECIMAL(10,2),
                     Fecha_Solicitud DATETIME,
-                    Estado VARCHAR(50) DEFAULT 'Pendiente'
+                    Estado VARCHAR(50) DEFAULT 'Pendiente',
+                    FOREIGN KEY (Cliente_ID_Cliente) REFERENCES cliente(ID_Cliente) ON DELETE CASCADE
                 )
             """)
             
             cursor.execute("""
-                INSERT INTO turno (DNI_CUIL, Nombre_Completo, Email, Telefono, Servicio, Presupuesto_Estimado, Fecha_Solicitud, Estado)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-            """, (dni, nombre, email, telefono, servicio, float(presupuesto), fecha_hoy, 'Pendiente'))
+                INSERT INTO turno (Cliente_ID_Cliente, Servicio, Presupuesto_Estimado, Fecha_Solicitud, Estado)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (id_c, servicio, float(presupuesto), fecha_hoy, 'Pendiente'))
             DB.commit()
             cursor.close()
             flash("Turno solicitado con éxito. Nos comunicaremos a la brevedad.", "success")

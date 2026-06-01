@@ -80,7 +80,7 @@
                                     <td class="fw-bold" style="color: var(--accent-emerald);">${{ item.precio }}</td>
                                     <td>
                                         {% if item.tipo_item == 'Repuesto_Fisico' %}
-                                            <span class="badge {{ 'bg-danger' if item.stock <= item.stock_minimo else 'bg-info text-dark' }}">{{ item.stock }} unid.</span>
+                                            <span class="badge {{ 'bg-danger' if item.stock <= item.stock_minimo else 'bg-info' }}">{{ item.stock }} unid.</span>
                                             {% if item.stock <= item.stock_minimo %}
                                                 <i class="text-danger fw-bold small d-block">¡Stock Bajo! (Min: {{ item.stock_minimo }})</i>
                                             {% endif %}

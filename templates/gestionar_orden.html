@@ -89,7 +89,7 @@
                         
                         <div class="alert bg-secondary text-white border-0 py-3 mb-3">
                             <strong>Equipo:</strong> {{ orden.equipo }} <br>
-                            <strong>Estado Actual:</strong> <span class="badge bg-info text-dark">{{ orden.estado }}</span>
+                            <strong>Estado Actual:</strong> <span class="badge bg-info">{{ orden.estado }}</span>
                         </div>
 
                         <!-- detalles visuales y fotos de recepcion -->
@@ -170,7 +170,103 @@
                 </div>
             </div>
 
+            <!-- chat de comunicación con el cliente -->
+            <div class="col-12 mt-4">
+                <div class="card glass-panel">
+                    <div class="card-header border-0 bg-transparent pt-4 pb-0">
+                        <h5 class="fw-bold text-info mb-0">💬 Canal de Comunicación Directa con el Cliente</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chat-box glass-panel p-3 mb-3" id="chat-box-{{ orden.id_orden }}" style="height: 250px; overflow-y: auto; background: rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 8px;">
+                            <div class="text-center text-muted small py-3">Iniciando chat...</div>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-text bg-secondary border-secondary text-white" style="font-size: 0.9rem;">
+                                Remitente: <strong>{{ session['nombre'] }} ({{ session['nombre_rol'] }})</strong>
+                            </span>
+                            <input type="text" id="chat-input-{{ orden.id_orden }}" class="form-control bg-dark border-secondary text-white" placeholder="Escribe un mensaje de respuesta para el cliente..." onkeydown="if(event.key === 'Enter') enviarMensajeEmpleado({{ orden.id_orden }})">
+                            <button class="btn btn-success fw-bold text-black" onclick="enviarMensajeEmpleado({{ orden.id_orden }})">Enviar Mensaje</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
+
+    <script>
+        function cargarMensajesEmpleado(idOrden) {
+            const box = document.getElementById(`chat-box-${idOrden}`);
+            if (!box) return;
+            
+            fetch(`/chat/${idOrden}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                        box.innerHTML = `<div class="text-center text-danger small py-3">${data.error}</div>`;
+                        return;
+                    }
+                    if (data.length === 0) {
+                        box.innerHTML = `<div class="text-center text-muted small py-3">No hay mensajes en este chat. Escribe un mensaje inicial para el cliente.</div>`;
+                        return;
+                    }
+                    
+                    let html = '';
+                    data.forEach(msg => {
+                        const esEmpleado = msg.remitente_tipo === 'empleado';
+                        const nombre = esEmpleado ? `${msg.empleado_nombre} (${msg.remitente_tipo === 'empleado' ? 'Soporte' : ''})` : msg.cliente_nombre;
+                        const alignClass = esEmpleado ? 'text-end align-self-end bg-primary-subtle text-white' : 'text-start align-self-start bg-secondary text-white';
+                        const bubbleStyle = esEmpleado ? 
+                            'background: rgba(0, 255, 157, 0.12); border: 1px solid rgba(0, 255, 157, 0.25); border-radius: 12px 12px 0 12px;' :
+                            'background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-glass); border-radius: 12px 12px 12px 0;';
+                        
+                        html += `
+                            <div class="p-2 px-3 mb-1" style="max-width: 80%; ${bubbleStyle} ${alignClass}">
+                                <small class="d-block text-info fw-bold" style="font-size: 0.75rem;">${nombre}</small>
+                                <span style="font-size: 0.9rem; word-break: break-word;">${msg.mensaje}</span>
+                                <small class="d-block text-muted text-end mt-1" style="font-size: 0.65rem;">${msg.fecha_envio}</small>
+                            </div>
+                        `;
+                    });
+                    
+                    const wasScrolledDown = box.scrollHeight - box.clientHeight <= box.scrollTop + 20;
+                    box.innerHTML = html;
+                    if (wasScrolledDown || box.innerHTML.includes('Iniciando chat...')) {
+                        box.scrollTop = box.scrollHeight;
+                    }
+                })
+                .catch(err => console.error('Error al cargar mensajes:', err));
+        }
+
+        function enviarMensajeEmpleado(idOrden) {
+            const input = document.getElementById(`chat-input-${idOrden}`);
+            if (!input) return;
+            const txt = input.value.trim();
+            if (!txt) return;
+
+            fetch(`/chat/${idOrden}/enviar`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ mensaje: txt })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    input.value = '';
+                    cargarMensajesEmpleado(idOrden);
+                } else {
+                    alert(data.error || 'Error al enviar mensaje');
+                }
+            })
+            .catch(err => console.error('Error:', err));
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            cargarMensajesEmpleado({{ orden.id_orden }});
+            setInterval(() => cargarMensajesEmpleado({{ orden.id_orden }}), 5000);
+        });
+    </script>
 </body>
 </html>

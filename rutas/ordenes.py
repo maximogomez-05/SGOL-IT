@@ -33,14 +33,12 @@ def gestionar_turnos():
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS turno (
                 ID_Turno INT AUTO_INCREMENT PRIMARY KEY,
-                DNI_CUIL VARCHAR(15),
-                Nombre_Completo VARCHAR(100),
-                Email VARCHAR(100),
-                Telefono VARCHAR(20),
+                Cliente_ID_Cliente INT NOT NULL,
                 Servicio VARCHAR(100),
                 Presupuesto_Estimado DECIMAL(10,2),
                 Fecha_Solicitud DATETIME,
-                Estado VARCHAR(50) DEFAULT 'Pendiente'
+                Estado VARCHAR(50) DEFAULT 'Pendiente',
+                FOREIGN KEY (Cliente_ID_Cliente) REFERENCES cliente(ID_Cliente) ON DELETE CASCADE
             )
         """)
         DB.commit()
@@ -48,14 +46,22 @@ def gestionar_turnos():
         print(f"Error al verificar/crear tabla turno: {e}")
         
     if q:
-        sql = """SELECT * FROM turno 
-                 WHERE Estado = 'Pendiente' AND (DNI_CUIL LIKE %s OR ID_Turno = %s OR Nombre_Completo LIKE %s)
-                 ORDER BY Fecha_Solicitud DESC"""
+        sql = """SELECT t.ID_Turno, t.Servicio, t.Presupuesto_Estimado, t.Fecha_Solicitud, t.Estado,
+                        c.DNI_CUIL, c.Nombre_Completo, c.Email, c.Telefono 
+                 FROM turno t 
+                 JOIN cliente c ON t.Cliente_ID_Cliente = c.ID_Cliente
+                 WHERE t.Estado = 'Pendiente' AND (c.DNI_CUIL LIKE %s OR t.ID_Turno = %s OR c.Nombre_Completo LIKE %s)
+                 ORDER BY t.Fecha_Solicitud DESC"""
         like_q = f"%{q}%"
         id_q = int(q) if q.isdigit() else 0
         cursor.execute(sql, (like_q, id_q, like_q))
     else:
-        cursor.execute("SELECT * FROM turno WHERE Estado = 'Pendiente' ORDER BY Fecha_Solicitud DESC")
+        cursor.execute("""SELECT t.ID_Turno, t.Servicio, t.Presupuesto_Estimado, t.Fecha_Solicitud, t.Estado,
+                                 c.DNI_CUIL, c.Nombre_Completo, c.Email, c.Telefono 
+                          FROM turno t 
+                          JOIN cliente c ON t.Cliente_ID_Cliente = c.ID_Cliente
+                          WHERE t.Estado = 'Pendiente' 
+                          ORDER BY t.Fecha_Solicitud DESC""")
         
     turnos = cursor.fetchall()
     cursor.close()
@@ -67,7 +73,10 @@ def procesar_turno(id_turno):
         return redirect(url_for('auth.inicio'))
     
     cursor = DB.cursor(dictionary=True)
-    cursor.execute("SELECT DNI_CUIL, Nombre_Completo, Email, Telefono FROM turno WHERE ID_Turno = %s", (id_turno,))
+    cursor.execute("""SELECT c.DNI_CUIL, c.Nombre_Completo, c.Email, c.Telefono 
+                      FROM turno t 
+                      JOIN cliente c ON t.Cliente_ID_Cliente = c.ID_Cliente 
+                      WHERE t.ID_Turno = %s""", (id_turno,))
     turno = cursor.fetchone()
     
     cursor.execute("UPDATE turno SET Estado = 'Procesado' WHERE ID_Turno = %s", (id_turno,))
@@ -155,12 +164,20 @@ def ingreso_equipo():
             if not id_c:
                 id_c = Cliente(dni, nom, em, tel, pw).registrar()
                 
-            # registra el equipo
-            id_eq = Equipo(ns, mod, tip, id_c, detalles_visuales, fotos_str).registrar()
+            # busca o registra el equipo
+            eq_existente = Equipo.buscar_por_numero_serie(ns)
+            if eq_existente:
+                id_eq = eq_existente['id']
+            else:
+                id_eq = Equipo(ns, mod, tip, id_c).registrar()
             
-            # crea la orden de trabajo
+            # crea la orden de trabajo (guarda Detalles_Visuales y Fotos aquí)
             cursor = DB.cursor()
-            cursor.execute("INSERT INTO orden_trabajo (Estado_General, Fecha_Creacion, Equipo_ID_Equipo, Empleado_ID_Empleado) VALUES (%s,%s,%s,%s)", ('Para Revisión', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), id_eq, session['usuario_id']))
+            cursor.execute("""
+                INSERT INTO orden_trabajo 
+                (Estado_General, Fecha_Creacion, Equipo_ID_Equipo, Empleado_ID_Empleado, Detalles_Visuales, Fotos) 
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, ('Para Revisión', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), id_eq, session['usuario_id'], detalles_visuales, fotos_str))
             id_o = cursor.lastrowid
             DB.commit()
             cursor.close()
@@ -202,9 +219,7 @@ def cotizar_orden(id_orden):
             cursor.close()
             return redirect(url_for('ordenes.cotizar_orden', id_orden=id_orden))
             
-        cursor.execute("SELECT Equipo_ID_Equipo FROM orden_trabajo WHERE ID_OT = %s", (id_orden,))
-        id_eq = cursor.fetchone()['Equipo_ID_Equipo']
-        id_pres = Presupuesto(total, id_eq).registrar()
+        id_pres = Presupuesto(total).registrar()
         cursor.execute("UPDATE orden_trabajo SET Presupuesto_ID_Presupuesto = %s, Estado_General = 'Esperando Respuesta' WHERE ID_OT = %s", (id_pres, id_orden))
         DB.commit()
         Seguimiento.registrar_hito(id_orden, "Esperando Respuesta", f"Presupuesto formal generado por ${total}.")

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Factura #{{ factura.id_factura }} | SGOL-IT</title>
@@ -13,15 +14,27 @@
             border-radius: 8px;
             max-width: 800px;
             margin: auto;
-            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
         }
+
         @media print {
-            body { background: #fff; color: #000; }
-            .no-print { display: none; }
-            .invoice-box { box-shadow: none; border: 1px solid #ccc; }
+            body {
+                background: #fff;
+                color: #000;
+            }
+
+            .no-print {
+                display: none;
+            }
+
+            .invoice-box {
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
         }
     </style>
 </head>
+
 <body class="py-5">
     <div class="container">
         <div class="mb-4 text-center no-print">
@@ -36,7 +49,8 @@
                     <p class="mb-0 text-muted">Servicio Técnico Especializado</p>
                 </div>
                 <div class="col-6 text-end">
-                    <h1 class="fw-bold" style="color: {% if factura.tipo == 'A' %}#f39c12{% else %}#3498db{% endif %};">FACTURA {{ factura.tipo }}</h1>
+                    <h1 class="fw-bold" style="color: {% if factura.tipo == 'A' %}#f39c12{% else %}#3498db{% endif %};">
+                        FACTURA {{ factura.tipo }}</h1>
                     <p class="mb-0"><strong>Nro:</strong> {{ "%04d" | format(factura.id_factura) }}</p>
                     <p class="mb-0"><strong>Fecha:</strong> {{ factura.fecha }}</p>
                 </div>
@@ -89,4 +103,5 @@
         </div>
     </div>
 </body>
+
 </html>

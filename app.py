@@ -8,6 +8,7 @@ from rutas.ordenes import bp_ordenes
 from rutas.facturacion import bp_facturacion
 from rutas.personal import bp_personal
 from rutas.inventario import bp_inventario
+from rutas.chat import bp_chat
 
 app = Flask(__name__)
 
@@ -26,6 +27,7 @@ app.register_blueprint(bp_ordenes)
 app.register_blueprint(bp_facturacion)
 app.register_blueprint(bp_personal)
 app.register_blueprint(bp_inventario)
+app.register_blueprint(bp_chat)
 
 # crea la carpeta de fotos si no existe
 os.makedirs(os.path.join(app.root_path, UPLOAD_FOLDER), exist_ok=True)

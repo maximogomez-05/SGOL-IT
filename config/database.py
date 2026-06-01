@@ -1,4 +1,5 @@
 import mysql.connector
+import threading
 
 class ConectorDB:
     def __init__(self):
@@ -6,7 +7,7 @@ class ConectorDB:
         self.user = "root"
         self.password = ""
         self.database = "sgol_it"
-        self.conexion = self._conectar()
+        self._local = threading.local()
 
     def _conectar(self):
         return mysql.connector.connect(
@@ -16,18 +17,22 @@ class ConectorDB:
             database=self.database
         )
 
+    @property
+    def conexion(self):
+        # obtiene o crea la conexion especifica de este hilo
+        if not hasattr(self._local, 'conexion') or not self._local.conexion.is_connected():
+            self._local.conexion = self._conectar()
+        return self._local.conexion
+
     def cursor(self, dictionary=False):
-        # Verificamos que la conexión siga viva antes de devolver el cursor
-        if not self.conexion.is_connected():
-            self.conexion = self._conectar()
         return self.conexion.cursor(dictionary=dictionary)
 
     def commit(self):
         self.conexion.commit()
         
     def close(self):
-        if self.conexion.is_connected():
-            self.conexion.close()
+        if hasattr(self._local, 'conexion') and self._local.conexion.is_connected():
+            self._local.conexion.close()
 
-# Instanciamos el objeto DB que están esperando importar el resto de los archivos
+# instanciamos el objeto DB que estan esperando importar el resto de los archivos
 DB = ConectorDB()

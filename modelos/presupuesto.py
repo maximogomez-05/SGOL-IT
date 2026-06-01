@@ -1,20 +1,19 @@
 from config.database import DB
 
 class Presupuesto:
-    def __init__(self, monto_total_cotizado, equipo_id_equipo, presupuesto_preliminar_web=0.0):
+    def __init__(self, monto_total_cotizado, presupuesto_preliminar_web=0.0):
         self.monto_total_cotizado = monto_total_cotizado
         self.estado_presupuesto = "Pendiente de Aprobacion"
         self.comprobante_impreso = "WEB"
         self.presupuesto_preliminar_web = presupuesto_preliminar_web
-        self.equipo_id_equipo = equipo_id_equipo
 
     def registrar(self):
         cursor = DB.cursor()
         sql = """INSERT INTO Presupuesto 
-                 (Monto_Total_Cotizado, Estado_Presupuesto, Comprobante_Impreso, Presupuesto_Preliminar_Web, Equipo_ID_Equipo) 
-                 VALUES (%s, %s, %s, %s, %s)"""
+                 (Monto_Total_Cotizado, Estado_Presupuesto, Comprobante_Impreso, Presupuesto_Preliminar_Web) 
+                 VALUES (%s, %s, %s, %s)"""
         val = (self.monto_total_cotizado, self.estado_presupuesto, self.comprobante_impreso, 
-               self.presupuesto_preliminar_web, self.equipo_id_equipo)
+               self.presupuesto_preliminar_web)
         cursor.execute(sql, val)
         DB.commit()
         

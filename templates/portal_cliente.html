@@ -33,7 +33,7 @@
             <div class="card glass-panel mb-4">
                 <div class="card-header border-0 bg-transparent pt-4 pb-0 d-flex justify-content-between align-items-center">
                     <span class="fw-bold fs-5">Orden #{{ o.id_orden }} | {{ o.equipo }} (Código de Tracking: {{ o.codigo }})</span>
-                    <span class="badge bg-info text-dark fs-6">{{ o.estado }}</span>
+                    <span class="badge bg-info fs-6">{{ o.estado }}</span>
                 </div>
                 <div class="card-body">
                     <!-- Línea de tiempo visual -->
@@ -68,97 +68,108 @@
                     <hr style="border-color: var(--border-glass);">
                     
                     <div class="row">
-                    
-                    <div class="col-md-7 border-end" style="border-color: var(--border-glass) !important;">
-                        <h5 class="fw-bold text-info mb-3">Línea de Tiempo</h5>
-                        <ul class="list-group list-group-flush">
-                            {% for hito in hitos %}
-                                {% if hito.Orden_Trabajo_ID_OT == o.id_orden %}
-                                <li class="list-group-item px-0" style="background: transparent; border-color: var(--border-glass) !important; color: var(--text-primary);">
-                                    <small class="text-muted fw-bold d-block">{{ hito.Fecha_Actualizacion }}</small>
-                                    <span class="fw-bold text-white">{{ hito.Estado_Alcanzado }}:</span> 
-                                    <span class="text-light">{{ hito.Comentario_Frontal }}</span>
-                                </li>
-                                {% endif %}
-                            {% endfor %}
-                        </ul>
-                    </div>
+                        <div class="col-md-7 border-end" style="border-color: var(--border-glass) !important;">
+                            <h5 class="fw-bold text-info mb-3">Línea de Tiempo</h5>
+                            <ul class="list-group list-group-flush">
+                                {% for hito in hitos %}
+                                    {% if hito.Orden_Trabajo_ID_OT == o.id_orden %}
+                                    <li class="list-group-item px-0" style="background: transparent; border-color: var(--border-glass) !important; color: var(--text-primary);">
+                                        <small class="text-muted fw-bold d-block">{{ hito.Fecha_Actualizacion }}</small>
+                                        <span class="fw-bold text-white">{{ hito.Estado_Alcanzado }}:</span> 
+                                        <span class="text-light">{{ hito.Comentario_Frontal }}</span>
+                                    </li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </div>
 
-                    <div class="col-md-5 ps-md-4">
-                        <h5 class="fw-bold text-info mb-3">Estado Financiero</h5>
-                        
-                        {% if o.estado == 'Esperando Respuesta' %}
-                            <div class="alert bg-warning border-0 p-4 text-white">
-                                <span class="text-warning small fw-bold">Presupuesto a Responder:</span>
-                                <h2 class="fw-bold text-warning my-2" style="font-family: 'Outfit'; font-weight: 800;">${{ o.costo }}</h2>
-                                
-                                {% if o.preliminar and o.preliminar > 0 and o.costo != o.preliminar %}
-                                    <div class="alert bg-danger text-white py-2 small fw-bold mb-3 text-start">
-                                        ⚠️ Se ha detectado una diferencia respecto a su presupuesto preliminar estimado (${{ o.preliminar }}) debido a componentes agregados en el diagnóstico.
+                        <div class="col-md-5 ps-md-4">
+                            <h5 class="fw-bold text-info mb-3">Estado Financiero</h5>
+                            
+                            {% if o.estado == 'Esperando Respuesta' %}
+                                <div class="alert bg-warning border-0 p-4 text-white">
+                                    <span class="text-warning small fw-bold">Presupuesto a Responder:</span>
+                                    <h2 class="fw-bold text-warning my-2" style="font-family: 'Outfit'; font-weight: 800;">${{ o.costo }}</h2>
+                                    
+                                    {% if o.preliminar and o.preliminar > 0 and o.costo != o.preliminar %}
+                                        <div class="alert bg-danger text-white py-2 small fw-bold mb-3 text-start">
+                                            ⚠️ Se ha detectado una diferencia respecto a su presupuesto preliminar estimado (${{ o.preliminar }}) debido a componentes agregados en el diagnóstico.
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <hr style="border-color: var(--border-glass);">
+                                    <h6 class="fw-bold text-start mb-2 text-warning">Detalle de la Cotización:</h6>
+                                    <ul class="list-group list-group-flush text-start small mb-3">
+                                        {% for d in detalles %}
+                                            {% if d.id_orden == o.id_orden %}
+                                                <li class="list-group-item bg-transparent px-0 py-1 d-flex justify-content-between border-0 border-bottom text-white" style="border-color: var(--border-glass) !important;">
+                                                    <span>{{ d.cantidad }}x {{ d.descripcion }}</span>
+                                                    <span class="fw-bold">${{ d.subtotal }}</span>
+                                                </li>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </ul>
+
+                                    <div class="d-flex gap-2 justify-content-center">
+                                        <a href="/responder_presupuesto/{{ o.id_orden }}/aprobar" class="btn btn-success fw-bold w-50 shadow-sm text-black">APROBAR</a>
+                                        <a href="/responder_presupuesto/{{ o.id_orden }}/rechazar" class="btn btn-outline-danger fw-bold w-50 shadow-sm">RECHAZAR</a>
                                     </div>
-                                {% endif %}
-                                
-                                <hr style="border-color: var(--border-glass);">
-                                <h6 class="fw-bold text-start mb-2 text-warning">Detalle de la Cotización:</h6>
-                                <ul class="list-group list-group-flush text-start small mb-3">
-                                    {% for d in detalles %}
-                                        {% if d.id_orden == o.id_orden %}
-                                            <li class="list-group-item bg-transparent px-0 py-1 d-flex justify-content-between border-0 border-bottom text-white" style="border-color: var(--border-glass) !important;">
-                                                <span>{{ d.cantidad }}x {{ d.descripcion }}</span>
-                                                <span class="fw-bold">${{ d.subtotal }}</span>
-                                            </li>
-                                        {% endif %}
-                                    {% endfor %}
-                                </ul>
-
-                                <div class="d-flex gap-2 justify-content-center">
-                                    <a href="/responder_presupuesto/{{ o.id_orden }}/aprobar" class="btn btn-success fw-bold w-50 shadow-sm text-black">APROBAR</a>
-                                    <a href="/responder_presupuesto/{{ o.id_orden }}/rechazar" class="btn btn-outline-danger fw-bold w-50 shadow-sm">RECHAZAR</a>
                                 </div>
-                            </div>
 
-                        {% elif o.estado == 'En Reparación' or o.estado == 'Listo para Entregar' or o.estado == 'Finalizado' %}
-                            <div class="alert bg-success border-0 p-4 text-white">
-                                <p class="mb-1 text-success small fw-bold">
-                                    {% if o.estado == 'Finalizado' %}
-                                        Monto Abonado:
-                                    {% else %}
-                                        Presupuesto Aprobado:
-                                    {% endif %}
-                                </p>
-                                <h2 class="fw-bold text-success" style="font-family: 'Outfit'; font-weight: 800;">${{ o.costo }}</h2>
-                                
-                                <hr style="border-color: var(--border-glass);">
-                                <h6 class="fw-bold text-start mb-2 text-success">
-                                    {% if o.estado == 'Finalizado' %}
-                                        Detalle del Servicio Finalizado:
-                                    {% else %}
-                                        Servicios y Repuestos Adquiridos:
-                                    {% endif %}
-                                </h6>
-                                <ul class="list-group list-group-flush text-start small">
-                                    {% for d in detalles %}
-                                        {% if d.id_orden == o.id_orden %}
-                                            <li class="list-group-item bg-transparent px-0 py-1 d-flex justify-content-between border-0 border-bottom text-white" style="border-color: var(--border-glass) !important;">
-                                                <span>{{ d.cantidad }}x {{ d.descripcion }}</span>
-                                                <span class="fw-bold">${{ d.subtotal }}</span>
-                                            </li>
+                            {% elif o.estado == 'En Reparación' or o.estado == 'Listo para Entregar' or o.estado == 'Finalizado' %}
+                                <div class="alert bg-success border-0 p-4 text-white">
+                                    <p class="mb-1 text-success small fw-bold">
+                                        {% if o.estado == 'Finalizado' %}
+                                            Monto Abonado:
+                                        {% else %}
+                                            Presupuesto Aprobado:
                                         {% endif %}
-                                    {% endfor %}
-                                </ul>
-                            </div>
+                                    </p>
+                                    <h2 class="fw-bold text-success" style="font-family: 'Outfit'; font-weight: 800;">${{ o.costo }}</h2>
+                                    
+                                    <hr style="border-color: var(--border-glass);">
+                                     <h6 class="fw-bold text-start mb-2 text-success">
+                                         {% if o.estado == 'Finalizado' %}
+                                             Detalle del Servicio Finalizado:
+                                         {% else %}
+                                             Servicios y Repuestos Adquiridos:
+                                         {% endif %}
+                                     </h6>
+                                    <ul class="list-group list-group-flush text-start small">
+                                        {% for d in detalles %}
+                                            {% if d.id_orden == o.id_orden %}
+                                                <li class="list-group-item bg-transparent px-0 py-1 d-flex justify-content-between border-0 border-bottom text-white" style="border-color: var(--border-glass) !important;">
+                                                    <span>{{ d.cantidad }}x {{ d.descripcion }}</span>
+                                                    <span class="fw-bold">${{ d.subtotal }}</span>
+                                                </li>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                </div>
 
-                        {% elif o.estado == 'Rechazado' %}
-                            <div class="alert bg-danger text-white border-0 text-center fw-bold p-3">
-                                Presupuesto Rechazado. Puede pasar a retirar su equipo.
-                            </div>
-                        {% else %}
-                            <div class="alert bg-secondary text-white border-0 text-center p-3">
-                                El equipo está siendo analizado por nuestros técnicos. Pronto recibirá una cotización.
-                            </div>
-                        {% endif %}
+                            {% elif o.estado == 'Rechazado' %}
+                                <div class="alert bg-danger text-white border-0 text-center fw-bold p-3">
+                                    Presupuesto Rechazado. Puede pasar a retirar su equipo.
+                                </div>
+                            {% else %}
+                                <div class="alert bg-secondary text-white border-0 text-center p-3">
+                                    El equipo está siendo analizado por nuestros técnicos. Pronto recibirá una cotización.
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
+
+                <!-- chat de soporte de la orden -->
+                <div class="card-footer border-top p-4 bg-transparent" style="border-color: var(--border-glass) !important;">
+                    <h6 class="fw-bold text-info mb-3">💬 Consultas y Soporte Técnico en Tiempo Real:</h6>
+                    <div class="chat-box glass-panel p-3 mb-2" id="chat-box-{{ o.id_orden }}" style="max-height: 250px; overflow-y: auto; background: rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 8px;">
+                        <div class="text-center text-muted small py-3">Iniciando chat...</div>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="chat-input-{{ o.id_orden }}" class="form-control bg-dark border-secondary text-white" placeholder="Escribe un mensaje al equipo técnico..." onkeydown="if(event.key === 'Enter') enviarMensajeCliente({{ o.id_orden }})">
+                        <button class="btn btn-primary fw-bold text-black" onclick="enviarMensajeCliente({{ o.id_orden }})">Enviar</button>
+                    </div>
                 </div>
             </div>
             {% endfor %}
@@ -194,6 +205,86 @@
         </div>
     </div>
 
+    <script>
+        // cargar y enviar mensajes del chat del cliente
+        function cargarMensajesCliente(idOrden) {
+            const box = document.getElementById(`chat-box-${idOrden}`);
+            if (!box) return;
+            
+            fetch(`/chat/${idOrden}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                        box.innerHTML = `<div class="text-center text-danger small py-3">${data.error}</div>`;
+                        return;
+                    }
+                    if (data.length === 0) {
+                        box.innerHTML = `<div class="text-center text-muted small py-3">No hay mensajes. ¡Escribe el primero!</div>`;
+                        return;
+                    }
+                    
+                    let html = '';
+                    data.forEach(msg => {
+                        const esCliente = msg.remitente_tipo === 'cliente';
+                        const nombre = esCliente ? 'Tú' : msg.empleado_nombre;
+                        const alignClass = esCliente ? 'text-end align-self-end bg-primary-subtle text-white' : 'text-start align-self-start bg-secondary text-white';
+                        const bubbleStyle = esCliente ? 
+                            'background: rgba(0, 242, 254, 0.15); border: 1px solid rgba(0, 242, 254, 0.3); border-radius: 12px 12px 0 12px;' :
+                            'background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-glass); border-radius: 12px 12px 12px 0;';
+                        
+                        html += `
+                            <div class="p-2 px-3 mb-1" style="max-width: 80%; ${bubbleStyle} ${alignClass}">
+                                <small class="d-block text-info fw-bold" style="font-size: 0.75rem;">${nombre}</small>
+                                <span style="font-size: 0.9rem; word-break: break-word;">${msg.mensaje}</span>
+                                <small class="d-block text-muted text-end mt-1" style="font-size: 0.65rem;">${msg.fecha_envio}</small>
+                            </div>
+                        `;
+                    });
+                    
+                    const wasScrolledDown = box.scrollHeight - box.clientHeight <= box.scrollTop + 20;
+                    box.innerHTML = html;
+                    if (wasScrolledDown || box.innerHTML.includes('Iniciando chat...')) {
+                        box.scrollTop = box.scrollHeight;
+                    }
+                })
+                .catch(err => {
+                    console.error('Error al cargar mensajes:', err);
+                });
+        }
+
+        function enviarMensajeCliente(idOrden) {
+            const input = document.getElementById(`chat-input-${idOrden}`);
+            if (!input) return;
+            const txt = input.value.trim();
+            if (!txt) return;
+
+            fetch(`/chat/${idOrden}/enviar`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ mensaje: txt })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    input.value = '';
+                    cargarMensajesCliente(idOrden);
+                } else {
+                    alert(data.error || 'Error al enviar mensaje');
+                }
+            })
+            .catch(err => console.error('Error:', err));
+        }
+
+        // inicializar carga periodica para todas las ordenes del cliente
+        document.addEventListener("DOMContentLoaded", () => {
+            {% for o in ordenes %}
+                cargarMensajesCliente({{ o.id_orden }});
+                setInterval(() => cargarMensajesCliente({{ o.id_orden }}), 5000);
+            {% endfor %}
+        });
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -50,7 +50,7 @@
                                 <td class="fw-bold">#{{ h.id_orden }}</td>
                                 <td>{{ h.fecha }}</td>
                                 <td>{{ h.equipo }}</td>
-                                <td><span class="badge bg-info text-dark">{{ h.estado }}</span></td>
+                                <td><span class="badge bg-info">{{ h.estado }}</span></td>
                                 <td class="small">{{ h.diagnostico | default('Sin diagnóstico finalizado', true) }}</td>
                             </tr>
                             {% endfor %}
@@ -82,7 +82,7 @@
                                 {% if t.estado == 'Para Revisión' %}
                                     <span class="badge bg-danger">{{ t.estado }}</span>
                                 {% else %}
-                                    <span class="badge bg-warning text-dark">{{ t.estado }}</span>
+                                    <span class="badge bg-warning">{{ t.estado }}</span>
                                 {% endif %}
                             </td>
                             <td class="text-center pe-4">

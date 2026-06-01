@@ -115,7 +115,43 @@ def dashboard():
         cursor.execute("SELECT COUNT(*) as cant FROM orden_trabajo WHERE Estado_General = 'Listo para Entregar'")
         res = cursor.fetchone()
         listos_count = res['cant'] if res else 0
+
+    # 9. Obtener últimas órdenes activas (laboratorio en progreso)
+    cursor.execute("""
+        SELECT ot.ID_OT, ot.Codigo_Tracking_web as Codigo_Tracking, 
+               eq.Marca_Modelo as Marca, eq.Tipo_Dispositivo as Modelo, ot.Estado_General, 
+               DATE_FORMAT(ot.Fecha_Creacion, '%d/%m/%Y %H:%i') as fecha, cl.Nombre_Completo as Cliente
+        FROM orden_trabajo ot
+        JOIN equipo eq ON ot.Equipo_ID_Equipo = eq.ID_Equipo
+        JOIN cliente cl ON eq.Cliente_ID_Cliente = cl.ID_Cliente
+        WHERE ot.Estado_General NOT IN ('Finalizado', 'Rechazado')
+        ORDER BY ot.ID_OT DESC
+        LIMIT 5
+    """)
+    ordenes_recientes = cursor.fetchall()
+
+    # 10. Obtener últimos turnos pendientes solicitados
+    turnos_recientes = []
+    if int(session.get('rol_id', 0) or 0) in (1, 2):
+        cursor.execute("""
+            SELECT t.ID_Turno, t.Servicio, t.Presupuesto_Estimado, 
+                   DATE_FORMAT(t.Fecha_Solicitud, '%d/%m/%Y %H:%i') as fecha, t.Estado,
+                   c.Nombre_Completo as Cliente, c.Telefono 
+            FROM turno t 
+            JOIN cliente c ON t.Cliente_ID_Cliente = c.ID_Cliente
+            WHERE t.Estado = 'Pendiente'
+            ORDER BY t.Fecha_Solicitud DESC
+            LIMIT 5
+        """)
+        turnos_recientes = cursor.fetchall()
         
     cursor.close()
         
-    return render_template('dashboard.html', listos_entrega=listos_count, alertas_stock=alertas_stock, stats=stats)
+    return render_template(
+        'dashboard.html', 
+        listos_entrega=listos_count, 
+        alertas_stock=alertas_stock, 
+        stats=stats,
+        ordenes_recientes=ordenes_recientes,
+        turnos_recientes=turnos_recientes
+    )

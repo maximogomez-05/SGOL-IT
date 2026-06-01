@@ -4,13 +4,15 @@ import string
 from config.database import DB
 
 class OrdenTrabajo:
-    def __init__(self, id_equipo, id_empleado, id_presupuesto=None, codigo_tracking=None, estado_general="Para Revisión", id_ot=None):
+    def __init__(self, id_equipo, id_empleado, id_presupuesto=None, codigo_tracking=None, estado_general="Para Revisión", detalles_visuales=None, fotos=None, id_ot=None):
         self.id_ot = id_ot
         self.estado_general = estado_general
         self.fecha_creacion = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         self.id_equipo = id_equipo
         self.id_empleado = id_empleado
         self.id_presupuesto = id_presupuesto
+        self.detalles_visuales = detalles_visuales
+        self.fotos = fotos
         # Autogeneración de código de seguimiento único si no se pasa
         self.codigo_tracking = codigo_tracking if codigo_tracking else self.generar_codigo()
 
@@ -23,9 +25,9 @@ class OrdenTrabajo:
         cursor = DB.cursor()
         try:
             sql = """INSERT INTO orden_trabajo 
-                     (Estado_General, Fecha_Creacion, Equipo_ID_Equipo, Empleado_ID_Empleado, Presupuesto_ID_Presupuesto, Codigo_Tracking_web) 
-                     VALUES (%s, %s, %s, %s, %s, %s)"""
-            val = (self.estado_general, self.fecha_creacion, self.id_equipo, self.id_empleado, self.id_presupuesto, self.codigo_tracking)
+                     (Estado_General, Fecha_Creacion, Equipo_ID_Equipo, Empleado_ID_Empleado, Presupuesto_ID_Presupuesto, Codigo_Tracking_web, Detalles_Visuales, Fotos) 
+                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
+            val = (self.estado_general, self.fecha_creacion, self.id_equipo, self.id_empleado, self.id_presupuesto, self.codigo_tracking, self.detalles_visuales, self.fotos)
             cursor.execute(sql, val)
             DB.commit()
             self.id_ot = cursor.lastrowid
@@ -136,7 +138,7 @@ class OrdenTrabajo:
         try:
             sql = """SELECT ot.ID_OT as id_orden, ot.Estado_General as estado, ot.Diagnostico_Final as diagnostico,
                      ot.Fecha_Creacion as fecha, CONCAT(e.Marca_Modelo, ' - ', e.Tipo_Dispositivo) as equipo,
-                     e.Detalles_Visuales as detalles_visuales, e.Fotos as fotos,
+                     ot.Detalles_Visuales as detalles_visuales, ot.Fotos as fotos,
                      p.Monto_Total_Cotizado as costo, p.Presupuesto_Preliminar_Web as preliminar
                      FROM orden_trabajo ot 
                      JOIN equipo e ON ot.Equipo_ID_Equipo = e.ID_Equipo 
@@ -157,7 +159,7 @@ class OrdenTrabajo:
         try:
             sql = """SELECT ot.ID_OT as id_orden, CONCAT(e.Marca_Modelo, ' - ', e.Tipo_Dispositivo) as equipo, 
                      ot.Estado_General as estado, p.Monto_Total_Cotizado as costo, p.Presupuesto_Preliminar_Web as preliminar,
-                     ot.Codigo_Tracking_web as codigo, e.Detalles_Visuales as detalles_visuales, e.Fotos as fotos
+                     ot.Codigo_Tracking_web as codigo, ot.Detalles_Visuales as detalles_visuales, ot.Fotos as fotos
                      FROM orden_trabajo ot 
                      JOIN equipo e ON ot.Equipo_ID_Equipo = e.ID_Equipo 
                      LEFT JOIN presupuesto p ON ot.Presupuesto_ID_Presupuesto = p.ID_Presupuesto 
@@ -231,8 +233,8 @@ class OrdenTrabajo:
                        ot.Diagnostico_Final as diagnostico, 
                        CONCAT(e.Marca_Modelo, ' - ', e.Tipo_Dispositivo) as equipo, 
                        e.Numero_Serie as nro_serie, 
-                       e.Detalles_Visuales as detalles_visuales,
-                       e.Fotos as fotos,
+                       ot.Detalles_Visuales as detalles_visuales,
+                       ot.Fotos as fotos,
                        c.Nombre_Completo as cliente, c.DNI_CUIL as dni, c.Telefono as telefono, c.Email as email, 
                        p.Monto_Total_Cotizado as presupuesto, ot.Presupuesto_ID_Presupuesto as id_presupuesto
                 FROM orden_trabajo ot 
