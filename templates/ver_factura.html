@@ -171,6 +171,17 @@
         </div>
 
         <div class="invoice-box">
+            <!-- BANNER DE COMPROBANTES ESPECIALES (RG 5762) -->
+            {% if factura.tipo == 'A-CBU' %}
+            <div style="background-color: #fef2f2; border: 1px solid #fee2e2; color: #991b1b; padding: 10px; text-align: center; font-weight: bold; font-size: 0.82rem; border-radius: 4px; margin-bottom: 15px; border-left: 5px solid #dc2626; text-transform: uppercase;">
+                ⚠️ Compra con CBU Informada: El pago de este comprobante debe ser efectuado obligatoriamente por transferencia o depósito a la CBU habilitada del emisor.
+            </div>
+            {% elif factura.tipo == 'A-RET' %}
+            <div style="background-color: #fffbeb; border: 1px solid #fef3c7; color: #92400e; padding: 10px; text-align: center; font-weight: bold; font-size: 0.82rem; border-radius: 4px; margin-bottom: 15px; border-left: 5px solid #d97706; text-transform: uppercase;">
+                ⚠️ Operación Sujeta a Retención: El comprador debe actuar como agente de retención (IVA y Ganancias) de acuerdo con la RG 5762.
+            </div>
+            {% endif %}
+
             <!-- CABECERA AL ESTILO AFIP -->
             <table class="header-table">
                 <tr>
@@ -189,8 +200,14 @@
                     <!-- Letra de Factura -->
                     <td class="box-letter-container">
                         <div style="font-size: 0.7rem; font-weight: bold; text-transform: uppercase; margin-bottom: 2px;">Original</div>
-                        <div class="box-letter">{{ factura.tipo }}</div>
+                        <div class="box-letter">{{ factura.tipo[0] }}</div>
+                        {% if factura.tipo == 'A-CBU' %}
+                        <div style="font-size: 0.48rem; color: #dc2626; margin-top: 3px; font-weight: 800; line-height: 1.1; max-width: 70px; text-align: center;">PAGO EN CBU<br>INFORMADA</div>
+                        {% elif factura.tipo == 'A-RET' %}
+                        <div style="font-size: 0.48rem; color: #dc2626; margin-top: 3px; font-weight: 800; line-height: 1.1; max-width: 70px; text-align: center;">OP. SUJETA A<br>RETENCIÓN</div>
+                        {% else %}
                         <div style="font-size: 0.65rem; color: #333; margin-top: 3px; font-weight: bold;">006</div>
+                        {% endif %}
                     </td>
 
                     <!-- Datos del Comprobante -->
@@ -232,7 +249,7 @@
             <div class="customer-info-box">
                 <div class="row">
                     <div class="col-7"><strong>Nombre:</strong> {{ factura.cliente_nombre }}</div>
-                    <div class="col-5"><strong>IVA:</strong> {% if factura.tipo == 'A' %}Responsable Inscripto{% else %}Consumidor Final{% endif %}</div>
+                    <div class="col-5"><strong>IVA:</strong> {% if factura.tipo in ['A', 'A-CBU', 'A-RET'] %}Responsable Inscripto{% else %}Consumidor Final{% endif %}</div>
                 </div>
                 <div class="row">
                     <div class="col-7"><strong>CUIT/DNI/CUIL:</strong> {{ factura.documento or factura.cliente_doc }}</div>
@@ -267,6 +284,9 @@
                 </thead>
                 <tbody>
                     {% for d in detalles %}
+                    {% set es_factura_a = factura.tipo in ['A', 'A-CBU', 'A-RET'] %}
+                    {% set unit_price = (d.precio_unit | float) / 1.21 if es_factura_a else d.precio_unit %}
+                    {% set item_subtotal = (d.subtotal | float) / 1.21 if es_factura_a else d.subtotal %}
                     <tr>
                         <td style="font-family: monospace;">SKU-00{{ d.id_item }}</td>
                         <td>
@@ -276,8 +296,8 @@
                             {% endif %}
                         </td>
                         <td style="text-align: center;">{{ d.cantidad }}</td>
-                        <td style="text-align: right;">${{ "%.2f" | format(d.precio_unit) }}</td>
-                        <td style="text-align: right;">${{ "%.2f" | format(d.subtotal) }}</td>
+                        <td style="text-align: right;">${{ "%.2f" | format(unit_price) }}</td>
+                        <td style="text-align: right;">${{ "%.2f" | format(item_subtotal) }}</td>
                         <td style="text-align: center;">21</td>
                         <td style="text-align: center;">-</td>
                     </tr>
@@ -345,9 +365,41 @@
                             <td>Importe Total</td>
                             <td class="text-end fs-6">${{ "%.2f" | format(total) }}</td>
                         </tr>
+                        {% if factura.tipo == 'A-RET' %}
+                        {% set ret_iva = neto * 0.21 %}
+                        {% set ret_gan = neto * 0.06 %}
+                        {% set total_neto_ret = total - ret_iva - ret_gan %}
+                        <tr style="border-top: 1px dashed #cbd5e1;">
+                            <td class="text-danger fw-semibold" style="font-size: 0.72rem;">Retención IVA (100%)</td>
+                            <td class="text-end text-danger fw-semibold" style="font-size: 0.72rem;">-${{ "%.2f" | format(ret_iva) }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-danger fw-semibold" style="font-size: 0.72rem;">Retención Ganancias (6%)</td>
+                            <td class="text-end text-danger fw-semibold" style="font-size: 0.72rem;">-${{ "%.2f" | format(ret_gan) }}</td>
+                        </tr>
+                        <tr class="total-row" style="background-color: #fef2f2; border-top: 2px solid #ef4444;">
+                            <td class="text-success fw-bold" style="font-size: 0.8rem;">Monto Neto a Transferir</td>
+                            <td class="text-end text-success fw-bold fs-6">${{ "%.2f" | format(total_neto_ret) }}</td>
+                        </tr>
+                        {% endif %}
                     </table>
                 </div>
             </div>
+
+            {% if factura.tipo == 'A-CBU' %}
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; margin-top: 15px; border-radius: 6px; font-size: 0.78rem; line-height: 1.5; color: #334155;">
+                <div style="font-weight: 800; text-transform: uppercase; color: #0f172a; margin-bottom: 5px; font-family: sans-serif; display: flex; align-items: center; gap: 5px;">
+                    🏦 Información de Pago (CBU Declarado en AFIP/ARCA)
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div><strong>Banco Emisor:</strong> Banco de la Nación Argentina (BNA)</div>
+                    <div><strong>CBU Habilitada:</strong> 01100063-20000154011111</div>
+                    <div><strong>Alias:</strong> SGOLIT.TECNOLOGIA.BNA</div>
+                    <div><strong>Titular:</strong> SGOL-IT SRL | <strong>CUIT:</strong> 30-71458923-4</div>
+                </div>
+                <div style="font-style: italic; color: #b91c1c; font-weight: bold; margin-top: 5px;">* El pago de esta operación debe efectuarse únicamente por transferencia bancaria directa a esta cuenta.</div>
+            </div>
+            {% endif %}
 
             <!-- Importe en letras y observaciones -->
             <div style="font-size: 0.75rem; margin-top: 15px; color: #333; line-height: 1.4;">

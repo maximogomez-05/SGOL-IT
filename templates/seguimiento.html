@@ -41,6 +41,9 @@
                         {% if orden.costo %}
                             <h3 class="fw-bold" style="color: var(--accent-emerald); font-family: 'Outfit'; font-weight: 700;">${{ orden.costo }}</h3>
                             <span class="text-muted small">Monto final congelado y acordado.</span>
+                        {% elif orden.estado == 'Esperando Aprobación' %}
+                            <h4 class="fw-bold text-info">Confeccionando Presupuesto</h4>
+                            <span class="text-muted small">El diagnóstico ha finalizado. La administración está elaborando la cotización.</span>
                         {% else %}
                             <h4 class="fw-bold text-muted">Pendiente de Diagnóstico</h4>
                             <span class="text-muted small">Nuestros técnicos están revisando su equipo.</span>

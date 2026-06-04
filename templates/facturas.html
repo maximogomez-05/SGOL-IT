@@ -43,7 +43,7 @@
                             <td class="fw-bold">{{ f.nro_factura }}</td>
                             <td>{{ f.fecha }}</td>
                             <td>{{ f.cliente }}</td>
-                            <td><span class="badge {% if f.tipo == 'A' %}bg-warning{% else %}bg-info{% endif %}">Factura {{ f.tipo }}</span></td>
+                            <td><span class="badge {% if f.tipo in ['A', 'A-CBU', 'A-RET'] %}bg-warning{% else %}bg-info{% endif %}">Factura {{ f.tipo }}</span></td>
                             <td>{{ f.documento or '-' }}</td>
                             <td class="fw-bold" style="color: var(--accent-emerald);">${{ f.monto }}</td>
                             <td>{{ f.metodo }}</td>

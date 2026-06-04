@@ -159,6 +159,10 @@
                                 <div class="alert bg-danger text-white border-0 text-center fw-bold p-3">
                                     Presupuesto Rechazado. Puede pasar a retirar su equipo.
                                 </div>
+                            {% elif o.estado == 'Esperando Aprobación' %}
+                                <div class="alert bg-info text-dark border-0 text-center p-3 fw-bold">
+                                    Diagnóstico finalizado. La administración está confeccionando su cotización formal. Pronto estará disponible para su aprobación.
+                                </div>
                             {% else %}
                                 <div class="alert bg-secondary text-white border-0 text-center p-3">
                                     El equipo está siendo analizado por nuestros técnicos. Pronto recibirá una cotización.
