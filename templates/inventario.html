@@ -48,7 +48,7 @@
                                 </div>
                                 <div class="col-6 mb-3" id="stock_minimo_container">
                                     <label class="form-label text-muted small">Stock Mínimo</label>
-                                    <input type="number" min="0" class="form-control" name="stock_minimo" id="stock_minimo_input" value="0">
+                                    <input type="number" min="10" class="form-control" name="stock_minimo" id="stock_minimo_input" value="10">
                                 </div>
                             </div>
                             <div class="mb-3" id="url_container">
@@ -147,7 +147,7 @@
                             </div>
                             <div class="col-6 mb-3">
                                 <label class="form-label text-muted small">Stock Mínimo</label>
-                                <input type="number" min="0" class="form-control" name="stock_minimo" value="{{ item.stock_minimo }}" required>
+                                <input type="number" min="10" class="form-control" name="stock_minimo" value="{{ item.stock_minimo }}" required>
                             </div>
                         </div>
                         <div class="mb-3">
@@ -187,12 +187,17 @@
                     stockMinContainer.style.display = "none";
                     urlContainer.style.display = "none";
                     stockInput.value = "0"; 
+                    stockMinInput.removeAttribute("min");
                     stockMinInput.value = "0"; 
                     urlInput.value = "";
                 } else {
                     stockContainer.style.display = "block";
                     stockMinContainer.style.display = "block";
                     urlContainer.style.display = "block";
+                    stockMinInput.setAttribute("min", "10");
+                    if (parseInt(stockMinInput.value) < 10) {
+                        stockMinInput.value = "10";
+                    }
                 }
             });
         });

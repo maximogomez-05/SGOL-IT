@@ -5,22 +5,132 @@
     <meta charset="UTF-8">
     <title>Factura {{ factura.nro_factura }} | SGOL-IT</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
-        .invoice-box {
-            background: #fff;
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #0f172a;
             color: #333;
-            padding: 40px;
-            border-radius: 8px;
-            max-width: 850px;
-            margin: auto;
-            box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
-            border: 1px solid #ddd;
+            margin: 0;
+            padding: 40px 0;
         }
 
-        .table-light th {
-            background-color: #f8f9fa !important;
-            color: #333 !important;
+        .invoice-outer {
+            max-width: 850px;
+            margin: auto;
+        }
+
+        .invoice-box {
+            background: #fff;
+            padding: 25px;
+            border: 1px solid #000;
+            color: #000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            font-size: 0.85rem;
+        }
+
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 0;
+        }
+
+        .header-cell {
+            vertical-align: top;
+            padding: 5px;
+        }
+
+        .box-letter-container {
+            width: 80px;
+            text-align: center;
+            border-left: 1px solid #000;
+            border-right: 1px solid #000;
+            vertical-align: middle;
+            padding: 0 10px;
+        }
+
+        .box-letter {
+            border: 1px solid #000;
+            font-size: 2.2rem;
+            font-weight: bold;
+            line-height: 55px;
+            height: 60px;
+            width: 60px;
+            margin: 0 auto;
+            background-color: #f1f5f9;
+        }
+
+        .meta-table {
+            width: 100%;
+            font-size: 0.8rem;
+        }
+
+        .meta-table td {
+            padding: 2px 0;
+        }
+
+        .customer-info-box {
+            border: 1px solid #000;
+            margin-top: 15px;
+            padding: 10px;
+            font-size: 0.82rem;
+        }
+
+        .customer-info-box .row {
+            margin-bottom: 4px;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.82rem;
+        }
+
+        .items-table th {
+            border-top: 1px solid #000;
+            border-bottom: 1px solid #000;
+            padding: 6px 4px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        .items-table td {
+            padding: 8px 4px;
+            vertical-align: top;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .footer-grid {
+            margin-top: 25px;
+            border-top: 1px solid #000;
+            padding-top: 15px;
+        }
+
+        .totals-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .totals-table td {
+            padding: 4px 6px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .totals-table tr.total-row td {
+            background-color: #f1f5f9;
+            font-weight: bold;
+            border: 1px solid #000;
+        }
+
+        .observations-section {
+            border: 1px solid #000;
+            margin-top: 15px;
+            padding: 8px 12px;
+            font-size: 0.75rem;
+            line-height: 1.4;
         }
 
         @media print {
@@ -36,126 +146,343 @@
 
             .invoice-box {
                 box-shadow: none !important;
-                border: none !important;
-                padding: 10px !important;
+                border: 1px solid #000 !important;
+                padding: 15px !important;
                 max-width: 100% !important;
                 margin: 0 !important;
-            }
-
-            .table-dark th, .table-dark td {
-                background-color: #333 !important;
-                color: #fff !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
             }
         }
     </style>
 </head>
 
-<body class="py-5" style="background-color: #0f172a;">
-    <div class="container">
+<body>
+    {% set fecha_str = (factura.fecha | string).split(' ')[0] %}
+    {% if '-' in fecha_str %}
+        {% set parts = fecha_str.split('-') %}
+        {% set fecha_formateada = parts[2] ~ '/' ~ parts[1] ~ '/' ~ parts[0] %}
+    {% else %}
+        {% set fecha_formateada = fecha_str %}
+    {% endif %}
+    <div class="container invoice-outer">
+        <!-- Controles de navegación y acción (ocultos en la impresión) -->
         <div class="mb-4 text-center no-print">
             <a href="/facturas" class="btn btn-outline-light me-2 fw-bold">← Volver al Listado</a>
             <button onclick="window.print()" class="btn btn-primary fw-bold text-black">🖨️ Imprimir Factura / Guardar PDF</button>
         </div>
 
         <div class="invoice-box">
-            <!-- CABECERA DE FACTURA -->
-            <div class="row border-bottom pb-3 mb-4 align-items-center">
-                <div class="col-5">
-                    <h2 class="fw-bold mb-1" style="color: #0f172a; letter-spacing: -1px;">SGOL-IT SRL</h2>
-                    <p class="mb-1 text-muted fw-semibold" style="font-size: 0.85rem;">Servicio Técnico Especializado en IT & Microelectrónica</p>
-                    <p class="mb-0 text-muted small">Av. Gral. San Martín 1540, Formosa, Argentina</p>
-                    <p class="mb-0 text-muted small">Tel: +54 370 411-2222 | administracion@sgolit.com.ar</p>
-                </div>
-                
-                <div class="col-2 text-center">
-                    <div class="d-inline-block border border-2 border-dark px-3 py-1 fw-bold fs-2 text-center" style="color: #0f172a; min-width: 70px; background: #f8f9fa; border-radius: 4px;">
-                        {{ factura.tipo }}
-                        <div style="font-size: 0.55rem; font-weight: normal; color: #444; margin-top: -2px;">COD. 00{{ 1 if factura.tipo == 'A' else 6 }}</div>
-                    </div>
-                </div>
+            <!-- CABECERA AL ESTILO AFIP -->
+            <table class="header-table">
+                <tr>
+                    <!-- Datos del Emisor -->
+                    <td class="header-cell" style="width: 42%;">
+                        <div style="font-size: 0.75rem; text-transform: uppercase; color: #475569; font-weight: bold; letter-spacing: 0.5px;">SGOL-IT SRL</div>
+                        <div style="font-size: 1.8rem; font-weight: 800; color: #0f172a; margin: 3px 0; font-family: 'Impact', 'Arial Black', sans-serif;">Tienda Moderna</div>
+                        <div style="font-weight: bold; font-size: 0.85rem; color: #1e293b; margin-bottom: 5px;">Responsable Inscripto</div>
+                        <div style="font-size: 0.72rem; color: #475569; line-height: 1.4;">
+                            Av. Gral. San Martín 1540, Piso:1 Dpto:B<br>
+                            Formosa Capital, CP: 3600 | Tel: +54 370 411-2222<br>
+                            Formosa, Argentina
+                        </div>
+                    </td>
 
-                <div class="col-5 text-end">
-                    <h4 class="fw-bold mb-1 text-uppercase text-dark">
-                        FACTURA
-                    </h4>
-                    <p class="mb-1"><strong>Nro:</strong> <span class="fw-semibold text-primary fs-6">{{ factura.nro_factura }}</span></p>
-                    <p class="mb-1"><strong>Fecha:</strong> {{ factura.fecha }}</p>
-                    <p class="mb-0 text-muted small"><strong>CUIT:</strong> 30-71458923-4</p>
-                    <p class="mb-0 text-muted small"><strong>Ingresos Brutos:</strong> 30-71458923-4</p>
+                    <!-- Letra de Factura -->
+                    <td class="box-letter-container">
+                        <div style="font-size: 0.7rem; font-weight: bold; text-transform: uppercase; margin-bottom: 2px;">Original</div>
+                        <div class="box-letter">{{ factura.tipo }}</div>
+                        <div style="font-size: 0.65rem; color: #333; margin-top: 3px; font-weight: bold;">006</div>
+                    </td>
+
+                    <!-- Datos del Comprobante -->
+                    <td class="header-cell" style="width: 42%; padding-left: 20px;">
+                        <h4 style="font-size: 1.15rem; font-weight: bold; margin-top: 0; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">
+                            FACTURA: <span style="font-family: monospace;">{{ "6666-%08d" | format(factura.id_orden) }}</span>
+                        </h4>
+                        <table class="meta-table">
+                            <tr>
+                                <td><strong>Fecha de Emisión:</strong></td>
+                                <td class="text-end">{{ fecha_formateada }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Fecha de Vencimiento:</strong></td>
+                                <td class="text-end">{{ fecha_formateada }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>CUIT:</strong></td>
+                                <td class="text-end">30-71458923-4</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Ing. Brutos C.M.:</strong></td>
+                                <td class="text-end">30-71458923-4</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Inicio de Actividad:</strong></td>
+                                <td class="text-end">01/08/2024</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Razón social:</strong></td>
+                                <td class="text-end" style="font-size: 0.72rem;">SGOL-IT SRL</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- DETALLES DEL RECEPTOR (CLIENTE) -->
+            <div class="customer-info-box">
+                <div class="row">
+                    <div class="col-7"><strong>Nombre:</strong> {{ factura.cliente_nombre }}</div>
+                    <div class="col-5"><strong>IVA:</strong> {% if factura.tipo == 'A' %}Responsable Inscripto{% else %}Consumidor Final{% endif %}</div>
+                </div>
+                <div class="row">
+                    <div class="col-7"><strong>CUIT/DNI/CUIL:</strong> {{ factura.documento or factura.cliente_doc }}</div>
+                    <div class="col-5"><strong>CP:</strong> 3600</div>
+                </div>
+                <div class="row">
+                    <div class="col-7"><strong>Dirección:</strong> Av. Gral. San Martín 1540 (Local) / S/D</div>
+                    <div class="col-5"><strong>Tel:</strong> {{ factura.cliente_tel }}</div>
+                </div>
+                <div class="row">
+                    <div class="col-7"><strong>Ciudad:</strong> Formosa</div>
+                    <div class="col-5"><strong>Condición de Venta:</strong> Contado</div>
+                </div>
+                <div class="row">
+                    <div class="col-7"><strong>Localidad:</strong> Formosa</div>
+                    <div class="col-5"><strong>Método de pago:</strong> {{ factura.metodo }}</div>
                 </div>
             </div>
 
-            <!-- DETALLES DE CLIENTE Y EMISION -->
-            <div class="row mb-4">
-                <div class="col-6">
-                    <h6 class="fw-bold text-uppercase text-secondary border-bottom pb-1 mb-2" style="font-size: 0.8rem; letter-spacing: 0.5px;">Cobrar a:</h6>
-                    <p class="mb-1"><strong>Cliente:</strong> {{ factura.cliente_nombre }}</p>
-                    <p class="mb-1"><strong>DNI/CUIT:</strong> {{ factura.documento or factura.cliente_doc }}</p>
-                    <p class="mb-1"><strong>Email:</strong> {{ factura.cliente_email }}</p>
-                    <p class="mb-0"><strong>Teléfono:</strong> {{ factura.cliente_tel }}</p>
-                </div>
-                <div class="col-6 text-end">
-                    <h6 class="fw-bold text-uppercase text-secondary border-bottom pb-1 mb-2 text-end" style="font-size: 0.8rem; letter-spacing: 0.5px;">Detalles de la Orden:</h6>
-                    <p class="mb-1"><strong>Orden de Trabajo:</strong> #{{ factura.id_orden }}</p>
-                    <p class="mb-1"><strong>Equipo:</strong> {{ factura.equipo }}</p>
-                    <p class="mb-1"><strong>Método de Pago:</strong> {{ factura.metodo }}</p>
-                    <p class="mb-0"><strong>Condición IVA:</strong> {% if factura.tipo == 'A' %}Responsable Inscripto (IVA Desglosado){% else %}Consumidor Final (IVA Incluido){% endif %}</p>
-                </div>
-            </div>
-
-            <!-- TABLA DE ITEMS -->
-            <table class="table table-striped table-bordered align-middle mb-4">
-                <thead class="table-light">
-                    <tr class="text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">
-                        <th>Descripción del Servicio / Repuesto</th>
-                        <th class="text-center" style="width: 100px;">Cant.</th>
-                        <th class="text-end" style="width: 150px;">Subtotal</th>
+            <!-- TABLA DE ITEMS CON SKU Y ALÍCUOTA DE IVA -->
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">SKU</th>
+                        <th style="width: 50%;">Descripción</th>
+                        <th style="width: 10%; text-align: center;">Cantidad</th>
+                        <th style="width: 12%; text-align: right;">Precio Unitario</th>
+                        <th style="width: 13%; text-align: right;">Importe Subtotal</th>
+                        <th style="width: 8%; text-align: center;">% IVA</th>
+                        <th style="width: 8%; text-align: center;">% II</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for d in detalles %}
                     <tr>
-                        <td class="fw-semibold text-dark">{{ d.descripcion }}</td>
-                        <td class="text-center">{{ d.cantidad }}</td>
-                        <td class="text-end">${{ "%.2f" | format(d.subtotal) }}</td>
+                        <td style="font-family: monospace;">SKU-00{{ d.id_item }}</td>
+                        <td>
+                            <strong>{{ d.descripcion }}</strong>
+                            {% if d.tipo_item == 'Repuesto_Fisico' %}
+                            <div class="text-muted" style="font-size: 0.72rem; margin-top: 2px;">Garantía del vendedor: 90 días</div>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: center;">{{ d.cantidad }}</td>
+                        <td style="text-align: right;">${{ "%.2f" | format(d.precio_unit) }}</td>
+                        <td style="text-align: right;">${{ "%.2f" | format(d.subtotal) }}</td>
+                        <td style="text-align: center;">21</td>
+                        <td style="text-align: center;">-</td>
                     </tr>
                     {% endfor %}
                 </tbody>
-                <tfoot>
-                    {% if factura.tipo == 'A' %}
-                    <tr>
-                        <th colspan="2" class="text-end text-muted fw-normal" style="font-size: 0.9rem;">Subtotal (Neto Gravado)</th>
-                        <td class="text-end fw-semibold">${{ "%.2f" | format(factura.subtotal) }}</td>
-                    </tr>
-                    <tr>
-                        <th colspan="2" class="text-end text-muted fw-normal" style="font-size: 0.9rem;">IVA Inscripto (21%)</th>
-                        <td class="text-end fw-semibold">${{ "%.2f" | format(factura.monto_iva) }}</td>
-                    </tr>
-                    {% endif %}
-                    <tr class="table-dark">
-                        <th colspan="2" class="text-end fs-5 text-uppercase" style="background-color: #0f172a; color: #fff;">Monto Total</th>
-                        <th class="text-end fs-5" style="background-color: #0f172a; color: #fff;">${{ "%.2f" | format(factura.monto) }}</th>
-                    </tr>
-                </tfoot>
             </table>
 
-            <!-- PIE DE FACTURA -->
-            <div class="row mt-5 pt-3 border-top align-items-center">
-                <div class="col-8">
-                    <p class="mb-0 text-muted small"><strong>Garantía:</strong> Los repuestos instalados cuentan con 90 días de garantía escrita bajo condiciones normales de uso.</p>
-                    <p class="mb-0 text-muted small">Este documento electrónico constituye un comprobante formal de cobro de servicios.</p>
-                </div>
-                <div class="col-4 text-end">
-                    <div class="text-center d-inline-block border px-3 py-2" style="border-radius: 6px; background-color: #f8f9fa;">
-                        <span class="fw-bold small d-block text-dark">SGOL-IT Administración</span>
-                        <span class="text-muted small" style="font-size: 0.65rem;">¡Gracias por su preferencia!</span>
+            <!-- SECCIÓN INFERIOR: QR, CAE Y TOTALES -->
+            <div class="row footer-grid">
+                <!-- QR y CAE -->
+                <div class="col-6">
+                    <div class="d-flex align-items-start gap-3">
+                        <div>
+                            <!-- Generador dinámico de QR de AFIP falso -->
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=115x115&data=https://www.afip.gob.ar/fe/qr/?p=c2dvbC1pdC1mYWN0dXJhL{{ factura.id_orden }}" style="width: 115px; height: 115px;" alt="QR AFIP">
+                        </div>
+                        <div style="font-size: 0.75rem; line-height: 1.5; color: #1e293b;">
+                            <div style="margin-bottom: 5px;"><strong>CAE:</strong> <span style="font-family: monospace;">8622{{ 8090232165 + factura.id_orden }}</span></div>
+                            <div><strong>Vencimiento CAE:</strong> 15/06/2026</div>
+                            <div class="mt-2" style="font-size: 0.7rem; color: #64748b;">
+                                <strong>Entrega Final Estimada:</strong> {{ fecha_formateada }}<br>
+                                <strong>Moneda:</strong> Pesos Argentinos
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+                <!-- Totals Box -->
+                <div class="col-6">
+                    <!-- Cálculos matemáticos en Jinja2 para desglose impositivo B (consumidor final) -->
+                    {% set total = factura.monto | float %}
+                    {% set neto = total / 1.21 %}
+                    {% set iva21 = total - neto %}
+
+                    <table class="totals-table">
+                        <tr>
+                            <td class="text-muted">Importe Neto Gravado</td>
+                            <td class="text-end fw-semibold">${{ "%.2f" | format(neto) }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Importe Neto No Gravado</td>
+                            <td class="text-end">-</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Importe IVA 10.5%</td>
+                            <td class="text-end">-</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Importe IVA 21%</td>
+                            <td class="text-end fw-semibold">${{ "%.2f" | format(iva21) }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Importe Exento</td>
+                            <td class="text-end">-</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Importe Otros Impuestos</td>
+                            <td class="text-end">-</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Descuentos</td>
+                            <td class="text-end">-</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td>Importe Total</td>
+                            <td class="text-end fs-6">${{ "%.2f" | format(total) }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Importe en letras y observaciones -->
+            <div style="font-size: 0.75rem; margin-top: 15px; color: #333; line-height: 1.4;">
+                <div id="importe_letras_container"><strong>Importe en Letras:</strong> Cargando descripción...</div>
+            </div>
+
+            <div class="observations-section">
+                <strong>Observaciones:</strong> El consumidor tiene derecho a revocar la aceptación durante los 10 días de recibido el producto de acuerdo a la Ley N° 24.240 de Defensa del Consumidor.<br>
+                <span class="fw-bold mt-1 d-block text-center">Tienda Moderna - SGOL-IT SRL</span>
             </div>
         </div>
     </div>
+
+    <!-- Script para conversión dinámica del importe total a palabras (en letras) -->
+    <script>
+        function numeroALetras(num) {
+            var temp = parseFloat(num).toFixed(2).split('.');
+            var pesos = parseInt(temp[0]);
+            var centavos = parseInt(temp[1]);
+            
+            function unidades(u) {
+                switch(u) {
+                    case 1: return "un";
+                    case 2: return "dos";
+                    case 3: return "tres";
+                    case 4: return "cuatro";
+                    case 5: return "cinco";
+                    case 6: return "seis";
+                    case 7: return "siete";
+                    case 8: return "ocho";
+                    case 9: return "nueve";
+                }
+                return "";
+            }
+            
+            function decenas(d, u) {
+                if (d === 0) return unidades(u);
+                if (d === 1) {
+                    switch(u) {
+                        case 0: return "diez";
+                        case 1: return "once";
+                        case 2: return "doce";
+                        case 3: return "trece";
+                        case 4: return "catorce";
+                        case 5: return "quince";
+                        default: return "dieci" + unidades(u);
+                    }
+                }
+                if (d === 2) {
+                    if (u === 0) return "veinte";
+                    return "veinti" + unidades(u);
+                }
+                var str = "";
+                switch(d) {
+                    case 3: str = "treinta"; break;
+                    case 4: str = "cuarenta"; break;
+                    case 5: str = "cincuenta"; break;
+                    case 6: str = "sesenta"; break;
+                    case 7: str = "setenta"; break;
+                    case 8: str = "ochenta"; break;
+                    case 9: str = "noventa"; break;
+                }
+                if (u > 0) return str + " y " + unidades(u);
+                return str;
+            }
+            
+            function centenas(c, d, u) {
+                if (c === 0) return decenas(d, u);
+                if (c === 1 && d === 0 && u === 0) return "cien";
+                var str = "";
+                switch(c) {
+                    case 1: str = "ciento"; break;
+                    case 2: str = "doscientos"; break;
+                    case 3: str = "trescientos"; break;
+                    case 4: str = "cuatrocientos"; break;
+                    case 5: str = "quinientos"; break;
+                    case 6: str = "seiscientos"; break;
+                    case 7: str = "sietecientos"; break;
+                    case 8: str = "ochocientos"; break;
+                    case 9: str = "novecientos"; break;
+                }
+                return str + " " + decenas(d, u);
+            }
+            
+            function seccion(num, divisor, strSingular, strPlural) {
+                var cientos = parseInt(num / divisor);
+                var resto = num % divisor;
+                
+                var c = parseInt(cientos / 100);
+                var d = parseInt((cientos % 100) / 10);
+                var u = cientos % 10;
+                
+                var str = "";
+                if (cientos > 0) {
+                    if (cientos === 1) str = strSingular;
+                    else str = centenas(c, d, u) + " " + strPlural;
+                }
+                return {str: str, resto: resto};
+            }
+            
+            if (pesos === 0) return "Cero pesos con " + centavos + "/100 centavos";
+            
+            var tempResto = pesos;
+            var strMillones = seccion(tempResto, 1000000, "un millón", "millones");
+            tempResto = strMillones.resto;
+            
+            var strMiles = seccion(tempResto, 1000, "mil", "mil");
+            tempResto = strMiles.resto;
+            
+            var c = parseInt(tempResto / 100);
+            var d = parseInt((tempResto % 100) / 10);
+            var u = tempResto % 10;
+            var strUnidades = centenas(c, d, u);
+            
+            var parts = [];
+            if (strMillones.str) parts.push(strMillones.str);
+            if (strMiles.str) {
+                if (strMiles.str === "un mil") parts.push("mil");
+                else parts.push(strMiles.str);
+            }
+            if (strUnidades) parts.push(strUnidades);
+            
+            var finalStr = parts.join(" ").trim();
+            finalStr = finalStr.charAt(0).toUpperCase() + finalStr.slice(1);
+            
+            var centavosStr = centavos > 0 ? (" con " + decenas(parseInt(centavos/10), centavos%10) + " centavos") : " con cero centavos";
+            return finalStr + " pesos" + centavosStr;
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const total = {{ factura.monto }};
+            const container = document.getElementById("importe_letras_container");
+            container.innerHTML = "<strong>Importe en Letras:</strong> " + numeroALetras(total).toLowerCase();
+        });
+    </script>
 </body>
 
 </html>

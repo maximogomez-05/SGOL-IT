@@ -50,7 +50,8 @@ class DetalleOrden:
                      d.Precio_Unitario_Congelado as precio_unit, 
                      (d.Cantidad * d.Precio_Unitario_Congelado) as subtotal, 
                      d.Estado_Detalle as estado,
-                     i.Descripcion as descripcion, d.Catalogo_Inventario_ID_Item as id_item
+                     i.Descripcion as descripcion, d.Catalogo_Inventario_ID_Item as id_item,
+                     i.Tipo_Item as tipo_item
                      FROM detalle_orden d 
                      JOIN catalogo_inventario i ON d.Catalogo_Inventario_ID_Item = i.ID_Item 
                      WHERE d.Orden_Trabajo_ID_OT = %s"""

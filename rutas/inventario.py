@@ -27,6 +27,9 @@ def inventario():
         if p < 0 or s < 0 or sm < 0:
             flash("Precio y stock no pueden ser negativos.", "danger")
             return redirect(url_for('inventario.inventario'))
+        if t == 'Repuesto_Fisico' and sm < 10:
+            flash("El stock mínimo crítico no puede ser menor a 10 para repuestos físicos.", "danger")
+            return redirect(url_for('inventario.inventario'))
 
         Inventario(t, d, p, s, sm, url).registrar()
         flash("Ítem agregado al catálogo.", "success")
@@ -41,6 +44,16 @@ def editar_item(id_item):
     s = int(request.form.get('stock') or 0)
     sm = int(request.form.get('stock_minimo') or 0)
     url = request.form.get('url_referencia', '')
+    
+    item = Inventario.buscar_por_id(id_item)
+    if not item:
+        flash("Ítem no encontrado.", "danger")
+        return redirect(url_for('inventario.inventario'))
+        
+    if item['tipo_item'] == 'Repuesto_Fisico' and sm < 10:
+        flash("El stock mínimo crítico no puede ser menor a 10 para repuestos físicos.", "danger")
+        return redirect(url_for('inventario.inventario'))
+        
     if Inventario.actualizar(id_item, d, p, s, sm, url):
         flash("Ítem actualizado exitosamente.", "success")
     else:

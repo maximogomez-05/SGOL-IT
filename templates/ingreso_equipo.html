@@ -29,19 +29,19 @@
                     <div class="row g-3 mb-4">
                         <div class="col-md-4">
                             <label class="form-label text-muted small">DNI / CUIL</label>
-                            <input type="text" name="dni" class="form-control" placeholder="Ej: 35123456" pattern="\d{7,11}" title="Ingrese solo números (entre 7 y 11 dígitos)" value="{{ datos.dni if datos else '' }}" required>
+                            <input type="text" name="dni" class="form-control" pattern="\d{7,11}" title="Ingrese solo números (entre 7 y 11 dígitos)" value="{{ datos.dni if datos else '' }}" required>
                         </div>
                         <div class="col-md-8">
                             <label class="form-label text-muted small">Nombre Completo</label>
-                            <input type="text" name="nombre" class="form-control" placeholder="Ej: Juan Pérez" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" title="El nombre no puede contener números ni símbolos" value="{{ datos.nombre if datos else '' }}" required>
+                            <input type="text" name="nombre" class="form-control" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" title="El nombre no puede contener números ni símbolos" value="{{ datos.nombre if datos else '' }}" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-muted small">Email</label>
-                            <input type="email" name="email" class="form-control" placeholder="ejemplo@correo.com" value="{{ datos.email if datos else '' }}" required>
+                            <input type="email" name="email" class="form-control" value="{{ datos.email if datos else '' }}" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-muted small">Teléfono</label>
-                            <input type="text" name="telefono" class="form-control" placeholder="Ej: 3704123456" pattern="\d{8,15}" title="Ingrese código de área y número, sin espacios ni guiones" value="{{ datos.telefono if datos else '' }}" required>
+                            <input type="text" name="telefono" class="form-control" pattern="\d{8,15}" title="Ingrese código de área y número, sin espacios ni guiones" value="{{ datos.telefono if datos else '' }}" required>
                         </div>
                         <div class="col-md-12">
                             <label class="form-label text-muted small">Contraseña Web (Para que el cliente siga su trámite)</label>
@@ -90,7 +90,7 @@
                         </div>
                         <div class="col-md-12 mt-3">
                             <label class="form-label text-muted small">Detalles Visuales / Estado Físico de Recepción</label>
-                            <textarea name="detalles_visuales" class="form-control" rows="3" placeholder="Ej: Rayones en la tapa superior, le falta un tornillo en la base, pantalla con suciedad superficial..." pattern="[^<>]*" title="No se permiten etiquetas HTML"></textarea>
+                            <textarea name="detalles_visuales" class="form-control" rows="3" pattern="[^<>]*" title="No se permiten etiquetas HTML"></textarea>
                         </div>
                         <div class="col-md-12 mt-3">
                             <label class="form-label text-muted small">Adjuntar Fotos del Equipo (Máximo 4 imágenes)</label>

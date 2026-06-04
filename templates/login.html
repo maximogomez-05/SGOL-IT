@@ -59,7 +59,7 @@
                     
                     <div class="mb-3">
                         <label class="form-label fw-bold">Usuario</label>
-                        <input type="text" class="form-control" name="usuario" placeholder="Ej: admin" autocomplete="chrome-off" required autofocus>
+                        <input type="text" class="form-control" name="usuario" autocomplete="chrome-off" required autofocus>
                     </div>
                     <div class="mb-4">
                         <label class="form-label fw-bold">Contraseña</label>
@@ -89,7 +89,7 @@
                     <div class="mb-3">
                         <label class="form-label text-muted small fw-bold">¿Tienes un código de seguimiento?</label>
                         <div class="input-group">
-                            <input type="text" id="tracking_code_input" class="form-control" placeholder="Ej: OT-X3D79F" autocomplete="off">
+                            <input type="text" id="tracking_code_input" class="form-control" autocomplete="off">
                             <button type="button" class="btn btn-primary fw-bold" onclick="var val = document.getElementById('tracking_code_input').value.trim(); if(val){ window.location.href='/seguimiento/' + val; } else { alert('Por favor, ingrese un código.'); }">Consultar</button>
                         </div>
                     </div>

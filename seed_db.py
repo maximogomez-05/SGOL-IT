@@ -110,8 +110,11 @@ def seed():
     ]
     
     db_inventario = {}
+    import random
     for nombre, precio, stock, minimo, url in items_fisicos:
-        inv = Inventario("Repuesto_Fisico", nombre, precio, stock, minimo, url)
+        stock_aleatorio = random.randint(30, 50)
+        minimo_fijo = 10
+        inv = Inventario("Repuesto_Fisico", nombre, precio, stock_aleatorio, minimo_fijo, url)
         db_inventario[nombre] = inv.registrar()
 
     # servicios de mano de obra
