@@ -47,7 +47,9 @@ def procesar_pago_avanzado(id_orden):
     id_factura = fact.registrar()
     
     if id_factura:
-        OrdenTrabajo.actualizar_estado(id_orden, 'Finalizado')
+        orden_obj = OrdenTrabajo.obtener_por_id(id_orden)
+        if orden_obj:
+            orden_obj.actualizar_estado('Finalizado')
         DetalleOrden.consumir_componentes(id_orden)
         Seguimiento.registrar_hito(id_orden, "Finalizado", f"Factura Tipo {tipo_factura} generada. Pago vía {metodo}.")
         flash(f"Orden finalizada y Factura Tipo {tipo_factura} generada con éxito.", "success")

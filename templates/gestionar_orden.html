@@ -89,7 +89,14 @@
                         
                         <div class="alert bg-secondary text-white border-0 py-3 mb-3">
                             <strong>Equipo:</strong> {{ orden.equipo }} <br>
-                            <strong>Estado Actual:</strong> <span class="badge bg-info">{{ orden.estado }}</span>
+                            <strong>Estado Actual:</strong> <span class="badge bg-info">{{ orden.estado }}</span> <br>
+                            <strong>Servicio Requerido:</strong> <span class="text-info fw-bold">{{ orden.servicio | default('No especificado', true) }}</span> <br>
+                            <strong>Garantía:</strong> 
+                            {% if orden.garantia %}
+                                <span class="badge bg-success text-white">Sí, posee garantía</span>
+                            {% else %}
+                                <span class="badge bg-secondary text-white">No posee garantía</span>
+                            {% endif %}
                         </div>
 
                         <!-- detalles visuales y fotos de recepcion -->
@@ -104,7 +111,7 @@
                             </p>
                             
                             {% if orden.fotos %}
-                                <div class="row g-2">
+                                <div class="row g-2 mb-3">
                                     {% for foto in orden.fotos.split(',') %}
                                         <div class="col-3">
                                             <a href="{{ url_for('static', filename='uploads/equipos/' ~ foto) }}" target="_blank">
@@ -114,6 +121,15 @@
                                     {% endfor %}
                                 </div>
                             {% endif %}
+                            
+                            <div class="pt-3 border-top border-secondary">
+                                <label class="form-label text-muted small fw-bold mb-1">📸 Agregar Fotos de la Reparación/Estado:</label>
+                                <form action="/subir_fotos_tecnico/{{ orden.id_orden }}" method="POST" enctype="multipart/form-data" class="d-flex gap-2">
+                                    <input type="file" name="fotos" class="form-control form-control-sm" accept="image/*" multiple id="fotos-tecnico-input" required>
+                                    <button type="submit" class="btn btn-primary btn-sm fw-bold px-3 text-black">Subir</button>
+                                </form>
+                                <div class="form-text text-light-gray mt-1" style="font-size: 0.7rem;">Formatos: png, jpg, jpeg, webp. Máximo 4 por vez.</div>
+                            </div>
                         </div>
 
                         <!-- Formulario para cambiar a estados intermedios (RF-3.1) -->
@@ -214,7 +230,7 @@
                     let html = '';
                     data.forEach(msg => {
                         const esEmpleado = msg.remitente_tipo === 'empleado';
-                        const nombre = esEmpleado ? `${msg.empleado_nombre} (${msg.remitente_tipo === 'empleado' ? 'Soporte' : ''})` : msg.cliente_nombre;
+                        const nombre = esEmpleado ? 'Soporte Técnico' : 'Cliente';
                         const alignClass = esEmpleado ? 'text-end align-self-end bg-primary-subtle text-white' : 'text-start align-self-start bg-secondary text-white';
                         const bubbleStyle = esEmpleado ? 
                             'background: rgba(0, 255, 157, 0.12); border: 1px solid rgba(0, 255, 157, 0.25); border-radius: 12px 12px 0 12px;' :
@@ -262,6 +278,13 @@
             })
             .catch(err => console.error('Error:', err));
         }
+
+        document.getElementById('fotos-tecnico-input').addEventListener('change', function() {
+            if (this.files.length > 4) {
+                alert('Solo se permite subir un máximo de 4 fotos a la vez.');
+                this.value = '';
+            }
+        });
 
         document.addEventListener("DOMContentLoaded", () => {
             cargarMensajesEmpleado({{ orden.id_orden }});

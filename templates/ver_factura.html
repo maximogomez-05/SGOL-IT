@@ -3,102 +3,156 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Factura #{{ factura.id_factura }} | SGOL-IT</title>
+    <title>Factura {{ factura.nro_factura }} | SGOL-IT</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
         .invoice-box {
             background: #fff;
             color: #333;
-            padding: 30px;
+            padding: 40px;
             border-radius: 8px;
-            max-width: 800px;
+            max-width: 850px;
             margin: auto;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid #ddd;
+        }
+
+        .table-light th {
+            background-color: #f8f9fa !important;
+            color: #333 !important;
         }
 
         @media print {
             body {
-                background: #fff;
-                color: #000;
+                background: #fff !important;
+                color: #000 !important;
+                padding: 0 !important;
             }
 
             .no-print {
-                display: none;
+                display: none !important;
             }
 
             .invoice-box {
-                box-shadow: none;
-                border: 1px solid #ccc;
+                box-shadow: none !important;
+                border: none !important;
+                padding: 10px !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+            }
+
+            .table-dark th, .table-dark td {
+                background-color: #333 !important;
+                color: #fff !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
         }
     </style>
 </head>
 
-<body class="py-5">
+<body class="py-5" style="background-color: #0f172a;">
     <div class="container">
         <div class="mb-4 text-center no-print">
-            <a href="/facturas" class="btn btn-outline-light me-2">Volver</a>
-            <button onclick="window.print()" class="btn btn-primary">🖨️ Imprimir PDF</button>
+            <a href="/facturas" class="btn btn-outline-light me-2 fw-bold">← Volver al Listado</a>
+            <button onclick="window.print()" class="btn btn-primary fw-bold text-black">🖨️ Imprimir Factura / Guardar PDF</button>
         </div>
 
         <div class="invoice-box">
-            <div class="row border-bottom pb-3 mb-4">
-                <div class="col-6">
-                    <h2 class="fw-bold" style="color: #2c3e50;">SGOL-IT</h2>
-                    <p class="mb-0 text-muted">Servicio Técnico Especializado</p>
+            <!-- CABECERA DE FACTURA -->
+            <div class="row border-bottom pb-3 mb-4 align-items-center">
+                <div class="col-5">
+                    <h2 class="fw-bold mb-1" style="color: #0f172a; letter-spacing: -1px;">SGOL-IT SRL</h2>
+                    <p class="mb-1 text-muted fw-semibold" style="font-size: 0.85rem;">Servicio Técnico Especializado en IT & Microelectrónica</p>
+                    <p class="mb-0 text-muted small">Av. Gral. San Martín 1540, Formosa, Argentina</p>
+                    <p class="mb-0 text-muted small">Tel: +54 370 411-2222 | administracion@sgolit.com.ar</p>
                 </div>
-                <div class="col-6 text-end">
-                    <h1 class="fw-bold" style="color: {% if factura.tipo == 'A' %}#f39c12{% else %}#3498db{% endif %};">
-                        FACTURA {{ factura.tipo }}</h1>
-                    <p class="mb-0"><strong>Nro:</strong> {{ "%04d" | format(factura.id_factura) }}</p>
-                    <p class="mb-0"><strong>Fecha:</strong> {{ factura.fecha }}</p>
+                
+                <div class="col-2 text-center">
+                    <div class="d-inline-block border border-2 border-dark px-3 py-1 fw-bold fs-2 text-center" style="color: #0f172a; min-width: 70px; background: #f8f9fa; border-radius: 4px;">
+                        {{ factura.tipo }}
+                        <div style="font-size: 0.55rem; font-weight: normal; color: #444; margin-top: -2px;">COD. 00{{ 1 if factura.tipo == 'A' else 6 }}</div>
+                    </div>
+                </div>
+
+                <div class="col-5 text-end">
+                    <h4 class="fw-bold mb-1 text-uppercase text-dark">
+                        FACTURA
+                    </h4>
+                    <p class="mb-1"><strong>Nro:</strong> <span class="fw-semibold text-primary fs-6">{{ factura.nro_factura }}</span></p>
+                    <p class="mb-1"><strong>Fecha:</strong> {{ factura.fecha }}</p>
+                    <p class="mb-0 text-muted small"><strong>CUIT:</strong> 30-71458923-4</p>
+                    <p class="mb-0 text-muted small"><strong>Ingresos Brutos:</strong> 30-71458923-4</p>
                 </div>
             </div>
 
+            <!-- DETALLES DE CLIENTE Y EMISION -->
             <div class="row mb-4">
                 <div class="col-6">
-                    <h5 class="fw-bold">Cobrar a:</h5>
-                    <p class="mb-0">{{ factura.cliente_nombre }}</p>
-                    <p class="mb-0">DNI/CUIT: {{ factura.documento or factura.cliente_doc }}</p>
-                    <p class="mb-0">{{ factura.cliente_email }}</p>
+                    <h6 class="fw-bold text-uppercase text-secondary border-bottom pb-1 mb-2" style="font-size: 0.8rem; letter-spacing: 0.5px;">Cobrar a:</h6>
+                    <p class="mb-1"><strong>Cliente:</strong> {{ factura.cliente_nombre }}</p>
+                    <p class="mb-1"><strong>DNI/CUIT:</strong> {{ factura.documento or factura.cliente_doc }}</p>
+                    <p class="mb-1"><strong>Email:</strong> {{ factura.cliente_email }}</p>
+                    <p class="mb-0"><strong>Teléfono:</strong> {{ factura.cliente_tel }}</p>
                 </div>
                 <div class="col-6 text-end">
-                    <h5 class="fw-bold">Detalle de Orden:</h5>
-                    <p class="mb-0">Orden #{{ factura.id_orden }}</p>
-                    <p class="mb-0">Equipo: {{ factura.equipo }}</p>
-                    <p class="mb-0">Método de Pago: {{ factura.metodo }}</p>
+                    <h6 class="fw-bold text-uppercase text-secondary border-bottom pb-1 mb-2 text-end" style="font-size: 0.8rem; letter-spacing: 0.5px;">Detalles de la Orden:</h6>
+                    <p class="mb-1"><strong>Orden de Trabajo:</strong> #{{ factura.id_orden }}</p>
+                    <p class="mb-1"><strong>Equipo:</strong> {{ factura.equipo }}</p>
+                    <p class="mb-1"><strong>Método de Pago:</strong> {{ factura.metodo }}</p>
+                    <p class="mb-0"><strong>Condición IVA:</strong> {% if factura.tipo == 'A' %}Responsable Inscripto (IVA Desglosado){% else %}Consumidor Final (IVA Incluido){% endif %}</p>
                 </div>
             </div>
 
-            <table class="table table-bordered mb-4">
+            <!-- TABLA DE ITEMS -->
+            <table class="table table-striped table-bordered align-middle mb-4">
                 <thead class="table-light">
-                    <tr>
-                        <th>Descripción</th>
-                        <th class="text-center">Cant.</th>
-                        <th class="text-end">Subtotal</th>
+                    <tr class="text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                        <th>Descripción del Servicio / Repuesto</th>
+                        <th class="text-center" style="width: 100px;">Cant.</th>
+                        <th class="text-end" style="width: 150px;">Subtotal</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for d in detalles %}
                     <tr>
-                        <td>{{ d.descripcion }}</td>
+                        <td class="fw-semibold text-dark">{{ d.descripcion }}</td>
                         <td class="text-center">{{ d.cantidad }}</td>
-                        <td class="text-end">${{ d.subtotal }}</td>
+                        <td class="text-end">${{ "%.2f" | format(d.subtotal) }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
                 <tfoot>
+                    {% if factura.tipo == 'A' %}
                     <tr>
-                        <th colspan="2" class="text-end">TOTAL</th>
-                        <th class="text-end fs-5 fw-bold">${{ factura.monto }}</th>
+                        <th colspan="2" class="text-end text-muted fw-normal" style="font-size: 0.9rem;">Subtotal (Neto Gravado)</th>
+                        <td class="text-end fw-semibold">${{ "%.2f" | format(factura.subtotal) }}</td>
+                    </tr>
+                    <tr>
+                        <th colspan="2" class="text-end text-muted fw-normal" style="font-size: 0.9rem;">IVA Inscripto (21%)</th>
+                        <td class="text-end fw-semibold">${{ "%.2f" | format(factura.monto_iva) }}</td>
+                    </tr>
+                    {% endif %}
+                    <tr class="table-dark">
+                        <th colspan="2" class="text-end fs-5 text-uppercase" style="background-color: #0f172a; color: #fff;">Monto Total</th>
+                        <th class="text-end fs-5" style="background-color: #0f172a; color: #fff;">${{ "%.2f" | format(factura.monto) }}</th>
                     </tr>
                 </tfoot>
             </table>
 
-            <div class="text-center mt-5 text-muted small">
-                <p>Gracias por confiar en SGOL-IT.</p>
-                <p>Este documento es válido como comprobante de pago.</p>
+            <!-- PIE DE FACTURA -->
+            <div class="row mt-5 pt-3 border-top align-items-center">
+                <div class="col-8">
+                    <p class="mb-0 text-muted small"><strong>Garantía:</strong> Los repuestos instalados cuentan con 90 días de garantía escrita bajo condiciones normales de uso.</p>
+                    <p class="mb-0 text-muted small">Este documento electrónico constituye un comprobante formal de cobro de servicios.</p>
+                </div>
+                <div class="col-4 text-end">
+                    <div class="text-center d-inline-block border px-3 py-2" style="border-radius: 6px; background-color: #f8f9fa;">
+                        <span class="fw-bold small d-block text-dark">SGOL-IT Administración</span>
+                        <span class="text-muted small" style="font-size: 0.65rem;">¡Gracias por su preferencia!</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

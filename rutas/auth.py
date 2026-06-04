@@ -47,9 +47,13 @@ def logout():
 @bp_auth.route('/tracking', methods=['GET', 'POST'])
 def tracking_login():
     if request.method == 'POST':
-        dni = request.form.get('dni')
-        pw = request.form.get('password_web')
-        cl = Cliente.buscar_por_credenciales(dni, pw)
+        dni = request.form.get('dni', '').strip()
+        pw = request.form.get('password_web', '').strip()
+        
+        # Limpiar DNI de puntos, guiones y espacios para robustez
+        dni_clean = re.sub(r'[^0-9]', '', dni)
+        
+        cl = Cliente.buscar_por_credenciales(dni_clean, pw)
         if cl: 
             session.update({'cliente_id': cl['id'], 'cliente_nombre': cl['nombre']})
             # si usa la clave por defecto del cliente
@@ -117,15 +121,16 @@ def responder_presupuesto(id_orden, respuesta):
     est = "En Reparación" if respuesta == 'aprobar' else "Rechazado"
     est_presupuesto = "Aprobado" if respuesta == 'aprobar' else "Rechazado"
     
-    orden = OrdenTrabajo.buscar_por_id(id_orden)
-    if orden and orden['id_presupuesto']:
-        Presupuesto.actualizar_estado(orden['id_presupuesto'], est_presupuesto)
+    orden_obj = OrdenTrabajo.obtener_por_id(id_orden)
+    if orden_obj and orden_obj.id_presupuesto:
+        Presupuesto.actualizar_estado(orden_obj.id_presupuesto, est_presupuesto)
         
     if respuesta == 'aprobar':
         # reservar componentes
         DetalleOrden.reservar_componentes(id_orden)
         
-    OrdenTrabajo.actualizar_estado(id_orden, est)
+    if orden_obj:
+        orden_obj.actualizar_estado(est)
     Seguimiento.registrar_hito(id_orden, est, f"El cliente {respuesta}ó el presupuesto.")
     return redirect(url_for('auth.portal_cliente'))
 
@@ -175,6 +180,7 @@ def solicitar_turno():
         email = request.form.get('email', '').strip()
         servicio = request.form.get('servicio', '').strip()
         presupuesto = request.form.get('presupuesto_estimado', '0')
+        garantia = int(request.form.get('garantia', '0'))
         
         # validaciones de entrada del cliente
         if not dni or not dni.isdigit() or not (7 <= len(dni) <= 11):
@@ -213,14 +219,15 @@ def solicitar_turno():
                     Presupuesto_Estimado DECIMAL(10,2),
                     Fecha_Solicitud DATETIME,
                     Estado VARCHAR(50) DEFAULT 'Pendiente',
+                    Garantia TINYINT(1) DEFAULT 0,
                     FOREIGN KEY (Cliente_ID_Cliente) REFERENCES cliente(ID_Cliente) ON DELETE CASCADE
                 )
             """)
             
             cursor.execute("""
-                INSERT INTO turno (Cliente_ID_Cliente, Servicio, Presupuesto_Estimado, Fecha_Solicitud, Estado)
-                VALUES (%s, %s, %s, %s, %s)
-            """, (id_c, servicio, float(presupuesto), fecha_hoy, 'Pendiente'))
+                INSERT INTO turno (Cliente_ID_Cliente, Servicio, Presupuesto_Estimado, Fecha_Solicitud, Estado, Garantia)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (id_c, servicio, float(presupuesto), fecha_hoy, 'Pendiente', garantia))
             DB.commit()
             cursor.close()
             flash("Turno solicitado con éxito. Nos comunicaremos a la brevedad.", "success")

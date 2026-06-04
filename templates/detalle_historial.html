@@ -33,6 +33,14 @@
                         <p class="mb-1"><strong>Equipo:</strong> <span class="text-white fw-bold">{{ orden.equipo }}</span></p>
                         <p class="mb-1"><strong>Nro. Serie:</strong> <span class="text-light">{{ orden.nro_serie }}</span></p>
                         <p class="mb-1"><strong>Estado Actual:</strong> <span class="badge bg-secondary">{{ orden.estado }}</span></p>
+                        <p class="mb-1"><strong>Garantía:</strong> 
+                            {% if orden.garantia %}
+                                <span class="badge bg-success text-white">Sí, posee garantía</span>
+                            {% else %}
+                                <span class="badge bg-secondary text-white">No posee garantía</span>
+                            {% endif %}
+                        </p>
+                        <p class="mb-1"><strong>Servicio Requerido:</strong> <span class="text-light fw-bold">{{ orden.servicio | default('No especificado', true) }}</span></p>
                         <p class="mb-0"><strong>Fecha de Ingreso:</strong> <span class="text-light">{{ orden.fecha }}</span></p>
                         
                         {% if orden.detalles_visuales or orden.fotos %}

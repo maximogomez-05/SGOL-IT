@@ -135,7 +135,7 @@ def dashboard():
     if int(session.get('rol_id', 0) or 0) in (1, 2):
         cursor.execute("""
             SELECT t.ID_Turno, t.Servicio, t.Presupuesto_Estimado, 
-                   DATE_FORMAT(t.Fecha_Solicitud, '%d/%m/%Y %H:%i') as fecha, t.Estado,
+                   DATE_FORMAT(t.Fecha_Solicitud, '%d/%m/%Y %H:%i') as fecha, t.Estado, t.Garantia,
                    c.Nombre_Completo as Cliente, c.Telefono 
             FROM turno t 
             JOIN cliente c ON t.Cliente_ID_Cliente = c.ID_Cliente

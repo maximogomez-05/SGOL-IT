@@ -2,7 +2,7 @@ import sys
 import os
 
 # asegurar que la ruta base este en sys.path
-base_dir = 'c:/Users/maxig/OneDrive/Desktop/Programacion III - BD/SGOLIT'
+base_dir = os.path.dirname(os.path.abspath(__file__))
 if base_dir not in sys.path:
     sys.path.append(base_dir)
 
@@ -93,20 +93,20 @@ def seed():
     
     # repuestos fisicos
     items_fisicos = [
-        ("Memoria RAM DDR4 8GB Kingston 3200MHz", 25000, 15, 4, "https://www.compragamer.com/producto/Memoria_Kingston_DDR4_8GB_3200MHz"),
-        ("Disco SSD Kingston 480GB SATA3", 42000, 10, 3, "https://www.compragamer.com/producto/Disco_Solido_SSD_Kingston_480GB"),
-        ("Pasta Termica Arctic MX-4 (4g)", 12500, 8, 2, "https://articulo.mercadolibre.com.ar/MLA-933391789-pasta-termica-arctic-mx-4-4g"),
-        ("Fuente Gigabyte 650W 80 Plus", 82000, 5, 2, "https://www.fullh4rd.com.ar/prod/fuente-gigabyte-650w"),
-        ("Placa Madre Gigabyte A520M K V2 AM4", 95000, 4, 1, "https://www.compragamer.com/producto/Mother_Gigabyte_A520M"),
-        ("Disco SSD M.2 NVMe WD Blue 1TB", 89000, 6, 2, "https://www.compragamer.com/producto/Disco_Solido_SSD_M2_WD_1TB"),
+        ("Memoria RAM DDR4 8GB Kingston 3200MHz", 25000, 15, 4, "https://www.compragamer.com/producto/Memoria_Kingston_DDR4_8GB_3200MHz_Fury_Beast_12040"),
+        ("Disco SSD Kingston 480GB SATA3", 42000, 10, 3, "https://www.compragamer.com/producto/Disco_Solido_SSD_Kingston_480GB_A400_SATA_III_2_5_8398"),
+        ("Pasta Termica Arctic MX-4 (4g)", 12500, 8, 2, "https://articulo.mercadolibre.com.ar/MLA-933391789-pasta-termica-arctic-mx-4-4g-_JM"),
+        ("Fuente Gigabyte 650W 80 Plus", 82000, 5, 2, "https://www.fullh4rd.com.ar/prod/26815/fuente-gigabyte-650w-80-plus-bronze-p650b"),
+        ("Placa Madre Gigabyte A520M K V2 AM4", 95000, 4, 1, "https://www.compragamer.com/producto/Mother_Gigabyte_A520M_K_V2_AM4_15220"),
+        ("Disco SSD M.2 NVMe WD Blue 1TB", 89000, 6, 2, "https://www.compragamer.com/producto/Disco_Solido_SSD_M_2_NVMe_WD_Blue_1TB_SN580_4150MB_s_PCIe_Gen4_15093"),
         ("Teclado Universal Notebook USB", 15000, 12, 3, "https://articulo.mercadolibre.com.ar/MLA-11223344-teclado-universal-usb"),
         ("Pantalla LED 15.6 Slim 30 pines", 85000, 3, 1, "https://articulo.mercadolibre.com.ar/MLA-99887766-pantalla-led-156-slim"),
-        ("Cooler Fan 120mm RGB", 9500, 20, 5, "https://www.fullh4rd.com.ar/prod/cooler-fan-120-rgb"),
+        ("Cooler Fan 120mm RGB", 9500, 20, 5, "https://www.fullh4rd.com.ar/prod/26425/cooler-fan-id-cooling-tf-12025-black-argb"),
         ("Cable HDMI 1.8m v2.0", 4500, 30, 8, "https://articulo.mercadolibre.com.ar/MLA-66778899-cable-hdmi-18m"),
         ("Cargador Notebook Universal 90W", 28000, 7, 2, "https://articulo.mercadolibre.com.ar/MLA-55443322-cargador-notebook-90w"),
         ("Pila CMOS CR2032 Litio", 1500, 50, 10, "https://articulo.mercadolibre.com.ar/MLA-33221100-pila-cr2032"),
-        ("Modulo Memoria RAM DDR5 16GB", 58000, 8, 2, "https://www.compragamer.com/producto/Memoria_RAM_DDR5_16GB"),
-        ("Disco Duro Externo 1TB Adata", 72000, 5, 2, "https://www.fullh4rd.com.ar/prod/disco-externo-1tb")
+        ("Modulo Memoria RAM DDR5 16GB", 58000, 8, 2, "https://www.compragamer.com/producto/Memoria_Kingston_DDR5_16GB_5600MHz_Fury_Beast_14163"),
+        ("Disco Duro Externo 1TB Adata", 72000, 5, 2, "https://www.fullh4rd.com.ar/prod/26107/disco-externo-1tb-adata-hd330-black")
     ]
     
     db_inventario = {}

@@ -13,9 +13,14 @@ class Inventario:
     def registrar(self):
         cursor = DB.cursor()
         try:
-            # Asegurarse de que la columna Stock_Minimo existe
+            # Asegurarse de que las columnas existen
             try:
                 cursor.execute("ALTER TABLE catalogo_inventario ADD COLUMN Stock_Minimo INT DEFAULT 0")
+                DB.commit()
+            except Exception:
+                pass
+            try:
+                cursor.execute("ALTER TABLE catalogo_inventario ADD COLUMN URL_Referencia_Externa VARCHAR(500) DEFAULT ''")
                 DB.commit()
             except Exception:
                 pass
@@ -49,7 +54,7 @@ class Inventario:
             except Exception:
                 pass
             
-            cursor.execute("SELECT ID_Item as id, Tipo_Item as tipo_item, Descripcion as descripcion, Precio_Actual as precio, Stock_Disponible as stock, Stock_Minimo as stock_minimo FROM catalogo_inventario")
+            cursor.execute("SELECT ID_Item as id, Tipo_Item as tipo_item, Descripcion as descripcion, Precio_Actual as precio, Stock_Disponible as stock, Stock_Minimo as stock_minimo, URL_Referencia_Externa as url_referencia FROM catalogo_inventario")
             return cursor.fetchall()
         except Exception as e:
             print(f"Error al listar inventario: {e}")
@@ -58,13 +63,19 @@ class Inventario:
             cursor.close()
 
     @staticmethod
-    def actualizar(id_item, descripcion, precio, stock, stock_minimo):
+    def actualizar(id_item, descripcion, precio, stock, stock_minimo, url_referencia=""):
         cursor = DB.cursor()
         try:
+            try:
+                cursor.execute("ALTER TABLE catalogo_inventario ADD COLUMN URL_Referencia_Externa VARCHAR(500) DEFAULT ''")
+                DB.commit()
+            except Exception:
+                pass
+            
             sql = """UPDATE catalogo_inventario 
-                     SET Descripcion = %s, Precio_Actual = %s, Stock_Disponible = %s, Stock_Minimo = %s 
+                     SET Descripcion = %s, Precio_Actual = %s, Stock_Disponible = %s, Stock_Minimo = %s, URL_Referencia_Externa = %s 
                      WHERE ID_Item = %s"""
-            cursor.execute(sql, (descripcion, precio, stock, stock_minimo, id_item))
+            cursor.execute(sql, (descripcion, precio, stock, stock_minimo, url_referencia, id_item))
             DB.commit()
             return True
         except Exception as e:
@@ -98,7 +109,7 @@ class Inventario:
     def buscar_por_id(id_item):
         cursor = DB.cursor(dictionary=True)
         try:
-            cursor.execute("SELECT ID_Item as id, Tipo_Item as tipo_item, Descripcion as descripcion, Precio_Actual as precio, Stock_Disponible as stock, Stock_Minimo as stock_minimo FROM catalogo_inventario WHERE ID_Item = %s", (id_item,))
+            cursor.execute("SELECT ID_Item as id, Tipo_Item as tipo_item, Descripcion as descripcion, Precio_Actual as precio, Stock_Disponible as stock, Stock_Minimo as stock_minimo, URL_Referencia_Externa as url_referencia FROM catalogo_inventario WHERE ID_Item = %s", (id_item,))
             return cursor.fetchone()
         except Exception as e:
             print(f"Error al buscar ítem de inventario por ID: {e}")

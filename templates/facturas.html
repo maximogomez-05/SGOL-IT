@@ -40,7 +40,7 @@
                     <tbody>
                         {% for f in facturas %}
                         <tr>
-                            <td class="fw-bold">#{{ f.id_factura }}</td>
+                            <td class="fw-bold">{{ f.nro_factura }}</td>
                             <td>{{ f.fecha }}</td>
                             <td>{{ f.cliente }}</td>
                             <td><span class="badge {% if f.tipo == 'A' %}bg-warning{% else %}bg-info{% endif %}">Factura {{ f.tipo }}</span></td>

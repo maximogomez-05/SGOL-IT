@@ -52,7 +52,14 @@
                                 <td class="ps-4">{{ t.Fecha_Solicitud }}</td>
                                 <td class="fw-bold text-white">{{ t.Nombre_Completo }}</td>
                                 <td>{{ t.DNI_CUIL }} <br> <small class="text-muted">{{ t.Telefono }}</small></td>
-                                <td>{{ t.Servicio }}</td>
+                                <td>
+                                    {{ t.Servicio }}
+                                    {% if t.Garantia %}
+                                        <br><span class="badge bg-success text-white mt-1">Con Garantía</span>
+                                    {% else %}
+                                        <br><span class="badge bg-secondary text-white mt-1">Sin Garantía</span>
+                                    {% endif %}
+                                </td>
                                 <td class="fw-bold" style="color: var(--accent-emerald);">${{ t.Presupuesto_Estimado }}</td>
                                 <td class="text-center pe-4">
                                     <form action="/procesar_turno/{{ t.ID_Turno }}" method="POST">

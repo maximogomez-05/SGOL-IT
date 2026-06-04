@@ -32,7 +32,15 @@
             {% for o in ordenes %}
             <div class="card glass-panel mb-4">
                 <div class="card-header border-0 bg-transparent pt-4 pb-0 d-flex justify-content-between align-items-center">
-                    <span class="fw-bold fs-5">Orden #{{ o.id_orden }} | {{ o.equipo }} (Código de Tracking: {{ o.codigo }})</span>
+                    <span class="fw-bold fs-5">
+                        Orden #{{ o.id_orden }} | {{ o.equipo }} (Código de Tracking: {{ o.codigo }})
+                        {% if o.garantia %}
+                            <span class="badge bg-success ms-2" style="font-size: 0.75rem;">Con Garantía</span>
+                        {% else %}
+                            <span class="badge bg-secondary ms-2" style="font-size: 0.75rem;">Sin Garantía</span>
+                        {% endif %}
+                        <span class="badge bg-primary ms-2" style="font-size: 0.75rem;">Servicio: {{ o.servicio | default('No especificado', true) }}</span>
+                    </span>
                     <span class="badge bg-info fs-6">{{ o.estado }}</span>
                 </div>
                 <div class="card-body">
@@ -226,7 +234,7 @@
                     let html = '';
                     data.forEach(msg => {
                         const esCliente = msg.remitente_tipo === 'cliente';
-                        const nombre = esCliente ? 'Tú' : msg.empleado_nombre;
+                        const nombre = esCliente ? 'Tú' : 'Soporte Técnico';
                         const alignClass = esCliente ? 'text-end align-self-end bg-primary-subtle text-white' : 'text-start align-self-start bg-secondary text-white';
                         const bubbleStyle = esCliente ? 
                             'background: rgba(0, 242, 254, 0.15); border: 1px solid rgba(0, 242, 254, 0.3); border-radius: 12px 12px 0 12px;' :

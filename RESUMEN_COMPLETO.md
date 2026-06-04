@@ -67,3 +67,31 @@ Este documento recopila de manera detallada todas las implementaciones, mejoras 
 * **Acceso y Roles del Admin:** Se habilitó al Administrador (`rol_id = 1`) para realizar pruebas y operaciones de todos los roles (Técnico y Recepcionista) directamente desde su Dashboard, sin necesidad de cerrar sesión.
 * **Bloqueo de Cotizaciones en $0:** Se añadió una validación en la cotización que impide emitir presupuestos vacíos o en $0, evitando que el flujo quede atascado o se generen cobros nulos.
 * **Carga de Repuestos en Diagnóstico:** Se flexibilizó la edición de la lista de materiales para que los técnicos puedan agregar repuestos tanto en estado `Para Revisión` como en `En Diagnóstico`.
+
+### 8. Fallback de Scraping e Integridad de Accesos
+* **Buscador de HardGamers como Fallback de Scraping:** Para eludir las barreras anti-bot de MercadoLibre y los sitios SPA dinámicos como CompraGamer, se implementó un scraper de búsqueda en **HardGamers** (usando `text=`). Cuando falla el scraping directo, se extraen palabras clave del slug de la URL o descripción local, se realiza una búsqueda de mercado y se valida mediante coincidencia porcentual de tokens. El sistema devuelve el precio real y actualiza el enlace "Ver ref. 🔗" en el inventario con el link del producto exacto comparado.
+* **Resolución de Error de Duplicidad en Órdenes de Trabajo:** Se corrigió el error `Duplicate entry '' for key 'Codigo_Tracking_web'` al registrar una segunda orden de trabajo. Se migró la consulta SQL directa al uso del modelo `OrdenTrabajo` y su método `.registrar()`, garantizando que la creación de toda orden genere y almacene un código de seguimiento web único (`OT-XXXXXX`).
+* **Sincronización de Credenciales para Clientes Preexistentes:** Se detectó que si un cliente se registraba inicialmente solicitando un turno web (con la contraseña por defecto `"123"`), y posteriormente el recepcionista le asignaba otra contraseña temporal en el local, el sistema no la actualizaba. Se implementó una sincronización automática (`Cliente.actualizar_password`) durante la creación de la orden de trabajo para sobrescribir credenciales temporales previas.
+* **Normalización Dinámica de Entrada de DNI en Login:** Se implementó una limpieza automática basada en expresiones regulares (`re.sub`) en el inicio de sesión del portal de autogestión de clientes para ignorar cualquier punto, espacio o guion introducido en el campo del DNI, garantizando un cotejo robusto contra el formato numérico de la base de datos.
+* **Portabilización del Poblador de Base de Datos (`seed_db.py`):** Se dinamizó la declaración de la ruta del proyecto usando `os.path` en lugar de una ruta absoluta propia de otra máquina, permitiendo ejecutar y resembrar la base de datos sin errores de entorno.
+
+---
+
+## 🛠️ Nuevas Funcionalidades e Integraciones Recientes (Fase Actual)
+
+### 9. Control de Garantía y Selección de Servicio/Síntoma
+* **Declaración de Garantía:** Se añadió la opción obligatoria para que el cliente indique si su equipo posee garantía al solicitar un turno online. Esto se propaga al proceso de recepción y se almacena en la orden de trabajo.
+* **Tipos de Servicio / Síntomas:** Se incorporó un campo selectivo con los principales tipos de servicio tanto en los turnos web como en la recepción de órdenes manuales, logrando que el recepcionista cuente con opciones predefinidas y que, si la orden proviene de un turno web, el servicio se pre-seleccione de forma automática.
+* **Migración de Esquema Dinámica:** Se implementaron validaciones automáticas `ALTER TABLE` que agregan las columnas `Garantia` y `Servicio` a las tablas `turno` y `orden_trabajo` en tiempo de ejecución al entrar al módulo de turnos para prevenir fallas por falta de campos en la base de datos.
+
+### 10. Impresión de Ticket de Recepción por Duplicado
+* **Formato de Comprobante Duplicado:** Al generar exitosamente una orden de trabajo, el recepcionista es redirigido de manera automática a la vista `/imprimir_ticket/<id_orden>`.
+* **Copia Cliente y Copia Empresa:** La página del ticket renderiza dos bloques de comprobante idénticos en una misma hoja, con datos detallados del cliente, del dispositivo (tipo, modelo, número de serie, garantía, síntoma/servicio) y áreas para las firmas físicas del cliente y el operador, separados por una línea punteada de corte con tijeras (`✂️`).
+* **Estilos y Autodisparo de Impresión (`@media print`):** Se diseñó una barra superior no imprimible con controles rápidos, y se aplicaron estilos CSS de impresión que transforman el fondo en blanco con letras de alto contraste para ahorro de tinta, ocultando cabeceras y menús del sitio. Un script de JavaScript abre automáticamente el cuadro de diálogo de impresión del sistema al cargar la página.
+
+### 11. Carga de Fotografías por el Técnico en Reparación
+* **Evolución del Registro Visual:** Se implementó una sección de subida de archivos múltiples en la vista de gestión del laboratorio técnico. Los técnicos pueden subir hasta 4 imágenes simultáneas para ilustrar problemas o el estado interno durante el diagnóstico o reparación.
+* **Migración a Tipo `TEXT`:** Se modificó la columna `Fotos` de la tabla `orden_trabajo` a tipo `TEXT` para permitir almacenar una lista ilimitada de nombres de imágenes separadas por comas, previniendo truncamiento de caracteres.
+* **Persistencia Acumulativa y Bitácora:** Las nuevas fotos cargadas por el técnico no eliminan las fotos iniciales de la recepción, sino que se concatenan. Cada subida genera además un hito en el historial de `Seguimiento` del equipo para auditoría e información al cliente.
+
+

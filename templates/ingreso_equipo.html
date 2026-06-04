@@ -71,6 +71,24 @@
                             </select>
                         </div>
                         <div class="col-md-12 mt-3">
+                            <label class="form-label text-muted small fw-bold">¿El equipo posee garantía?</label>
+                            <select name="garantia" id="garantia" class="form-select" required>
+                                <option value="0" {% if datos and (datos.garantia == '0' or datos.garantia == 0) %}selected{% endif %}>No posee garantía</option>
+                                <option value="1" {% if datos and (datos.garantia == '1' or datos.garantia == 1) %}selected{% endif %}>Sí, posee garantía</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12 mt-3">
+                            <label class="form-label text-muted small fw-bold">Síntoma o Servicio Requerido</label>
+                            <select name="servicio" id="servicio" class="form-select" required>
+                                <option value="" selected disabled>Seleccione una opción...</option>
+                                <option value="Limpieza y Mantenimiento" {% if datos and datos.servicio == 'Limpieza y Mantenimiento' %}selected{% endif %}>Limpieza Física y Cambio de Pasta Térmica</option>
+                                <option value="Formateo e Instalación OS" {% if datos and datos.servicio == 'Formateo e Instalación OS' %}selected{% endif %}>Formateo e Instalación de Windows</option>
+                                <option value="No enciende" {% if datos and datos.servicio == 'No enciende' %}selected{% endif %}>El equipo no enciende (Revisión técnica)</option>
+                                <option value="Lentitud extrema" {% if datos and datos.servicio == 'Lentitud extrema' %}selected{% endif %}>Lentitud extrema (Revisión + Optimizacion)</option>
+                                <option value="Otro" {% if datos and datos.servicio == 'Otro' %}selected{% endif %}>Otro problema (A cotizar en local)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12 mt-3">
                             <label class="form-label text-muted small">Detalles Visuales / Estado Físico de Recepción</label>
                             <textarea name="detalles_visuales" class="form-control" rows="3" placeholder="Ej: Rayones en la tapa superior, le falta un tornillo en la base, pantalla con suciedad superficial..." pattern="[^<>]*" title="No se permiten etiquetas HTML"></textarea>
                         </div>

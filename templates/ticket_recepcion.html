@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Imprimir Ticket OT #{{ orden.id_orden }} | SGOL-IT</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* Estilos específicos para la vista del ticket */
+        body {
+            background-color: #0a0f1d;
+            background-image: 
+                radial-gradient(at 10% 10%, rgba(79, 172, 254, 0.05) 0px, transparent 50%),
+                radial-gradient(at 90% 90%, rgba(0, 242, 254, 0.05) 0px, transparent 50%);
+            min-height: 100vh;
+            color: #f3f4f6;
+            font-family: 'Inter', sans-serif;
+            padding: 2rem 1rem;
+        }
+
+        .control-bar {
+            max-width: 800px;
+            margin: 0 auto 2rem auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(19, 27, 46, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 1.2rem 2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .ticket-page {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            color: #1e293b;
+            padding: 3rem;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .ticket-copy {
+            padding: 1rem 0;
+        }
+
+        .ticket-copy-label {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ticket-copy-label span.badge-copy {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            border: 1px solid #cbd5e1;
+        }
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .company-logo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1;
+        }
+
+        .company-subtitle {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 0.2rem;
+        }
+
+        .ticket-meta {
+            text-align: right;
+            font-size: 0.9rem;
+        }
+
+        .ticket-meta div {
+            margin-bottom: 0.2rem;
+            color: #334155;
+        }
+
+        .ticket-meta strong {
+            color: #0f172a;
+        }
+
+        .section-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: #0f172a;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 0.3rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        .info-item {
+            color: #334155;
+        }
+
+        .info-item strong {
+            color: #0f172a;
+        }
+
+        .info-full {
+            grid-column: span 2;
+            color: #334155;
+        }
+
+        .observations-box {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0.8rem 1rem;
+            font-size: 0.85rem;
+            color: #475569;
+            min-height: 60px;
+            white-space: pre-wrap;
+            margin-top: 0.3rem;
+        }
+
+        .terms-notes {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 1.2rem;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 0.6rem;
+            line-height: 1.4;
+        }
+
+        .signatures-area {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 3rem;
+            margin-top: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .signature-box {
+            text-align: center;
+        }
+
+        .signature-line {
+            border-top: 1px solid #94a3b8;
+            margin-top: 2rem;
+            padding-top: 0.4rem;
+            font-size: 0.8rem;
+            color: #475569;
+        }
+
+        .cut-line {
+            border-top: 2px dashed #94a3b8;
+            position: relative;
+            margin: 2.5rem 0;
+            text-align: center;
+        }
+
+        .cut-line span {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ffffff;
+            padding: 0 1rem;
+            font-size: 0.8rem;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        /* Modificaciones para impresión */
+        @media print {
+            body {
+                background: #ffffff !important;
+                background-image: none !important;
+                color: #000000 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .control-bar {
+                display: none !important;
+            }
+
+            .ticket-page {
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                padding: 0 !important;
+                max-width: 100% !important;
+            }
+
+            .cut-line {
+                border-top: 2px dashed #000000 !important;
+                margin: 3rem 0 !important;
+            }
+
+            .cut-line span {
+                background: #ffffff !important;
+                color: #000000 !important;
+            }
+
+            .ticket-copy {
+                page-break-inside: avoid;
+            }
+
+            .observations-box {
+                background-color: #ffffff !important;
+                border: 1px solid #000000 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Barra de control superior (no se imprime) -->
+    <div class="control-bar no-print">
+        <div>
+            <h4 class="m-0 text-white fw-bold">🎫 Ticket de Recepción Generado</h4>
+            <p class="m-0 text-muted small">Orden de Trabajo #{{ orden.id_orden }}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button onclick="window.print()" class="btn btn-primary text-black fw-bold">
+                🖨️ Imprimir Ticket
+            </button>
+            <a href="/ingreso_equipo" class="btn btn-outline-primary">
+                ➕ Nueva Orden
+            </a>
+            <a href="/dashboard" class="btn btn-outline-secondary">
+                🏠 Ir al Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Página del ticket que se imprime -->
+    <div class="ticket-page">
+        
+        <!-- ================= COPIA CLIENTE ================= -->
+        <div class="ticket-copy">
+            <div class="ticket-copy-label">
+                <span>Comprobante de Recepción de Equipo</span>
+                <span class="badge-copy">COPIA PARA EL CLIENTE</span>
+            </div>
+            
+            <div class="ticket-header">
+                <div>
+                    <div class="company-logo">SGOL-IT</div>
+                    <div class="company-subtitle">Servicio de Gestión de Ordenes de Laboratorio IT</div>
+                </div>
+                <div class="ticket-meta">
+                    <div>Orden Nro: <strong>#{{ orden.id_orden }}</strong></div>
+                    <div>Código Tracking: <strong>{{ orden.codigo }}</strong></div>
+                    <div>Fecha: <strong>{{ orden.fecha }}</strong></div>
+                </div>
+            </div>
+
+            <div class="section-title">Información del Cliente</div>
+            <div class="info-grid">
+                <div class="info-item"><strong>Nombre:</strong> {{ orden.cliente }}</div>
+                <div class="info-item"><strong>DNI / CUIL:</strong> {{ orden.dni }}</div>
+                <div class="info-item"><strong>Teléfono:</strong> {{ orden.telefono }}</div>
+                <div class="info-item"><strong>Email:</strong> {{ orden.email }}</div>
+            </div>
+
+            <div class="section-title">Información del Equipo</div>
+            <div class="info-grid">
+                <div class="info-item"><strong>Tipo de Dispositivo:</strong> {{ orden.tipo_dispositivo or 'No especificado' }}</div>
+                <div class="info-item"><strong>Marca y Modelo:</strong> {{ orden.modelo or 'No especificado' }}</div>
+                <div class="info-item"><strong>Número de Serie:</strong> {{ orden.nro_serie }}</div>
+                <div class="info-item"><strong>Garantía:</strong> {% if orden.garantia == 1 %}Sí, posee garantía{% else %}No posee garantía{% endif %}</div>
+                <div class="info-full"><strong>Servicio Requerido:</strong> {{ orden.servicio or 'No especificado' }}</div>
+                <div class="info-full">
+                    <strong>Observaciones / Estado Físico:</strong>
+                    <div class="observations-box">{% if orden.detalles_visuales %}{{ orden.detalles_visuales }}{% else %}Sin observaciones particulares.{% endif %}</div>
+                </div>
+            </div>
+
+            <div class="terms-notes">
+                <strong>Términos y Condiciones:</strong> Presente este ticket de forma obligatoria para el retiro de su equipo. Puede realizar el seguimiento de su orden de manera online a través de nuestro portal web utilizando el <strong>Código de Tracking: {{ orden.codigo }}</strong>. Pasados los 90 días del aviso de retiro, la empresa no se responsabiliza por el destino del equipo.
+            </div>
+
+            <div class="signatures-area">
+                <div class="signature-box">
+                    <div class="signature-line">Firma del Cliente</div>
+                </div>
+                <div class="signature-box">
+                    <div class="signature-line">Firma del Receptor (SGOL-IT)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Línea de corte -->
+        <div class="cut-line">
+            <span>✂️ CORTE AQUÍ ✂️</span>
+        </div>
+
+        <!-- ================= COPIA EMPRESA ================= -->
+        <div class="ticket-copy">
+            <div class="ticket-copy-label">
+                <span>Comprobante de Recepción de Equipo</span>
+                <span class="badge-copy">COPIA PARA LA EMPRESA</span>
+            </div>
+            
+            <div class="ticket-header">
+                <div>
+                    <div class="company-logo">SGOL-IT</div>
+                    <div class="company-subtitle">Servicio de Gestión de Ordenes de Laboratorio IT</div>
+                </div>
+                <div class="ticket-meta">
+                    <div>Orden Nro: <strong>#{{ orden.id_orden }}</strong></div>
+                    <div>Código Tracking: <strong>{{ orden.codigo }}</strong></div>
+                    <div>Fecha: <strong>{{ orden.fecha }}</strong></div>
+                </div>
+            </div>
+
+            <div class="section-title">Información del Cliente</div>
+            <div class="info-grid">
+                <div class="info-item"><strong>Nombre:</strong> {{ orden.cliente }}</div>
+                <div class="info-item"><strong>DNI / CUIL:</strong> {{ orden.dni }}</div>
+                <div class="info-item"><strong>Teléfono:</strong> {{ orden.telefono }}</div>
+                <div class="info-item"><strong>Email:</strong> {{ orden.email }}</div>
+            </div>
+
+            <div class="section-title">Información del Equipo</div>
+            <div class="info-grid">
+                <div class="info-item"><strong>Tipo de Dispositivo:</strong> {{ orden.tipo_dispositivo or 'No especificado' }}</div>
+                <div class="info-item"><strong>Marca y Modelo:</strong> {{ orden.modelo or 'No especificado' }}</div>
+                <div class="info-item"><strong>Número de Serie:</strong> {{ orden.nro_serie }}</div>
+                <div class="info-item"><strong>Garantía:</strong> {% if orden.garantia == 1 %}Sí, posee garantía{% else %}No posee garantía{% endif %}</div>
+                <div class="info-full"><strong>Servicio Requerido:</strong> {{ orden.servicio or 'No especificado' }}</div>
+                <div class="info-full">
+                    <strong>Observaciones / Estado Físico:</strong>
+                    <div class="observations-box">{% if orden.detalles_visuales %}{{ orden.detalles_visuales }}{% else %}Sin observaciones particulares.{% endif %}</div>
+                </div>
+            </div>
+
+            <div class="terms-notes">
+                <strong>Notas de Recepción:</strong> Comprobante interno para respaldo físico y archivo. Registrado por el operador en el sistema de gestión.
+            </div>
+
+            <div class="signatures-area">
+                <div class="signature-box">
+                    <div class="signature-line">Firma del Cliente</div>
+                </div>
+                <div class="signature-box">
+                    <div class="signature-line">Firma del Receptor (SGOL-IT)</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Script para autodisparar el diálogo de impresión al cargar la página -->
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            // Un pequeño retraso para asegurar que los estilos estén completamente renderizados
+            setTimeout(() => {
+                window.print();
+            }, 300);
+        });
+    </script>
+</body>
+</html>

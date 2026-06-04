@@ -28,7 +28,7 @@ def gestionar_turnos():
     q = request.args.get('q', '').strip()
     cursor = DB.cursor(dictionary=True)
     
-    # asegurar tabla turno
+    # asegurar tabla turno y columnas de garantia
     try:
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS turno (
@@ -38,15 +38,40 @@ def gestionar_turnos():
                 Presupuesto_Estimado DECIMAL(10,2),
                 Fecha_Solicitud DATETIME,
                 Estado VARCHAR(50) DEFAULT 'Pendiente',
+                Garantia TINYINT(1) DEFAULT 0,
                 FOREIGN KEY (Cliente_ID_Cliente) REFERENCES cliente(ID_Cliente) ON DELETE CASCADE
             )
         """)
         DB.commit()
     except Exception as e:
         print(f"Error al verificar/crear tabla turno: {e}")
+
+    try:
+        cursor.execute("SHOW COLUMNS FROM turno LIKE 'Garantia'")
+        if not cursor.fetchone():
+            cursor.execute("ALTER TABLE turno ADD COLUMN Garantia TINYINT(1) DEFAULT 0")
+            DB.commit()
+    except Exception as e:
+        print(f"Error al verificar/agregar Garantia a turno: {e}")
+
+    try:
+        cursor.execute("SHOW COLUMNS FROM orden_trabajo LIKE 'Garantia'")
+        if not cursor.fetchone():
+            cursor.execute("ALTER TABLE orden_trabajo ADD COLUMN Garantia TINYINT(1) DEFAULT 0")
+            DB.commit()
+    except Exception as e:
+        print(f"Error al verificar/agregar Garantia a orden_trabajo: {e}")
+
+    try:
+        cursor.execute("SHOW COLUMNS FROM orden_trabajo LIKE 'Servicio'")
+        if not cursor.fetchone():
+            cursor.execute("ALTER TABLE orden_trabajo ADD COLUMN Servicio VARCHAR(100)")
+            DB.commit()
+    except Exception as e:
+        print(f"Error al verificar/agregar Servicio a orden_trabajo: {e}")
         
     if q:
-        sql = """SELECT t.ID_Turno, t.Servicio, t.Presupuesto_Estimado, t.Fecha_Solicitud, t.Estado,
+        sql = """SELECT t.ID_Turno, t.Servicio, t.Presupuesto_Estimado, t.Fecha_Solicitud, t.Estado, t.Garantia,
                         c.DNI_CUIL, c.Nombre_Completo, c.Email, c.Telefono 
                  FROM turno t 
                  JOIN cliente c ON t.Cliente_ID_Cliente = c.ID_Cliente
@@ -56,7 +81,7 @@ def gestionar_turnos():
         id_q = int(q) if q.isdigit() else 0
         cursor.execute(sql, (like_q, id_q, like_q))
     else:
-        cursor.execute("""SELECT t.ID_Turno, t.Servicio, t.Presupuesto_Estimado, t.Fecha_Solicitud, t.Estado,
+        cursor.execute("""SELECT t.ID_Turno, t.Servicio, t.Presupuesto_Estimado, t.Fecha_Solicitud, t.Estado, t.Garantia,
                                  c.DNI_CUIL, c.Nombre_Completo, c.Email, c.Telefono 
                           FROM turno t 
                           JOIN cliente c ON t.Cliente_ID_Cliente = c.ID_Cliente
@@ -73,7 +98,7 @@ def procesar_turno(id_turno):
         return redirect(url_for('auth.inicio'))
     
     cursor = DB.cursor(dictionary=True)
-    cursor.execute("""SELECT c.DNI_CUIL, c.Nombre_Completo, c.Email, c.Telefono 
+    cursor.execute("""SELECT c.DNI_CUIL, c.Nombre_Completo, c.Email, c.Telefono, t.Garantia, t.Servicio 
                       FROM turno t 
                       JOIN cliente c ON t.Cliente_ID_Cliente = c.ID_Cliente 
                       WHERE t.ID_Turno = %s""", (id_turno,))
@@ -86,7 +111,13 @@ def procesar_turno(id_turno):
     flash("Turno validado exitosamente. Proceda a generar la Orden de Trabajo formal.", "success")
     
     if turno:
-        return redirect(url_for('ordenes.ingreso_equipo', dni=turno['DNI_CUIL'], nombre=turno['Nombre_Completo'], email=turno['Email'], telefono=turno['Telefono']))
+        return redirect(url_for('ordenes.ingreso_equipo', 
+                               dni=turno['DNI_CUIL'], 
+                               nombre=turno['Nombre_Completo'], 
+                               email=turno['Email'], 
+                               telefono=turno['Telefono'],
+                               garantia=turno['Garantia'],
+                               servicio=turno['Servicio']))
     
     return redirect(url_for('ordenes.ingreso_equipo'))
 
@@ -105,6 +136,8 @@ def ingreso_equipo():
         mod = request.form.get('modelo')
         tip = request.form.get('tipo')
         detalles_visuales = request.form.get('detalles_visuales', '').strip()
+        garantia = int(request.form.get('garantia', '0'))
+        servicio = request.form.get('servicio', '').strip()
         
         # validaciones basicas
         if not dni or not dni.isdigit() or not (7 <= len(dni) <= 11):
@@ -130,6 +163,9 @@ def ingreso_equipo():
             return redirect(url_for('ordenes.ingreso_equipo'))
         if tip not in ('Notebook', 'PC de Escritorio', 'All-in-One', 'Impresora', 'Otro'):
             flash("Tipo de dispositivo inválido.", "danger")
+            return redirect(url_for('ordenes.ingreso_equipo'))
+        if not servicio:
+            flash("Debe seleccionar un tipo de servicio.", "danger")
             return redirect(url_for('ordenes.ingreso_equipo'))
         if "<" in detalles_visuales or ">" in detalles_visuales:
             flash("Las observaciones contienen caracteres inválidos.", "danger")
@@ -163,6 +199,10 @@ def ingreso_equipo():
             id_c = cl['id'] if cl else None
             if not id_c:
                 id_c = Cliente(dni, nom, em, tel, pw).registrar()
+            else:
+                # Si el cliente ya existe (ej: por registrar un turno previo), actualizamos su contraseña web
+                # a la nueva contraseña temporal provista en la recepción
+                Cliente.actualizar_password(id_c, pw)
                 
             # busca o registra el equipo
             eq_existente = Equipo.buscar_por_numero_serie(ns)
@@ -171,30 +211,46 @@ def ingreso_equipo():
             else:
                 id_eq = Equipo(ns, mod, tip, id_c).registrar()
             
-            # crea la orden de trabajo (guarda Detalles_Visuales y Fotos aquí)
-            cursor = DB.cursor()
-            cursor.execute("""
-                INSERT INTO orden_trabajo 
-                (Estado_General, Fecha_Creacion, Equipo_ID_Equipo, Empleado_ID_Empleado, Detalles_Visuales, Fotos) 
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """, ('Para Revisión', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), id_eq, session['usuario_id'], detalles_visuales, fotos_str))
-            id_o = cursor.lastrowid
-            DB.commit()
-            cursor.close()
+            # crea la orden de trabajo (guarda Detalles_Visuales y Fotos aquí) usando OOP
+            orden = OrdenTrabajo(
+                id_equipo=id_eq,
+                id_empleado=session['usuario_id'],
+                detalles_visuales=detalles_visuales,
+                fotos=fotos_str,
+                garantia=garantia,
+                servicio=servicio
+            )
+            id_o = orden.registrar()
             
             Seguimiento.registrar_hito(id_o, "Ingresado", "El equipo ingresó al laboratorio para su revisión inicial.")
             flash(f"¡Éxito! Orden #{id_o} generada.", "success")
+            return redirect(url_for('ordenes.imprimir_ticket', id_orden=id_o))
         except Exception as e: 
             flash(f"Error: {e}", "danger")
-        return redirect(url_for('ordenes.ingreso_equipo'))
+            return redirect(url_for('ordenes.ingreso_equipo'))
         
     datos_turno = {
         'dni': request.args.get('dni', ''),
         'nombre': request.args.get('nombre', ''),
         'email': request.args.get('email', ''),
-        'telefono': request.args.get('telefono', '')
+        'telefono': request.args.get('telefono', ''),
+        'garantia': request.args.get('garantia', '0'),
+        'servicio': request.args.get('servicio', '')
     }
     return render_template('ingreso_equipo.html', datos=datos_turno)
+
+@bp_ordenes.route('/imprimir_ticket/<int:id_orden>')
+def imprimir_ticket(id_orden):
+    if 'usuario_id' not in session or int(session.get('rol_id', 0) or 0) not in (1, 2): 
+        return redirect(url_for('auth.inicio'))
+    
+    orden = OrdenTrabajo.buscar_detalle_completo(id_orden)
+    if not orden:
+        flash("La orden no existe.", "danger")
+        return redirect(url_for('ordenes.ingreso_equipo'))
+        
+    return render_template('ticket_recepcion.html', orden=orden)
+
 
 @bp_ordenes.route('/presupuestos_pendientes')
 def presupuestos_pendientes():
@@ -220,8 +276,9 @@ def cotizar_orden(id_orden):
             return redirect(url_for('ordenes.cotizar_orden', id_orden=id_orden))
             
         id_pres = Presupuesto(total).registrar()
-        cursor.execute("UPDATE orden_trabajo SET Presupuesto_ID_Presupuesto = %s, Estado_General = 'Esperando Respuesta' WHERE ID_OT = %s", (id_pres, id_orden))
-        DB.commit()
+        orden_obj = OrdenTrabajo.obtener_por_id(id_orden)
+        if orden_obj:
+            orden_obj.vincular_presupuesto(id_pres)
         Seguimiento.registrar_hito(id_orden, "Esperando Respuesta", f"Presupuesto formal generado por ${total}.")
         cursor.close()
         return redirect(url_for('ordenes.presupuestos_pendientes'))
@@ -284,7 +341,8 @@ def gestionar_orden(id_orden):
         return redirect(url_for('auth.inicio'))
     
     orden = OrdenTrabajo.buscar_detalle_completo(id_orden)
-    if not orden:
+    orden_obj = OrdenTrabajo.obtener_por_id(id_orden)
+    if not orden or not orden_obj:
         flash("La orden no existe.", "danger")
         return redirect(url_for('ordenes.laboratorio'))
 
@@ -294,7 +352,7 @@ def gestionar_orden(id_orden):
         if action == 'actualizar_estado':
             nuevo_est = request.form.get('nuevo_estado')
             if nuevo_est in ('En Diagnóstico', 'Esperando Repuestos', 'Reparando', 'En Testing', 'Para Revisión'):
-                OrdenTrabajo.actualizar_estado(id_orden, nuevo_est)
+                orden_obj.actualizar_estado(nuevo_est)
                 Seguimiento.registrar_hito(id_orden, nuevo_est, f"El técnico actualizó el estado a: {nuevo_est}.")
                 flash(f"Estado actualizado a '{nuevo_est}'.", "success")
             else:
@@ -303,8 +361,8 @@ def gestionar_orden(id_orden):
         elif orden['estado'] in ('Para Revisión', 'En Diagnóstico'):
             diag = request.form.get('diagnostico')
             if diag:
-                OrdenTrabajo.actualizar_estado(id_orden, 'Esperando Aprobación')
-                OrdenTrabajo.actualizar_diagnostico(id_orden, diag)
+                orden_obj.actualizar_estado('Esperando Aprobación')
+                orden_obj.actualizar_diagnostico(diag)
                 Seguimiento.registrar_hito(id_orden, "Diagnóstico Listo", diag)
                 flash("Diagnóstico guardado y orden enviada a recepción para cotizar.", "success")
             else:
@@ -320,7 +378,7 @@ def gestionar_orden(id_orden):
             else:
                 try:
                     ControlCalidad(id_orden, session['usuario_id'], t, b, o).registrar()
-                    OrdenTrabajo.actualizar_estado(id_orden, 'Listo para Entregar')
+                    orden_obj.actualizar_estado('Listo para Entregar')
                     Seguimiento.registrar_hito(id_orden, "Listo para Entregar", "Control QA aprobado satisfactoriamente.")
                     
                     # notificacion en consola
@@ -342,6 +400,50 @@ def gestionar_orden(id_orden):
     if orden:
         orden['diagnostico_final'] = orden['diagnostico']
     return render_template('gestionar_orden.html', orden=orden, inventario=Inventario.listar_todo(), detalles=detalles)
+
+@bp_ordenes.route('/subir_fotos_tecnico/<int:id_orden>', methods=['POST'])
+def subir_fotos_tecnico(id_orden):
+    if 'usuario_id' not in session or int(session.get('rol_id', 0) or 0) not in (1, 3): 
+        return redirect(url_for('auth.inicio'))
+        
+    orden = OrdenTrabajo.buscar_detalle_completo(id_orden)
+    if not orden:
+        flash("La orden no existe.", "danger")
+        return redirect(url_for('ordenes.laboratorio'))
+        
+    fotos_subidas = []
+    fotos = request.files.getlist('fotos')
+    fotos = [f for f in fotos if f and f.filename != '']
+    
+    if not fotos:
+        flash("Debe seleccionar al menos una foto para subir.", "warning")
+        return redirect(url_for('ordenes.gestionar_orden', id_orden=id_orden))
+        
+    if len(fotos) > 4:
+        flash("Solo puedes subir un máximo de 4 fotos a la vez.", "danger")
+        return redirect(url_for('ordenes.gestionar_orden', id_orden=id_orden))
+        
+    for f in fotos:
+        if f and allowed_file(f.filename):
+            nombre_seguro = secure_filename(f.filename)
+            ext = nombre_seguro.rsplit('.', 1)[1].lower()
+            nuevo_nombre = f"{uuid.uuid4().hex}.{ext}"
+            ruta_completa = os.path.join(current_app.config['UPLOAD_FOLDER'], nuevo_nombre)
+            f.save(ruta_completa)
+            fotos_subidas.append(nuevo_nombre)
+        elif f:
+            flash("Formato de imagen no permitido. Usa png, jpg, jpeg o webp.", "danger")
+            return redirect(url_for('ordenes.gestionar_orden', id_orden=id_orden))
+            
+    if fotos_subidas:
+        orden_obj = OrdenTrabajo.obtener_por_id(id_orden)
+        if orden_obj and orden_obj.guardar_fotos(fotos_subidas):
+            Seguimiento.registrar_hito(id_orden, orden['estado'], f"El técnico subió {len(fotos_subidas)} nueva(s) fotografía(s) del equipo en estado: {orden['estado']}.")
+            flash("Imágenes subidas exitosamente.", "success")
+        else:
+            flash("Error al actualizar las fotos en la base de datos.", "danger")
+            
+    return redirect(url_for('ordenes.gestionar_orden', id_orden=id_orden))
 
 @bp_ordenes.route('/agregar_repuesto/<int:id_orden>', methods=['POST'])
 def agregar_repuesto(id_orden):
