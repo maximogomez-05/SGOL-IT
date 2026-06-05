@@ -140,11 +140,15 @@
                             <div class="input-group input-group-sm">
                                 <select name="nuevo_estado" class="form-select" required>
                                     <option value="" disabled selected>Cambiar estado...</option>
-                                    <option value="En Diagnóstico" {% if orden.estado == 'En Diagnóstico' %}selected{% endif %}>En Diagnóstico</option>
-                                    <option value="Esperando Repuestos" {% if orden.estado == 'Esperando Repuestos' %}selected{% endif %}>Esperando Repuestos</option>
-                                    <option value="Reparando" {% if orden.estado == 'Reparando' %}selected{% endif %}>Reparando</option>
-                                    <option value="En Testing" {% if orden.estado == 'En Testing' %}selected{% endif %}>En Testing</option>
-                                    <option value="Para Revisión" {% if orden.estado == 'Para Revisión' %}selected{% endif %}>Para Revisión (Pendiente)</option>
+                                    {% if orden.estado in ('Para Revisión', 'En Diagnóstico') %}
+                                        <option value="Para Revisión" {% if orden.estado == 'Para Revisión' %}selected{% endif %}>Para Revisión (Pendiente)</option>
+                                        <option value="En Diagnóstico" {% if orden.estado == 'En Diagnóstico' %}selected{% endif %}>En Diagnóstico</option>
+                                    {% elif orden.estado in ('En Reparación', 'Esperando Repuestos', 'Reparando', 'En Testing') %}
+                                        <option value="En Reparación" {% if orden.estado == 'En Reparación' %}selected{% endif %}>En Reparación (General)</option>
+                                        <option value="Esperando Repuestos" {% if orden.estado == 'Esperando Repuestos' %}selected{% endif %}>Esperando Repuestos</option>
+                                        <option value="Reparando" {% if orden.estado == 'Reparando' %}selected{% endif %}>Reparando</option>
+                                        <option value="En Testing" {% if orden.estado == 'En Testing' %}selected{% endif %}>En Testing</option>
+                                    {% endif %}
                                 </select>
                                 <button type="submit" class="btn btn-primary btn-sm fw-bold">Actualizar</button>
                             </div>

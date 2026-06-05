@@ -36,8 +36,18 @@
                         Orden #{{ o.id_orden }} | {{ o.equipo }} (Código de Tracking: {{ o.codigo }})
                         {% if o.garantia %}
                             <span class="badge bg-success ms-2" style="font-size: 0.75rem;">Con Garantía</span>
+                            <span class="badge bg-success ms-2" style="font-size: 0.75rem;">Tiempo Estimado: Mismo día</span>
                         {% else %}
                             <span class="badge bg-secondary ms-2" style="font-size: 0.75rem;">Sin Garantía</span>
+                            {% if o.servicio == 'Limpieza y Mantenimiento' or o.servicio == 'Formateo e Instalación OS' %}
+                                <span class="badge bg-info ms-2" style="font-size: 0.75rem;">Tiempo Estimado: 24-48 hs hábiles</span>
+                            {% elif o.servicio == 'Lentitud extrema' %}
+                                <span class="badge bg-info ms-2" style="font-size: 0.75rem;">Tiempo Estimado: 24-72 hs hábiles</span>
+                            {% elif o.servicio == 'No enciende' or o.servicio == 'Otro' %}
+                                <span class="badge bg-info ms-2" style="font-size: 0.75rem;">Tiempo Estimado: 3-5 días hábiles</span>
+                            {% else %}
+                                <span class="badge bg-secondary ms-2" style="font-size: 0.75rem;">Tiempo Estimado: Sujeto a diagnóstico</span>
+                            {% endif %}
                         {% endif %}
                         <span class="badge bg-primary ms-2" style="font-size: 0.75rem;">Servicio: {{ o.servicio | default('No especificado', true) }}</span>
                     </span>
@@ -158,10 +168,6 @@
                             {% elif o.estado == 'Rechazado' %}
                                 <div class="alert bg-danger text-white border-0 text-center fw-bold p-3">
                                     Presupuesto Rechazado. Puede pasar a retirar su equipo.
-                                </div>
-                            {% elif o.estado == 'Esperando Aprobación' %}
-                                <div class="alert bg-info text-dark border-0 text-center p-3 fw-bold">
-                                    Diagnóstico finalizado. La administración está confeccionando su cotización formal. Pronto estará disponible para su aprobación.
                                 </div>
                             {% else %}
                                 <div class="alert bg-secondary text-white border-0 text-center p-3">

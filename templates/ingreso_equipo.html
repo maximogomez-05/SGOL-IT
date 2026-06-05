@@ -88,6 +88,11 @@
                                 <option value="Otro" {% if datos and datos.servicio == 'Otro' %}selected{% endif %}>Otro problema (A cotizar en local)</option>
                             </select>
                         </div>
+                        <!-- Tiempo Estimado de Reparación -->
+                        <div id="tiempo_estimado_container" class="alert bg-dark text-white border-0 text-center mt-3 p-3" style="border: 1px solid var(--border-glass) !important; display: none; border-radius: 10px;">
+                            <span class="fs-5">Tiempo Estimado de Reparación: </span>
+                            <span class="fs-4 fw-bold" id="tiempo_estimado_display" style="font-family: 'Outfit'; font-weight: 800;">-</span>
+                        </div>
                         <div class="col-md-12 mt-3">
                             <label class="form-label text-muted small">Detalles Visuales / Estado Físico de Recepción</label>
                             <textarea name="detalles_visuales" class="form-control" rows="3" pattern="[^<>]*" title="No se permiten etiquetas HTML"></textarea>
@@ -112,6 +117,58 @@
                 this.value = '';
             }
         });
+
+        function actualizarEstimacion() {
+            var servicioSelect = document.getElementById('servicio');
+            var garantiaSelect = document.getElementById('garantia');
+            
+            var tiempoContainer = document.getElementById('tiempo_estimado_container');
+            var tiempoDisplay = document.getElementById('tiempo_estimado_display');
+            
+            if (!servicioSelect || servicioSelect.selectedIndex <= 0) {
+                if (tiempoContainer) tiempoContainer.style.display = 'none';
+                return;
+            }
+            
+            var servicioValue = servicioSelect.value;
+            var garantiaValue = garantiaSelect ? garantiaSelect.value : '';
+            
+            var tiempoTexto = '';
+            var tiempoColor = 'var(--accent-cyan)';
+            
+            if (garantiaValue === '1') {
+                tiempoTexto = 'Mismo día (Prioritario - Aprox. 2 a 4 horas)';
+                tiempoColor = 'var(--accent-emerald)';
+            } else {
+                if (servicioValue === 'Limpieza y Mantenimiento' || servicioValue === 'Formateo e Instalación OS') {
+                    tiempoTexto = '24 a 48 horas hábiles';
+                } else if (servicioValue === 'Lentitud extrema') {
+                    tiempoTexto = '24 a 72 horas hábiles';
+                } else if (servicioValue === 'No enciende') {
+                    tiempoTexto = '3 a 5 días hábiles (Diagnóstico complejo de hardware)';
+                } else if (servicioValue === 'Otro') {
+                    tiempoTexto = '3 a 5 días hábiles (Sujeto a diagnóstico en local)';
+                } else {
+                    tiempoTexto = 'Sujeto a diagnóstico técnico';
+                }
+            }
+            
+            if (tiempoDisplay) {
+                tiempoDisplay.innerText = tiempoTexto;
+                tiempoDisplay.style.color = tiempoColor;
+            }
+            if (tiempoContainer) {
+                tiempoContainer.style.display = 'block';
+            }
+        }
+        
+        document.getElementById('servicio').addEventListener('change', actualizarEstimacion);
+        if (document.getElementById('garantia')) {
+            document.getElementById('garantia').addEventListener('change', actualizarEstimacion);
+        }
+        
+        // Ejecutar al cargar la página para procesar datos preseleccionados
+        document.addEventListener('DOMContentLoaded', actualizarEstimacion);
     </script>
 </body>
 </html>

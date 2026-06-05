@@ -351,12 +351,22 @@ def gestionar_orden(id_orden):
         
         if action == 'actualizar_estado':
             nuevo_est = request.form.get('nuevo_estado')
-            if nuevo_est in ('En Diagnóstico', 'Esperando Repuestos', 'Reparando', 'En Testing', 'Para Revisión'):
+            estado_actual = orden['estado']
+            
+            transicion_permitida = False
+            if estado_actual in ('Para Revisión', 'En Diagnóstico'):
+                if nuevo_est in ('Para Revisión', 'En Diagnóstico'):
+                    transicion_permitida = True
+            elif estado_actual in ('En Reparación', 'Esperando Repuestos', 'Reparando', 'En Testing'):
+                if nuevo_est in ('En Reparación', 'Esperando Repuestos', 'Reparando', 'En Testing'):
+                    transicion_permitida = True
+            
+            if transicion_permitida:
                 orden_obj.actualizar_estado(nuevo_est)
                 Seguimiento.registrar_hito(id_orden, nuevo_est, f"El técnico actualizó el estado a: {nuevo_est}.")
                 flash(f"Estado actualizado a '{nuevo_est}'.", "success")
             else:
-                flash("Estado inválido para actualización manual.", "danger")
+                flash("Transición de estado no permitida. Respete el flujo de reparación y aprobación del cliente.", "danger")
                 
         elif orden['estado'] in ('Para Revisión', 'En Diagnóstico'):
             diag = request.form.get('diagnostico')
@@ -449,6 +459,12 @@ def subir_fotos_tecnico(id_orden):
 def agregar_repuesto(id_orden):
     if 'usuario_id' not in session or int(session.get('rol_id', 0) or 0) not in (1, 3): 
         return redirect(url_for('auth.inicio'))
+        
+    orden = OrdenTrabajo.buscar_detalle_completo(id_orden)
+    if not orden or orden['estado'] not in ('Para Revisión', 'En Diagnóstico'):
+        flash("No se pueden agregar repuestos en el estado actual de la orden.", "danger")
+        return redirect(url_for('ordenes.gestionar_orden', id_orden=id_orden))
+        
     id_i = request.form.get('id_item')
     cant = int(request.form.get('cantidad') or 0)
     
@@ -468,6 +484,12 @@ def agregar_repuesto(id_orden):
 def eliminar_repuesto_ot(id_orden, id_item):
     if 'usuario_id' not in session or int(session.get('rol_id', 0) or 0) not in (1, 3): 
         return redirect(url_for('auth.inicio'))
+        
+    orden = OrdenTrabajo.buscar_detalle_completo(id_orden)
+    if not orden or orden['estado'] not in ('Para Revisión', 'En Diagnóstico'):
+        flash("No se pueden remover repuestos en el estado actual de la orden.", "danger")
+        return redirect(url_for('ordenes.gestionar_orden', id_orden=id_orden))
+        
     if DetalleOrden.eliminar_item_ot(id_orden, id_item):
         flash("Ítem removido.", "success")
     else:

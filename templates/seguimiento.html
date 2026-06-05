@@ -35,15 +35,29 @@
                                 <span class="badge bg-secondary text-white">No posee garantía</span>
                             {% endif %}
                         </p>
+                        <p class="text-muted mb-0"><strong>Tiempo Estimado:</strong> 
+                            {% if orden.garantia == 1 or orden.garantia == '1' %}
+                                <span class="fw-bold" style="color: var(--accent-emerald);">Mismo día (Prioritario - Aprox. 2 a 4 hs)</span>
+                            {% else %}
+                                <span class="fw-bold" style="color: var(--accent-cyan);">
+                                    {% if orden.servicio == 'Limpieza y Mantenimiento' or orden.servicio == 'Formateo e Instalación OS' %}
+                                        24 a 48 horas hábiles
+                                    {% elif orden.servicio == 'Lentitud extrema' %}
+                                        24 a 72 horas hábiles
+                                    {% elif orden.servicio == 'No enciende' or orden.servicio == 'Otro' %}
+                                        3 a 5 días hábiles
+                                    {% else %}
+                                        Sujeto a diagnóstico
+                                    {% endif %}
+                                </span>
+                            {% endif %}
+                        </p>
                     </div>
                     <div class="col-md-6 ps-md-4">
                         <h6 class="text-muted text-uppercase fw-bold small">Estado del Presupuesto</h6>
                         {% if orden.costo %}
                             <h3 class="fw-bold" style="color: var(--accent-emerald); font-family: 'Outfit'; font-weight: 700;">${{ orden.costo }}</h3>
                             <span class="text-muted small">Monto final congelado y acordado.</span>
-                        {% elif orden.estado == 'Esperando Aprobación' %}
-                            <h4 class="fw-bold text-info">Confeccionando Presupuesto</h4>
-                            <span class="text-muted small">El diagnóstico ha finalizado. La administración está elaborando la cotización.</span>
                         {% else %}
                             <h4 class="fw-bold text-muted">Pendiente de Diagnóstico</h4>
                             <span class="text-muted small">Nuestros técnicos están revisando su equipo.</span>

@@ -118,6 +118,12 @@ def portal_cliente():
 def responder_presupuesto(id_orden, respuesta):
     if 'cliente_id' not in session:
         return redirect(url_for('auth.inicio'))
+        
+    orden_completa = OrdenTrabajo.buscar_detalle_completo(id_orden)
+    if not orden_completa or orden_completa['estado'] not in ('Esperando Aprobación', 'Esperando Respuesta'):
+        flash("La orden no se encuentra en estado de aprobación.", "danger")
+        return redirect(url_for('auth.portal_cliente'))
+        
     est = "En Reparación" if respuesta == 'aprobar' else "Rechazado"
     est_presupuesto = "Aprobado" if respuesta == 'aprobar' else "Rechazado"
     

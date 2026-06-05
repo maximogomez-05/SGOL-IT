@@ -297,6 +297,21 @@
                 <div class="info-item"><strong>Marca y Modelo:</strong> {{ orden.modelo or 'No especificado' }}</div>
                 <div class="info-item"><strong>Número de Serie:</strong> {{ orden.nro_serie }}</div>
                 <div class="info-item"><strong>Garantía:</strong> {% if orden.garantia == 1 %}Sí, posee garantía{% else %}No posee garantía{% endif %}</div>
+                <div class="info-item"><strong>Tiempo Estimado:</strong> 
+                    {% if orden.garantia == 1 or orden.garantia == '1' %}
+                        Mismo día (Prioritario - Aprox. 2 a 4 hs)
+                    {% else %}
+                        {% if orden.servicio == 'Limpieza y Mantenimiento' or orden.servicio == 'Formateo e Instalación OS' %}
+                            24 a 48 horas hábiles
+                        {% elif orden.servicio == 'Lentitud extrema' %}
+                            24 a 72 horas hábiles
+                        {% elif orden.servicio == 'No enciende' or orden.servicio == 'Otro' %}
+                            3 a 5 días hábiles
+                        {% else %}
+                            Sujeto a diagnóstico
+                        {% endif %}
+                    {% endif %}
+                </div>
                 <div class="info-full"><strong>Servicio Requerido:</strong> {{ orden.servicio or 'No especificado' }}</div>
                 <div class="info-full">
                     <strong>Observaciones / Estado Físico:</strong>
@@ -356,6 +371,21 @@
                 <div class="info-item"><strong>Marca y Modelo:</strong> {{ orden.modelo or 'No especificado' }}</div>
                 <div class="info-item"><strong>Número de Serie:</strong> {{ orden.nro_serie }}</div>
                 <div class="info-item"><strong>Garantía:</strong> {% if orden.garantia == 1 %}Sí, posee garantía{% else %}No posee garantía{% endif %}</div>
+                <div class="info-item"><strong>Tiempo Estimado:</strong> 
+                    {% if orden.garantia == 1 or orden.garantia == '1' %}
+                        Mismo día (Prioritario - Aprox. 2 a 4 hs)
+                    {% else %}
+                        {% if orden.servicio == 'Limpieza y Mantenimiento' or orden.servicio == 'Formateo e Instalación OS' %}
+                            24 a 48 horas hábiles
+                        {% elif orden.servicio == 'Lentitud extrema' %}
+                            24 a 72 horas hábiles
+                        {% elif orden.servicio == 'No enciende' or orden.servicio == 'Otro' %}
+                            3 a 5 días hábiles
+                        {% else %}
+                            Sujeto a diagnóstico
+                        {% endif %}
+                    {% endif %}
+                </div>
                 <div class="info-full"><strong>Servicio Requerido:</strong> {{ orden.servicio or 'No especificado' }}</div>
                 <div class="info-full">
                     <strong>Observaciones / Estado Físico:</strong>
