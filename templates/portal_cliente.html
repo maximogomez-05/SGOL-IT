@@ -72,7 +72,7 @@
                     {% endif %}
 
                     <div class="tracking-timeline px-2 mb-4">
-                        <div class="tracking-progress-line" style="width: {{ current_idx * 20 }}%;"></div>
+                        <div class="tracking-progress-line" style="width: {{ current_idx * 18 }}%;"></div>
                         {% for st in states %}
                             <div class="timeline-step {% if loop.index0 < current_idx %}completed{% elif loop.index0 == current_idx %}active{% endif %}">
                                 <div class="step-icon">
@@ -107,7 +107,7 @@
                             {% if o.estado == 'Esperando Respuesta' %}
                                 <div class="alert bg-warning border-0 p-4 text-white">
                                     <span class="text-warning small fw-bold">Presupuesto a Responder:</span>
-                                    <h2 class="fw-bold text-warning my-2" style="font-family: 'Outfit'; font-weight: 800;">${{ o.costo }}</h2>
+                                    <h2 class="fw-bold text-warning my-2" style="font-family: 'Outfit'; font-weight: 800;">${{ o.costo | default('0.00', true) }}</h2>
                                     
                                     {% if o.preliminar and o.preliminar > 0 and o.costo != o.preliminar %}
                                         <div class="alert bg-danger text-white py-2 small fw-bold mb-3 text-start">
@@ -127,13 +127,13 @@
                                             {% endif %}
                                         {% endfor %}
                                     </ul>
-
+ 
                                     <div class="d-flex gap-2 justify-content-center">
                                         <a href="/responder_presupuesto/{{ o.id_orden }}/aprobar" class="btn btn-success fw-bold w-50 shadow-sm text-black">APROBAR</a>
                                         <a href="/responder_presupuesto/{{ o.id_orden }}/rechazar" class="btn btn-outline-danger fw-bold w-50 shadow-sm">RECHAZAR</a>
                                     </div>
                                 </div>
-
+ 
                             {% elif o.estado == 'En Reparación' or o.estado == 'Listo para Entregar' or o.estado == 'Finalizado' %}
                                 <div class="alert bg-success border-0 p-4 text-white">
                                     <p class="mb-1 text-success small fw-bold">
@@ -143,7 +143,7 @@
                                             Presupuesto Aprobado:
                                         {% endif %}
                                     </p>
-                                    <h2 class="fw-bold text-success" style="font-family: 'Outfit'; font-weight: 800;">${{ o.costo }}</h2>
+                                    <h2 class="fw-bold text-success" style="font-family: 'Outfit'; font-weight: 800;">${{ o.costo | default('0.00', true) }}</h2>
                                     
                                     <hr style="border-color: var(--border-glass);">
                                      <h6 class="fw-bold text-start mb-2 text-success">

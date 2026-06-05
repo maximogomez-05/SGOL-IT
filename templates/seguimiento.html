@@ -107,7 +107,7 @@
                 {% endif %}
 
                 <div class="tracking-timeline px-2">
-                    <div class="tracking-progress-line" style="width: {{ current_idx * 20 }}%;"></div>
+                    <div class="tracking-progress-line" style="width: {{ current_idx * 18 }}%;"></div>
                     {% for st in states %}
                         <div class="timeline-step {% if loop.index0 < current_idx %}completed{% elif loop.index0 == current_idx %}active{% endif %}">
                             <div class="step-icon">
