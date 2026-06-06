@@ -19,8 +19,12 @@ def dashboard():
             cursor.execute("ALTER TABLE catalogo_inventario ADD COLUMN Stock_Minimo INT DEFAULT 0")
         except:
             pass
-        cursor.execute("SELECT Descripcion, Stock_Disponible, Stock_Minimo FROM catalogo_inventario WHERE Tipo_Item = 'Repuesto_Fisico' AND Stock_Disponible <= Stock_Minimo")
+        cursor.execute("CALL sp_obtener_alertas_stock()")
         alertas_stock = cursor.fetchall()
+        
+        # MySQL Connector puede requerir avanzar el resultset después de un CALL
+        while cursor.nextset():
+            pass
         
         # 1. total ingresos
         cursor.execute("SELECT SUM(Monto_Total) as total FROM factura")
@@ -119,18 +123,11 @@ def dashboard():
         listos_count = res['cant'] if res else 0
 
     # 9. Obtener últimas órdenes activas (laboratorio en progreso)
-    cursor.execute("""
-        SELECT ot.ID_OT, ot.Codigo_Tracking_web as Codigo_Tracking, 
-               eq.Marca_Modelo as Marca, eq.Tipo_Dispositivo as Modelo, ot.Estado_General, 
-               DATE_FORMAT(ot.Fecha_Creacion, '%d/%m/%Y %H:%i') as fecha, cl.Nombre_Completo as Cliente
-        FROM orden_trabajo ot
-        JOIN equipo eq ON ot.Equipo_ID_Equipo = eq.ID_Equipo
-        JOIN cliente cl ON eq.Cliente_ID_Cliente = cl.ID_Cliente
-        WHERE ot.Estado_General NOT IN ('Finalizado', 'Rechazado')
-        ORDER BY ot.ID_OT DESC
-        LIMIT 5
-    """)
+    cursor.execute("CALL sp_obtener_ordenes_recientes()")
     ordenes_recientes = cursor.fetchall()
+    
+    while cursor.nextset():
+        pass
 
     # 10. Obtener últimos turnos pendientes solicitados
     turnos_recientes = []
