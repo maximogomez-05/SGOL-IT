@@ -9,7 +9,7 @@
 <body>
     <div class="container-fluid px-md-5 py-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold text-white">📦 Catálogo e Inventario</h2>
+            <h2 class="fw-bold text-white">Catálogo e Inventario</h2>
             <a href="/dashboard" class="btn btn-outline-primary fw-bold">Volver al Panel</a>
         </div>
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -55,7 +55,7 @@
                                 <label class="form-label text-muted small">URL Referencia MercadoLibre / Compra Gamer</label>
                                 <input type="url" class="form-control" name="url_referencia" id="url_input" placeholder="https://articulo.mercadolibre.com.ar/...">
                             </div>
-                            <button type="submit" class="btn btn-success w-100 fw-bold text-black">GUARDAR EN CATÁLOGO</button>
+                            <button type="submit" class="btn btn-success w-100 fw-bold">GUARDAR EN CATÁLOGO</button>
                         </form>
                     </div>
                 </div>
@@ -87,7 +87,7 @@
                                         <td id="comparativa-cell-{{ item.id }}">
                                             {% if item.tipo_item == 'Repuesto_Fisico' %}
                                                 {% if item.url_referencia %}
-                                                    <button class="btn btn-xs btn-outline-info py-0 px-2 fw-bold text-info" onclick="compararPrecio({{ item.id }})" style="font-size: 0.75rem; border-radius: 6px;">🔍 Consultar Online</button>
+                                                    <button class="btn btn-xs btn-outline-info py-0 px-2 fw-bold text-info" onclick="compararPrecio({{ item.id }})" style="font-size: 0.75rem; border-radius: 6px;">Consultar Online</button>
                                                 {% else %}
                                                     <span class="text-muted small" style="font-size: 0.75rem;">Sin enlace ref.</span>
                                                 {% endif %}
@@ -166,7 +166,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-danger fw-bold" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary fw-bold text-black">Guardar Cambios</button>
+                        <button type="submit" class="btn btn-primary fw-bold">Guardar Cambios</button>
                     </div>
                 </form>
             </div>
@@ -223,7 +223,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'ok') {
-                        let badgeClass = 'bg-success text-black';
+                        let badgeClass = 'bg-success';
                         let label = 'Competitivo';
                         let sign = '';
                         
@@ -232,7 +232,7 @@
                             label = 'Caro';
                             sign = '+';
                         } else if (data.comparativa === 'Bajo') {
-                            badgeClass = 'bg-info text-black';
+                            badgeClass = 'bg-info';
                             label = 'Económico';
                             sign = '';
                         }
@@ -246,13 +246,13 @@
                                 <span class="badge ${badgeClass}" style="font-size: 0.65rem; border-radius: 4px; padding: 2px 4px;">
                                     ${label} (${formattedPct})
                                 </span>
-                                <a href="${data.url_referencia}" target="_blank" class="text-info small" style="font-size: 0.6rem; text-decoration: none; opacity: 0.8;">Ver ref. 🔗</a>
+                                <a href="${data.url_referencia}" target="_blank" class="text-info small" style="font-size: 0.6rem; text-decoration: none; opacity: 0.8;">Ver ref.</a>
                             </div>
                         `;
                     } else {
                         cell.innerHTML = `
                             <div class="d-flex flex-column align-items-start" style="gap: 2px;">
-                                <span class="text-danger small" style="font-size: 0.65rem;">⚠️ No disponible</span>
+                                <span class="text-danger small" style="font-size: 0.65rem;">No disponible</span>
                                 <button class="btn btn-link text-info p-0 small" style="font-size: 0.6rem; text-decoration: none;" onclick='compararPrecio(${idItem})'>Reintentar</button>
                             </div>
                         `;
@@ -261,7 +261,7 @@
                 .catch(err => {
                     cell.innerHTML = `
                         <div class="d-flex flex-column align-items-start" style="gap: 2px;">
-                            <span class="text-danger small" style="font-size: 0.65rem;">⚠️ No disponible</span>
+                            <span class="text-danger small" style="font-size: 0.65rem;">No disponible</span>
                             <button class="btn btn-link text-info p-0 small" style="font-size: 0.6rem; text-decoration: none;" onclick='compararPrecio(${idItem})'>Reintentar</button>
                         </div>
                     `;

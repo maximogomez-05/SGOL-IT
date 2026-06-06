@@ -9,7 +9,7 @@
 <body>
     <div class="container py-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold text-white">👥 Gestión de Personal</h2>
+            <h2 class="fw-bold text-white">Gestión de Personal</h2>
             <a href="/dashboard" class="btn btn-outline-primary fw-bold">Volver al Panel</a>
         </div>
 
@@ -47,7 +47,7 @@
                                     <option value="3">Técnico de Laboratorio</option>
                                 </select>
                             </div>
-                            <button type="submit" class="btn btn-primary w-100 fw-bold text-black">REGISTRAR USUARIO</button>
+                            <button type="submit" class="btn btn-primary w-100 fw-bold">REGISTRAR USUARIO</button>
                         </form>
 
                     </div>
@@ -70,7 +70,7 @@
                             </thead>
                             <tbody>
                                 {% for emp in empleados %}
-                                <tr style="background: transparent;">
+                                <tr>
                                     <td class="ps-4 fw-bold text-white">{{ emp.id }}</td>
                                     <td class="fw-bold text-white">{{ emp.nombre }}</td>
                                     <td class="text-muted">@{{ emp.usuario }}</td>

@@ -9,7 +9,7 @@
 <body>
     <nav class="navbar navbar-dark mb-4">
         <div class="container">
-            <span class="navbar-brand fw-bold fs-3" style="background: var(--grad-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Mi Portal | {{ session['cliente_nombre'] }}</span>
+            <span class="navbar-brand fw-bold fs-3" style="color: var(--accent-blue);">Mi Portal | {{ session['cliente_nombre'] }}</span>
             <div>
                 <button class="btn btn-sm btn-outline-primary me-2 fw-bold" data-bs-toggle="modal" data-bs-target="#modalPassword">Cambiar Contraseña</button>
                 <a href="/logout_cliente" class="btn btn-sm btn-outline-danger fw-bold">Cerrar Sesión</a>
@@ -35,18 +35,18 @@
                     <span class="fw-bold fs-5">
                         Orden #{{ o.id_orden }} | {{ o.equipo }} (Código de Tracking: {{ o.codigo }})
                         {% if o.garantia %}
-                            <span class="badge bg-success ms-2" style="font-size: 0.75rem;">Con Garantía</span>
-                            <span class="badge bg-success ms-2" style="font-size: 0.75rem;">Tiempo Estimado: Mismo día</span>
+                            <span class="badge bg-success ms-2" style="font-size: 0.75rem;">Con Garantia</span>
+                            <span class="badge bg-success ms-2" style="font-size: 0.75rem;">Tiempo Estimado: En el dia o proximo dia habil (tarde)</span>
                         {% else %}
-                            <span class="badge bg-secondary ms-2" style="font-size: 0.75rem;">Sin Garantía</span>
-                            {% if o.servicio == 'Limpieza y Mantenimiento' or o.servicio == 'Formateo e Instalación OS' %}
-                                <span class="badge bg-info ms-2" style="font-size: 0.75rem;">Tiempo Estimado: 24-48 hs hábiles</span>
+                            <span class="badge bg-secondary ms-2" style="font-size: 0.75rem;">Sin Garantia</span>
+                            {% if o.servicio == 'Limpieza y Mantenimiento' or o.servicio == 'Formateo e Instalacion OS' %}
+                                <span class="badge bg-info ms-2" style="font-size: 0.75rem;">Tiempo Estimado: 2-4 dias habiles</span>
                             {% elif o.servicio == 'Lentitud extrema' %}
-                                <span class="badge bg-info ms-2" style="font-size: 0.75rem;">Tiempo Estimado: 24-72 hs hábiles</span>
+                                <span class="badge bg-info ms-2" style="font-size: 0.75rem;">Tiempo Estimado: 3-5 dias habiles</span>
                             {% elif o.servicio == 'No enciende' or o.servicio == 'Otro' %}
-                                <span class="badge bg-info ms-2" style="font-size: 0.75rem;">Tiempo Estimado: 3-5 días hábiles</span>
+                                <span class="badge bg-info ms-2" style="font-size: 0.75rem;">Tiempo Estimado: 5-10 dias habiles</span>
                             {% else %}
-                                <span class="badge bg-secondary ms-2" style="font-size: 0.75rem;">Tiempo Estimado: Sujeto a diagnóstico</span>
+                                <span class="badge bg-secondary ms-2" style="font-size: 0.75rem;">Tiempo Estimado: Sujeto a diagnostico</span>
                             {% endif %}
                         {% endif %}
                         <span class="badge bg-primary ms-2" style="font-size: 0.75rem;">Servicio: {{ o.servicio | default('No especificado', true) }}</span>
@@ -87,11 +87,11 @@
                     
                     <div class="row">
                         <div class="col-md-7 border-end" style="border-color: var(--border-glass) !important;">
-                            <h5 class="fw-bold text-info mb-3">Línea de Tiempo</h5>
+                            <h5 class="fw-bold text-info mb-3">Linea de Tiempo</h5>
                             <ul class="list-group list-group-flush">
                                 {% for hito in hitos %}
                                     {% if hito.Orden_Trabajo_ID_OT == o.id_orden %}
-                                    <li class="list-group-item px-0" style="background: transparent; border-color: var(--border-glass) !important; color: var(--text-primary);">
+                                    <li class="list-group-item px-0" style="background: transparent; border-color: var(--border-glass) !important;">
                                         <small class="text-muted fw-bold d-block">{{ hito.Fecha_Actualizacion }}</small>
                                         <span class="fw-bold text-white">{{ hito.Estado_Alcanzado }}:</span> 
                                         <span class="text-light">{{ hito.Comentario_Frontal }}</span>
@@ -107,11 +107,11 @@
                             {% if o.estado == 'Esperando Respuesta' %}
                                 <div class="alert bg-warning border-0 p-4 text-white">
                                     <span class="text-warning small fw-bold">Presupuesto a Responder:</span>
-                                    <h2 class="fw-bold text-warning my-2" style="font-family: 'Outfit'; font-weight: 800;">${{ o.costo | default('0.00', true) }}</h2>
+                                    <h2 class="fw-bold text-warning my-2">${{ o.costo | default('0.00', true) }}</h2>
                                     
                                     {% if o.preliminar and o.preliminar > 0 and o.costo != o.preliminar %}
                                         <div class="alert bg-danger text-white py-2 small fw-bold mb-3 text-start">
-                                            ⚠️ Se ha detectado una diferencia respecto a su presupuesto preliminar estimado (${{ o.preliminar }}) debido a componentes agregados en el diagnóstico.
+                                            Se ha detectado una diferencia respecto a su presupuesto preliminar estimado (${{ o.preliminar }}) debido a componentes agregados en el diagnóstico.
                                         </div>
                                     {% endif %}
                                     
@@ -129,8 +129,8 @@
                                     </ul>
  
                                     <div class="d-flex gap-2 justify-content-center">
-                                        <a href="/responder_presupuesto/{{ o.id_orden }}/aprobar" class="btn btn-success fw-bold w-50 shadow-sm text-black">APROBAR</a>
-                                        <a href="/responder_presupuesto/{{ o.id_orden }}/rechazar" class="btn btn-outline-danger fw-bold w-50 shadow-sm">RECHAZAR</a>
+                                        <a href="/responder_presupuesto/{{ o.id_orden }}/aprobar" class="btn btn-success fw-bold w-50">APROBAR</a>
+                                        <a href="/responder_presupuesto/{{ o.id_orden }}/rechazar" class="btn btn-outline-danger fw-bold w-50">RECHAZAR</a>
                                     </div>
                                 </div>
  
@@ -143,7 +143,7 @@
                                             Presupuesto Aprobado:
                                         {% endif %}
                                     </p>
-                                    <h2 class="fw-bold text-success" style="font-family: 'Outfit'; font-weight: 800;">${{ o.costo | default('0.00', true) }}</h2>
+                                    <h2 class="fw-bold text-success">${{ o.costo | default('0.00', true) }}</h2>
                                     
                                     <hr style="border-color: var(--border-glass);">
                                      <h6 class="fw-bold text-start mb-2 text-success">
@@ -180,13 +180,13 @@
 
                 <!-- chat de soporte de la orden -->
                 <div class="card-footer border-top p-4 bg-transparent" style="border-color: var(--border-glass) !important;">
-                    <h6 class="fw-bold text-info mb-3">💬 Consultas y Soporte Técnico en Tiempo Real:</h6>
+                    <h6 class="fw-bold text-info mb-3">Consultas y Soporte Técnico en Tiempo Real:</h6>
                     <div class="chat-box glass-panel p-3 mb-2" id="chat-box-{{ o.id_orden }}" style="max-height: 250px; overflow-y: auto; background: rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 8px;">
                         <div class="text-center text-muted small py-3">Iniciando chat...</div>
                     </div>
                     <div class="input-group">
                         <input type="text" id="chat-input-{{ o.id_orden }}" class="form-control bg-dark border-secondary text-white" placeholder="Escribe un mensaje al equipo técnico..." onkeydown="if(event.key === 'Enter') enviarMensajeCliente({{ o.id_orden }})">
-                        <button class="btn btn-primary fw-bold text-black" onclick="enviarMensajeCliente({{ o.id_orden }})">Enviar</button>
+                        <button class="btn btn-primary fw-bold" onclick="enviarMensajeCliente({{ o.id_orden }})">Enviar</button>
                     </div>
                 </div>
             </div>

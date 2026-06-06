@@ -56,8 +56,8 @@ def tracking_login():
         cl = Cliente.buscar_por_credenciales(dni_clean, pw)
         if cl: 
             session.update({'cliente_id': cl['id'], 'cliente_nombre': cl['nombre']})
-            # si usa la clave por defecto del cliente
-            if pw in ('1234', '123'):
+            # si el cliente nunca cambió su contraseña provisional, obligar
+            if not cl.get('password_cambiada', 1):
                 session['force_password_change'] = True
                 return redirect(url_for('auth.cambiar_password_obligatorio'))
             return redirect(url_for('auth.portal_cliente'))
@@ -157,7 +157,7 @@ def cambiar_password_cliente():
     else:
         flash("Error al actualizar la contraseña.", "danger")
         
-    return redirect(url_for('portal_cliente'))
+    return redirect(url_for('auth.portal_cliente'))
 
 @bp_auth.route('/seguimiento/<codigo_tracking>')
 def seguimiento_publico(codigo_tracking):
@@ -243,3 +243,32 @@ def solicitar_turno():
             return render_template('solicitar_turno.html')
             
     return render_template('solicitar_turno.html')
+
+@bp_auth.route('/resetear_password_cliente', methods=['POST'])
+def resetear_password_cliente():
+    """Permite a un recepcionista o admin resetear la contraseña de un cliente."""
+    if 'usuario_id' not in session or int(session.get('rol_id', 0) or 0) not in (1, 2):
+        return redirect(url_for('auth.inicio'))
+    
+    dni = request.form.get('dni_reset', '').strip()
+    nueva_password = request.form.get('nueva_password_reset', '').strip()
+    
+    if not dni or not nueva_password:
+        flash("DNI y nueva contraseña son obligatorios.", "danger")
+        return redirect(url_for('dashboard.dashboard'))
+    
+    if len(nueva_password) < 6:
+        flash("La contraseña debe tener al menos 6 caracteres.", "danger")
+        return redirect(url_for('dashboard.dashboard'))
+    
+    cl = Cliente.buscar_por_dni(re.sub(r'[^0-9]', '', dni))
+    if not cl:
+        flash(f"No se encontró ningún cliente con DNI: {dni}", "danger")
+        return redirect(url_for('dashboard.dashboard'))
+    
+    if Cliente.actualizar_password(cl['id'], nueva_password):
+        flash(f"Contraseña del cliente {cl['nombre']} reseteada exitosamente. Nueva clave temporal: {nueva_password}", "success")
+    else:
+        flash("Error al resetear la contraseña.", "danger")
+    
+    return redirect(url_for('dashboard.dashboard'))

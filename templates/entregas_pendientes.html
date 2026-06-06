@@ -9,7 +9,7 @@
 <body>
     <div class="container py-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold text-white">📦 Equipos Listos para Entregar</h2>
+            <h2 class="fw-bold text-white">Equipos Listos para Entregar</h2>
             <a href="/dashboard" class="btn btn-outline-primary fw-bold">Volver al Panel</a>
         </div>
 
@@ -35,12 +35,12 @@
                     <tbody>
                         {% if trabajos %}
                             {% for t in trabajos %}
-                            <tr style="background: transparent;">
+                            <tr>
                                 <td class="ps-4 fw-bold text-white">#{{ t.id_orden }}</td>
                                 <td class="fw-bold text-light">{{ t.equipo }}</td>
                                 <td class="fw-bold" style="color: var(--accent-emerald);">${{ t.costo }}</td>
                                 <td class="text-center pe-4">
-                                    <a href="/facturar/{{ t.id_orden }}" class="btn btn-success btn-sm fw-bold px-3 text-black">
+                                    <a href="/facturar/{{ t.id_orden }}" class="btn btn-success btn-sm fw-bold px-3">
                                         Cobrar y Entregar
                                     </a>
                                 </td>

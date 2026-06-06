@@ -167,18 +167,18 @@
         <!-- Controles de navegación y acción (ocultos en la impresión) -->
         <div class="mb-4 text-center no-print">
             <a href="/facturas" class="btn btn-outline-light me-2 fw-bold">← Volver al Listado</a>
-            <button onclick="window.print()" class="btn btn-primary fw-bold text-black">🖨️ Imprimir Factura / Guardar PDF</button>
+            <button onclick="window.print()" class="btn btn-primary fw-bold">Imprimir Factura / Guardar PDF</button>
         </div>
 
         <div class="invoice-box">
             <!-- BANNER DE COMPROBANTES ESPECIALES (RG 5762) -->
             {% if factura.tipo == 'A-CBU' %}
             <div style="background-color: #fef2f2; border: 1px solid #fee2e2; color: #991b1b; padding: 10px; text-align: center; font-weight: bold; font-size: 0.82rem; border-radius: 4px; margin-bottom: 15px; border-left: 5px solid #dc2626; text-transform: uppercase;">
-                ⚠️ Compra con CBU Informada: El pago de este comprobante debe ser efectuado obligatoriamente por transferencia o depósito a la CBU habilitada del emisor.
+                Compra con CBU Informada: El pago de este comprobante debe ser efectuado obligatoriamente por transferencia o depósito a la CBU habilitada del emisor.
             </div>
             {% elif factura.tipo == 'A-RET' %}
             <div style="background-color: #fffbeb; border: 1px solid #fef3c7; color: #92400e; padding: 10px; text-align: center; font-weight: bold; font-size: 0.82rem; border-radius: 4px; margin-bottom: 15px; border-left: 5px solid #d97706; text-transform: uppercase;">
-                ⚠️ Operación Sujeta a Retención: El comprador debe actuar como agente de retención (IVA y Ganancias) de acuerdo con la RG 5762.
+                Operación Sujeta a Retención: El comprador debe actuar como agente de retención (IVA y Ganancias) de acuerdo con la RG 5762.
             </div>
             {% endif %}
 
@@ -389,7 +389,7 @@
             {% if factura.tipo == 'A-CBU' %}
             <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; margin-top: 15px; border-radius: 6px; font-size: 0.78rem; line-height: 1.5; color: #334155;">
                 <div style="font-weight: 800; text-transform: uppercase; color: #0f172a; margin-bottom: 5px; font-family: sans-serif; display: flex; align-items: center; gap: 5px;">
-                    🏦 Información de Pago (CBU Declarado en AFIP/ARCA)
+                    Información de Pago (CBU Declarado en AFIP/ARCA)
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     <div><strong>Banco Emisor:</strong> Banco de la Nación Argentina (BNA)</div>

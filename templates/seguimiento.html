@@ -10,7 +10,7 @@
 <body>
     <nav class="navbar navbar-dark mb-4">
         <div class="container">
-            <span class="navbar-brand fw-bold fs-3" style="background: var(--grad-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">SGOL-IT | Seguimiento Público</span>
+            <span class="navbar-brand fw-bold fs-3" style="color: var(--accent-blue);">SGOL-IT | Seguimiento Publico</span>
             <a href="/" class="btn btn-outline-primary btn-sm fw-bold">Volver al Inicio</a>
         </div>
     </nav>
@@ -34,20 +34,19 @@
                             {% else %}
                                 <span class="badge bg-secondary text-white">No posee garantía</span>
                             {% endif %}
-                        </p>
                         <p class="text-muted mb-0"><strong>Tiempo Estimado:</strong> 
                             {% if orden.garantia == 1 or orden.garantia == '1' %}
-                                <span class="fw-bold" style="color: var(--accent-emerald);">Mismo día (Prioritario - Aprox. 2 a 4 hs)</span>
+                                <span class="fw-bold text-success">En el dia o proximo dia habil en horario de tarde (14-19hs)</span>
                             {% else %}
                                 <span class="fw-bold" style="color: var(--accent-cyan);">
-                                    {% if orden.servicio == 'Limpieza y Mantenimiento' or orden.servicio == 'Formateo e Instalación OS' %}
-                                        24 a 48 horas hábiles
+                                    {% if orden.servicio == 'Limpieza y Mantenimiento' or orden.servicio == 'Formateo e Instalacion OS' %}
+                                        2 a 4 dias habiles
                                     {% elif orden.servicio == 'Lentitud extrema' %}
-                                        24 a 72 horas hábiles
+                                        3 a 5 dias habiles
                                     {% elif orden.servicio == 'No enciende' or orden.servicio == 'Otro' %}
-                                        3 a 5 días hábiles
+                                        5 a 10 dias habiles
                                     {% else %}
-                                        Sujeto a diagnóstico
+                                        Sujeto a diagnostico
                                     {% endif %}
                                 </span>
                             {% endif %}
@@ -56,7 +55,7 @@
                     <div class="col-md-6 ps-md-4">
                         <h6 class="text-muted text-uppercase fw-bold small">Estado del Presupuesto</h6>
                         {% if orden.costo %}
-                            <h3 class="fw-bold" style="color: var(--accent-emerald); font-family: 'Outfit'; font-weight: 700;">${{ orden.costo }}</h3>
+                            <h3 class="fw-bold" style="color: var(--accent-emerald); font-weight: 700;">${{ orden.costo }}</h3>
                             <span class="text-muted small">Monto final congelado y acordado.</span>
                         {% else %}
                             <h4 class="fw-bold text-muted">Pendiente de Diagnóstico</h4>
@@ -67,7 +66,7 @@
                 
                 {% if orden.detalles_visuales or orden.fotos %}
                 <div class="p-3 mb-4 rounded" style="border: 1px solid var(--border-glass); background: rgba(255,255,255,0.01);">
-                    <h6 class="fw-bold text-info mb-2">🔍 Estado Físico de Recepción:</h6>
+                    <h6 class="fw-bold text-info mb-2">Estado Físico de Recepción:</h6>
                     <p class="text-white small mb-3">{{ orden.detalles_visuales | default('Sin detalles visuales registrados.', true) }}</p>
                     {% if orden.fotos %}
                         <div class="row g-2">
@@ -124,7 +123,7 @@
             <div class="col-md-7">
                 <div class="card glass-panel h-100">
                     <div class="card-body">
-                        <h5 class="fw-bold text-white mb-4">📜 Historial de Estados y Comentarios</h5>
+                        <h5 class="fw-bold text-white mb-4">Historial de Estados y Comentarios</h5>
                         <ul class="list-group list-group-flush">
                             {% for hito in hitos %}
                             <li class="list-group-item px-0 py-3 border-0 border-bottom" style="background: transparent; border-color: var(--border-glass) !important; color: var(--text-primary);">
@@ -146,7 +145,7 @@
             <div class="col-md-5">
                 <div class="card glass-panel h-100">
                     <div class="card-body">
-                        <h5 class="fw-bold text-white mb-4">📦 Detalle de Componentes y Servicios</h5>
+                        <h5 class="fw-bold text-white mb-4">Detalle de Componentes y Servicios</h5>
                         <table class="table table-sm table-hover align-middle">
                             <thead>
                                 <tr>
@@ -157,7 +156,7 @@
                             </thead>
                             <tbody>
                                 {% for d in detalles %}
-                                <tr style="background: transparent;">
+                                <tr>
                                     <td>{{ d.descripcion }}</td>
                                     <td class="text-center fw-bold">{{ d.cantidad }}</td>
                                     <td class="text-end fw-bold" style="color: var(--accent-emerald);">${{ d.subtotal }}</td>

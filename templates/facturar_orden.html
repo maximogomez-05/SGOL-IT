@@ -12,7 +12,7 @@
             <div class="col-md-6">
                 <div class="card glass-panel">
                     <div class="card-header border-0 bg-transparent pt-4 pb-0">
-                        <h4 class="fw-bold mb-0 text-info">🧾 Facturación y Entrega</h4>
+                        <h4 class="fw-bold mb-0 text-info">Facturación y Entrega</h4>
                     </div>
                     <div class="card-body p-4">
                         <h5 class="fw-bold text-white">Ticket #{{ orden.id_orden }}</h5>
@@ -21,7 +21,7 @@
                         
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <span class="fs-5 text-light">Total a Cobrar:</span>
-                            <span class="fs-3 fw-bold" style="color: var(--accent-emerald); font-family: 'Outfit'; font-weight: 800;">${{ orden.costo }}</span>
+                            <span class="fs-3 fw-bold" style="color: var(--accent-emerald); font-weight: 800;">${{ orden.costo }}</span>
                         </div>
 
                         <form action="/procesar_pago_avanzado/{{ orden.id_orden }}" method="POST">
@@ -29,10 +29,10 @@
                                 <label class="form-label text-muted small fw-bold">Método de Pago del Cliente</label>
                                 <select name="metodo_pago" class="form-select form-select-lg" required>
                                     <option value="" disabled selected>Seleccione método...</option>
-                                    <option value="Efectivo">💵 Efectivo</option>
-                                    <option value="Transferencia">📱 Transferencia / MercadoPago</option>
-                                    <option value="Tarjeta de Débito">💳 Tarjeta de Débito</option>
-                                    <option value="Tarjeta de Crédito">💳 Tarjeta de Crédito</option>
+                                    <option value="Efectivo">Efectivo</option>
+                                    <option value="Transferencia">Transferencia / MercadoPago</option>
+                                    <option value="Tarjeta de Débito">Tarjeta de Débito</option>
+                                    <option value="Tarjeta de Crédito">Tarjeta de Crédito</option>
                                 </select>
                             </div>
                             
@@ -57,7 +57,7 @@
                             </div>
 
                             <div class="d-grid gap-2 mt-4">
-                                <button type="submit" class="btn btn-success btn-lg fw-bold text-black">REGISTRAR PAGO Y ENTREGAR</button>
+                                <button type="submit" class="btn btn-success btn-lg fw-bold">REGISTRAR PAGO Y ENTREGAR</button>
                                 <a href="/entregas_pendientes" class="btn btn-outline-danger fw-bold mt-2">Cancelar y Volver</a>
                             </div>
                         </form>

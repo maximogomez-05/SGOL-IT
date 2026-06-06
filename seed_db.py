@@ -1,308 +1,313 @@
+"""
+seed_db.py - Script para insertar datos de prueba en SGOL-IT.
+Ejecutar una vez para popular la BD con clientes, equipos, ordenes y seguimientos de ejemplo.
+Todos los clientes tienen password '123' (hasheada).
+
+USO: python seed_db.py
+"""
+
 import sys
 import os
-
-# asegurar que la ruta base este en sys.path
-base_dir = os.path.dirname(os.path.abspath(__file__))
-if base_dir not in sys.path:
-    sys.path.append(base_dir)
-
 import datetime
-from config.database import DB
+import random
+import string
+
+# Asegurar que el path del proyecto está disponible
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 from werkzeug.security import generate_password_hash
+from config.database import DB
 
-# importar clases del modelo (paradigma oop)
-from modelos.roles import Rol
-from modelos.empleado import Empleado
-from modelos.cliente import Cliente
-from modelos.equipo import Equipo
-from modelos.orden_trabajo import OrdenTrabajo
-from modelos.inventario import Inventario
-from modelos.presupuesto import Presupuesto
-from modelos.factura import Factura
-from modelos.seguimiento import Seguimiento
-from modelos.detalle_orden import DetalleOrden
-from modelos.control_calidad import ControlCalidad
+# ============================================================
+# CONFIGURACION DE DATOS DE PRUEBA
+# ============================================================
 
-def seed():
+CLIENTES = [
+    {"dni": "40123456", "nombre": "Juan Carlos Martinez", "email": "jcmartinez@gmail.com", "telefono": "1155667788"},
+    {"dni": "35987654", "nombre": "Maria Laura Gonzalez", "email": "mlgonzalez@hotmail.com", "telefono": "1143218765"},
+    {"dni": "42567890", "nombre": "Lucas Andres Fernandez", "email": "lucas.fernandez@gmail.com", "telefono": "1167894532"},
+    {"dni": "38456123", "nombre": "Valentina Lopez Suarez", "email": "vlopez@yahoo.com.ar", "telefono": "1198765432"},
+    {"dni": "44321789", "nombre": "Santiago Nicolas Ramirez", "email": "sramirez@outlook.com", "telefono": "1134567891"},
+    {"dni": "36789012", "nombre": "Camila Sofia Torres", "email": "camilatorres@gmail.com", "telefono": "1176543210"},
+    {"dni": "41234567", "nombre": "Mateo Agustin Diaz", "email": "mateodiaz@hotmail.com", "telefono": "1123456789"},
+]
+
+PASSWORD_TEMPORAL = "123"
+
+# Equipos variados con servicios asignados
+EQUIPOS_Y_ORDENES = [
+    # Juan Carlos Martinez - 2 ordenes (una finalizada, una en curso)
+    {"cliente_idx": 0, "equipo": {"nro_serie": "SN-DELL-001", "modelo": "Dell Inspiron 3510", "tipo": "Notebook"},
+     "orden": {"servicio": "Limpieza y Mantenimiento", "estado": "Finalizado", "garantia": 0, "diagnostico": "Equipo con acumulacion de polvo en ventiladores y disipador. Se realizo limpieza integral y cambio de pasta termica. Temperaturas normalizadas.", "dias_atras": 15}},
+    {"cliente_idx": 0, "equipo": {"nro_serie": "SN-DELL-002", "modelo": "Dell Latitude 5420", "tipo": "Notebook"},
+     "orden": {"servicio": "Lentitud extrema", "estado": "En Diagnóstico", "garantia": 0, "diagnostico": None, "dias_atras": 2}},
+
+    # Maria Laura Gonzalez - 3 ordenes (2 finalizadas, 1 esperando respuesta)
+    {"cliente_idx": 1, "equipo": {"nro_serie": "SN-HP-003", "modelo": "HP Pavilion 15-eh1023", "tipo": "Notebook"},
+     "orden": {"servicio": "Formateo e Instalación OS", "estado": "Finalizado", "garantia": 0, "diagnostico": "Se realizo backup de datos, formateo completo e instalacion de Windows 11 Pro con drivers actualizados.", "dias_atras": 30}},
+    {"cliente_idx": 1, "equipo": {"nro_serie": "SN-HP-004", "modelo": "HP ProDesk 400 G7", "tipo": "PC de Escritorio"},
+     "orden": {"servicio": "No enciende", "estado": "Finalizado", "garantia": 0, "diagnostico": "Fuente de alimentacion defectuosa (capacitor inflado). Se reemplazo fuente ATX 500W. Equipo operativo.", "dias_atras": 20}},
+    {"cliente_idx": 1, "equipo": {"nro_serie": "SN-HP-005", "modelo": "HP 205 G4 AiO", "tipo": "All-in-One"},
+     "orden": {"servicio": "Lentitud extrema", "estado": "Esperando Respuesta", "garantia": 0, "diagnostico": "Disco HDD con sectores defectuosos. Se recomienda reemplazo por SSD 480GB.", "dias_atras": 3}},
+
+    # Lucas Andres Fernandez - 1 orden (en reparacion)
+    {"cliente_idx": 2, "equipo": {"nro_serie": "SN-LEN-006", "modelo": "Lenovo IdeaPad 3 15ALC6", "tipo": "Notebook"},
+     "orden": {"servicio": "No enciende", "estado": "En Reparación", "garantia": 1, "diagnostico": "Falla en chip de carga del motherboard. Se procede a microsoldadura BGA.", "dias_atras": 5}},
+
+    # Valentina Lopez Suarez - 2 ordenes (1 finalizada, 1 listo para entregar)
+    {"cliente_idx": 3, "equipo": {"nro_serie": "SN-ASUS-007", "modelo": "ASUS VivoBook X515JA", "tipo": "Notebook"},
+     "orden": {"servicio": "Limpieza y Mantenimiento", "estado": "Finalizado", "garantia": 0, "diagnostico": "Limpieza preventiva completa. Sin fallas detectadas.", "dias_atras": 45}},
+    {"cliente_idx": 3, "equipo": {"nro_serie": "SN-EPSON-008", "modelo": "Epson L3250 EcoTank", "tipo": "Impresora"},
+     "orden": {"servicio": "Otro", "estado": "Listo para Entregar", "garantia": 0, "diagnostico": "Cabezal de impresion obstruido. Se realizo limpieza quimica y purga de tintas. Test de impresion satisfactorio.", "dias_atras": 4}},
+
+    # Santiago Nicolas Ramirez - 1 orden (para revision)
+    {"cliente_idx": 4, "equipo": {"nro_serie": "SN-ACER-009", "modelo": "Acer Nitro 5 AN515-57", "tipo": "Notebook"},
+     "orden": {"servicio": "Lentitud extrema", "estado": "Para Revisión", "garantia": 0, "diagnostico": None, "dias_atras": 1}},
+
+    # Camila Sofia Torres - 2 ordenes (ambas finalizadas)
+    {"cliente_idx": 5, "equipo": {"nro_serie": "SN-MSI-010", "modelo": "MSI Modern 14 B11MOU", "tipo": "Notebook"},
+     "orden": {"servicio": "Formateo e Instalación OS", "estado": "Finalizado", "garantia": 0, "diagnostico": "Formateo completo con instalacion dual boot Windows 11 / Ubuntu 22.04.", "dias_atras": 60}},
+    {"cliente_idx": 5, "equipo": {"nro_serie": "SN-CUSTOM-011", "modelo": "PC Gamer Custom (Ryzen 5 5600X)", "tipo": "PC de Escritorio"},
+     "orden": {"servicio": "Limpieza y Mantenimiento", "estado": "Finalizado", "garantia": 0, "diagnostico": "Limpieza integral, cambio de pasta termica en CPU y GPU, reorganizacion de cables internos.", "dias_atras": 25}},
+
+    # Mateo Agustin Diaz - 1 orden (en diagnostico)
+    {"cliente_idx": 6, "equipo": {"nro_serie": "SN-SAMSUNG-012", "modelo": "Samsung Galaxy Book2 Pro", "tipo": "Notebook"},
+     "orden": {"servicio": "No enciende", "estado": "En Diagnóstico", "garantia": 1, "diagnostico": None, "dias_atras": 1}},
+]
+
+# ============================================================
+# FUNCIONES AUXILIARES
+# ============================================================
+
+def generar_codigo_tracking():
+    chars = string.ascii_uppercase + string.digits
+    return "OT-" + "".join(random.choices(chars, k=6))
+
+
+def insertar_cliente(cursor, datos):
+    """Inserta un cliente si no existe por DNI. Retorna el ID."""
+    cursor.execute("SELECT ID_Cliente FROM cliente WHERE DNI_CUIL = %s", (datos['dni'],))
+    existente = cursor.fetchone()
+    if existente:
+        print(f"  [EXISTE] Cliente {datos['nombre']} (DNI: {datos['dni']}) ya existe con ID {existente[0]}")
+        return existente[0]
+    
+    hashed_pwd = generate_password_hash(PASSWORD_TEMPORAL)
+    cursor.execute(
+        "INSERT INTO cliente (DNI_CUIL, Nombre_Completo, Email, Telefono, Password_web, Password_Cambiada) VALUES (%s, %s, %s, %s, %s, 0)",
+        (datos['dni'], datos['nombre'], datos['email'], datos['telefono'], hashed_pwd)
+    )
+    id_cliente = cursor.lastrowid
+    print(f"  [NUEVO] Cliente {datos['nombre']} (DNI: {datos['dni']}) creado con ID {id_cliente}")
+    return id_cliente
+
+
+def insertar_equipo(cursor, datos, id_cliente):
+    """Inserta un equipo si no existe por nro_serie. Retorna el ID."""
+    cursor.execute("SELECT ID_Equipo FROM equipo WHERE Numero_Serie = %s", (datos['nro_serie'],))
+    existente = cursor.fetchone()
+    if existente:
+        print(f"  [EXISTE] Equipo {datos['modelo']} ya existe con ID {existente[0]}")
+        return existente[0]
+    
+    cursor.execute(
+        "INSERT INTO equipo (Numero_Serie, Marca_Modelo, Tipo_Dispositivo, Cliente_ID_Cliente) VALUES (%s, %s, %s, %s)",
+        (datos['nro_serie'], datos['modelo'], datos['tipo'], id_cliente)
+    )
+    id_equipo = cursor.lastrowid
+    print(f"  [NUEVO] Equipo {datos['modelo']} ({datos['tipo']}) creado con ID {id_equipo}")
+    return id_equipo
+
+
+def obtener_id_tecnico(cursor):
+    """Obtiene el ID del primer empleado con rol 3 (técnico). Si no hay, retorna el primer empleado."""
+    cursor.execute("""
+        SELECT e.ID_Empleado 
+        FROM empleado e 
+        JOIN legajo_empleado le ON e.ID_Empleado = le.Empleado_ID_Empleado 
+        WHERE le.Roles_ID_Rol = 3 AND e.Activo = 1
+        LIMIT 1
+    """)
+    result = cursor.fetchone()
+    if result:
+        return result[0]
+    
+    # fallback: primer empleado activo
+    cursor.execute("SELECT ID_Empleado FROM empleado WHERE Activo = 1 LIMIT 1")
+    result = cursor.fetchone()
+    if result:
+        return result[0]
+    
+    print("[ERROR] No hay empleados en el sistema. Registre al menos un empleado antes de ejecutar el seed.")
+    sys.exit(1)
+
+
+def obtener_id_recepcionista(cursor):
+    """Obtiene el ID del primer empleado con rol 2 (recepcion)."""
+    cursor.execute("""
+        SELECT e.ID_Empleado 
+        FROM empleado e 
+        JOIN legajo_empleado le ON e.ID_Empleado = le.Empleado_ID_Empleado 
+        WHERE le.Roles_ID_Rol = 2 AND e.Activo = 1
+        LIMIT 1
+    """)
+    result = cursor.fetchone()
+    if result:
+        return result[0]
+    return obtener_id_tecnico(cursor)
+
+
+def insertar_orden(cursor, id_equipo, id_empleado, datos_orden):
+    """Inserta una orden de trabajo con su historial de seguimiento."""
+    fecha_creacion = datetime.datetime.now() - datetime.timedelta(days=datos_orden['dias_atras'])
+    codigo = generar_codigo_tracking()
+    
+    cursor.execute(
+        """INSERT INTO orden_trabajo 
+           (Estado_General, Fecha_Creacion, Equipo_ID_Equipo, Empleado_ID_Empleado, 
+            Codigo_Tracking_web, Garantia, Servicio, Diagnostico_Final) 
+           VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
+        (datos_orden['estado'], fecha_creacion.strftime('%Y-%m-%d %H:%M:%S'), 
+         id_equipo, id_empleado, codigo, datos_orden['garantia'], 
+         datos_orden['servicio'], datos_orden.get('diagnostico'))
+    )
+    id_ot = cursor.lastrowid
+    print(f"  [ORDEN] OT #{id_ot} - {datos_orden['servicio']} - Estado: {datos_orden['estado']} - Codigo: {codigo}")
+    
+    # Crear historial de seguimiento segun el estado
+    estados_progresion = {
+        'Para Revisión': ['Ingresado'],
+        'En Diagnóstico': ['Ingresado', 'En Diagnóstico'],
+        'Esperando Respuesta': ['Ingresado', 'En Diagnóstico', 'Esperando Aprobación'],
+        'En Reparación': ['Ingresado', 'En Diagnóstico', 'Esperando Aprobación', 'En Reparación'],
+        'Listo para Entregar': ['Ingresado', 'En Diagnóstico', 'Esperando Aprobación', 'En Reparación', 'Listo para Entregar'],
+        'Finalizado': ['Ingresado', 'En Diagnóstico', 'Esperando Aprobación', 'En Reparación', 'Listo para Entregar', 'Finalizado'],
+    }
+    
+    comentarios = {
+        'Ingresado': 'Equipo recibido en recepcion. Se genera orden de trabajo.',
+        'En Diagnóstico': 'El equipo fue derivado al laboratorio para revision tecnica.',
+        'Esperando Aprobación': 'Diagnostico completado. Presupuesto enviado al cliente para aprobacion.',
+        'En Reparación': 'Presupuesto aprobado por el cliente. Se inicia la reparacion.',
+        'Listo para Entregar': 'Reparacion finalizada. Control de calidad aprobado. Listo para retiro.',
+        'Finalizado': 'Equipo entregado al cliente. Orden cerrada.',
+    }
+    
+    progresion = estados_progresion.get(datos_orden['estado'], ['Ingresado'])
+    
+    for i, estado in enumerate(progresion):
+        fecha_hito = fecha_creacion + datetime.timedelta(hours=i * random.randint(4, 24))
+        cursor.execute(
+            """INSERT INTO Seguimiento_Estados 
+               (Fecha_Actualizacion, Estado_Alcanzado, Comentario_Frontal, Orden_Trabajo_ID_OT) 
+               VALUES (%s, %s, %s, %s)""",
+            (fecha_hito.strftime('%Y-%m-%d %H:%M:%S'), estado, 
+             comentarios.get(estado, ''), id_ot)
+        )
+    
+    # Si la orden tiene presupuesto (estados avanzados), crear presupuesto
+    if datos_orden['estado'] in ('Esperando Respuesta', 'En Reparación', 'Listo para Entregar', 'Finalizado'):
+        monto = round(random.uniform(8000, 45000), 2)
+        cursor.execute(
+            "INSERT INTO presupuesto (Monto_Total_Cotizado, Presupuesto_Preliminar_Web) VALUES (%s, %s)",
+            (monto, monto)
+        )
+        id_presupuesto = cursor.lastrowid
+        cursor.execute(
+            "UPDATE orden_trabajo SET Presupuesto_ID_Presupuesto = %s WHERE ID_OT = %s",
+            (id_presupuesto, id_ot)
+        )
+        print(f"         Presupuesto: ${monto}")
+    
+    # Si la orden esta finalizada, crear factura
+    if datos_orden['estado'] == 'Finalizado':
+        cursor.execute("SELECT Presupuesto_ID_Presupuesto FROM orden_trabajo WHERE ID_OT = %s", (id_ot,))
+        row = cursor.fetchone()
+        if row and row[0]:
+            cursor.execute("SELECT Monto_Total_Cotizado FROM presupuesto WHERE ID_Presupuesto = %s", (row[0],))
+            prow = cursor.fetchone()
+            if prow:
+                monto_factura = float(prow[0])
+                metodo = random.choice(['Efectivo', 'Tarjeta Debito', 'Tarjeta Credito', 'Transferencia'])
+                fecha_factura = fecha_creacion + datetime.timedelta(days=datos_orden['dias_atras'] - 1)
+                cursor.execute(
+                    """INSERT INTO factura 
+                       (Fecha_Emision, Monto_Total, Metodo_Pago, Orden_Trabajo_ID_OT) 
+                       VALUES (%s, %s, %s, %s)""",
+                    (fecha_factura.strftime('%Y-%m-%d %H:%M:%S'), monto_factura, metodo, id_ot)
+                )
+                print(f"         Factura: ${monto_factura} ({metodo})")
+    
+    return id_ot
+
+
+# ============================================================
+# EJECUCION PRINCIPAL
+# ============================================================
+
+def main():
+    print("=" * 60)
+    print("  SGOL-IT - Seed de Datos de Prueba")
+    print("=" * 60)
+    
     cursor = DB.cursor()
-    print("iniciando el poblado (seeding) de la base de datos...")
-
-    # desactivar fk checks para vaciar de forma segura
-    cursor.execute("SET FOREIGN_KEY_CHECKS = 0")
     
-    tablas = [
-        "roles", "empleado", "legajo_empleado", "cliente", 
-        "catalogo_inventario", "equipo", "orden_trabajo", 
-        "detalle_orden", "presupuesto", "factura", 
-        "seguimiento_estados", "control_calidad", "turno"
-    ]
-    
-    for t in tablas:
-        try:
-            cursor.execute(f"TRUNCATE TABLE {t}")
-            print(f"tabla '{t}' limpia.")
-        except Exception as e:
-            print(f"error al limpiar tabla '{t}': {e}")
+    try:
+        # Verificar que existe la columna Password_Cambiada
+        cursor.execute("SHOW COLUMNS FROM cliente LIKE 'Password_Cambiada'")
+        if not cursor.fetchone():
+            cursor.execute("ALTER TABLE cliente ADD COLUMN Password_Cambiada TINYINT(1) DEFAULT 0")
+            print("[MIGRACION] Columna Password_Cambiada creada.\n")
+        
+        # Obtener empleados disponibles
+        id_tecnico = obtener_id_tecnico(cursor)
+        id_recepcion = obtener_id_recepcionista(cursor)
+        print(f"\n[INFO] Tecnico ID: {id_tecnico} | Recepcionista ID: {id_recepcion}\n")
+        
+        # Cache de IDs de clientes creados
+        ids_clientes = {}
+        
+        for entry in EQUIPOS_Y_ORDENES:
+            cliente_data = CLIENTES[entry['cliente_idx']]
             
-    cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
-    DB.commit()
-    cursor.close()
-
-    # 1. registrar roles
-    print("registrando roles...")
-    r1_id = Rol("Administrador").registrar()
-    r2_id = Rol("Recepcionista").registrar()
-    r3_id = Rol("Tecnico").registrar()
-
-    # 2. registrar empleados
-    print("registrando empleados...")
-    emp_admin = Empleado("Admin General", "admin", "admin123", 1)
-    id_admin = emp_admin.registrar()
-    
-    emp_recep = Empleado("Lucia Recepcionista", "recep", "123", 2)
-    id_recep = emp_recep.registrar()
-    
-    emp_tecnico = Empleado("Mateo Tecnico", "tecnico", "123", 3)
-    id_tecnico = emp_tecnico.registrar()
-
-    # 3. registrar clientes con nombres comunes (pedido del usuario)
-    print("registrando clientes...")
-    c1 = Cliente("45000001", "Maximo Piriz", "maximo@gmail.com", "3704111222", "123")
-    id_c1 = c1.registrar()
-    
-    c2 = Cliente("45000002", "Lautaro Torres", "lautaro@gmail.com", "3704333444", "123")
-    id_c2 = c2.registrar()
-    
-    c3 = Cliente("45000003", "Julian Gonzalez", "julian@gmail.com", "3704555666", "123")
-    id_c3 = c3.registrar()
-
-    c4 = Cliente("45000004", "Maximo Gomez", "maximo.gomez@gmail.com", "3704666777", "123")
-    id_c4 = c4.registrar()
-
-    c5 = Cliente("45000005", "Maria Fernandez", "maria.fer@gmail.com", "3704888999", "123")
-    id_c5 = c5.registrar()
-
-    c6 = Cliente("45000006", "Carlos Rodriguez", "carlos.rod@gmail.com", "3704999000", "123")
-    id_c6 = c6.registrar()
-
-    c7 = Cliente("45000007", "Ana Martinez", "ana.martinez@gmail.com", "3704222333", "123")
-    id_c7 = c7.registrar()
-
-    # 4. registrar catalogo de inventario robusto (pedido del usuario)
-    print("registrando repuestos y mano de obra...")
-    
-    # repuestos fisicos
-    items_fisicos = [
-        ("Memoria RAM DDR4 8GB Kingston 3200MHz", 25000, 15, 4, "https://www.compragamer.com/producto/Memoria_Kingston_DDR4_8GB_3200MHz_Fury_Beast_12040"),
-        ("Disco SSD Kingston 480GB SATA3", 42000, 10, 3, "https://www.compragamer.com/producto/Disco_Solido_SSD_Kingston_480GB_A400_SATA_III_2_5_8398"),
-        ("Pasta Termica Arctic MX-4 (4g)", 12500, 8, 2, "https://articulo.mercadolibre.com.ar/MLA-933391789-pasta-termica-arctic-mx-4-4g-_JM"),
-        ("Fuente Gigabyte 650W 80 Plus", 82000, 5, 2, "https://www.fullh4rd.com.ar/prod/26815/fuente-gigabyte-650w-80-plus-bronze-p650b"),
-        ("Placa Madre Gigabyte A520M K V2 AM4", 95000, 4, 1, "https://www.compragamer.com/producto/Mother_Gigabyte_A520M_K_V2_AM4_15220"),
-        ("Disco SSD M.2 NVMe WD Blue 1TB", 89000, 6, 2, "https://www.compragamer.com/producto/Disco_Solido_SSD_M_2_NVMe_WD_Blue_1TB_SN580_4150MB_s_PCIe_Gen4_15093"),
-        ("Teclado Universal Notebook USB", 15000, 12, 3, "https://articulo.mercadolibre.com.ar/MLA-11223344-teclado-universal-usb"),
-        ("Pantalla LED 15.6 Slim 30 pines", 85000, 3, 1, "https://articulo.mercadolibre.com.ar/MLA-99887766-pantalla-led-156-slim"),
-        ("Cooler Fan 120mm RGB", 9500, 20, 5, "https://www.fullh4rd.com.ar/prod/26425/cooler-fan-id-cooling-tf-12025-black-argb"),
-        ("Cable HDMI 1.8m v2.0", 4500, 30, 8, "https://articulo.mercadolibre.com.ar/MLA-66778899-cable-hdmi-18m"),
-        ("Cargador Notebook Universal 90W", 28000, 7, 2, "https://articulo.mercadolibre.com.ar/MLA-55443322-cargador-notebook-90w"),
-        ("Pila CMOS CR2032 Litio", 1500, 50, 10, "https://articulo.mercadolibre.com.ar/MLA-33221100-pila-cr2032"),
-        ("Modulo Memoria RAM DDR5 16GB", 58000, 8, 2, "https://www.compragamer.com/producto/Memoria_Kingston_DDR5_16GB_5600MHz_Fury_Beast_14163"),
-        ("Disco Duro Externo 1TB Adata", 72000, 5, 2, "https://www.fullh4rd.com.ar/prod/26107/disco-externo-1tb-adata-hd330-black")
-    ]
-    
-    db_inventario = {}
-    import random
-    for nombre, precio, stock, minimo, url in items_fisicos:
-        stock_aleatorio = random.randint(30, 50)
-        minimo_fijo = 10
-        inv = Inventario("Repuesto_Fisico", nombre, precio, stock_aleatorio, minimo_fijo, url)
-        db_inventario[nombre] = inv.registrar()
-
-    # servicios de mano de obra
-    items_servicios = [
-        ("Diagnostico Tecnico General", 10000),
-        ("Limpieza Fisica Completa y Pasta Termica", 18000),
-        ("Formateo e Instalacion de Windows 11 + Drivers", 20000),
-        ("Reparacion Compleja Placa Madre", 38000),
-        ("Ensamblaje y Optimizacion de Computadora", 25000),
-        ("Backup de Datos e Informacion", 15000),
-        ("Cambio de Pantalla Notebook", 18000),
-        ("Soldadura de Pin de Carga", 25000),
-        ("Clonacion de Disco a SSD", 12000)
-    ]
-    
-    for nombre, precio in items_servicios:
-        inv = Inventario("Servicio_ManoObra", nombre, precio, 0, 0, "")
-        db_inventario[nombre] = inv.registrar()
-
-    # 5. crear ordenes de trabajo para cada cliente en distintos estados
-    print("creando escenarios de ordenes de trabajo...")
-
-    # cliente 1: maximo piriz (escenarios a, b, c, d, e, f)
-    
-    # orden 1: recien ingresado (para revision)
-    eq1 = Equipo("SN-DELL-111", "Dell Inspiron 3000", "Notebook", id_c1)
-    id_eq1 = eq1.registrar()
-    ot1 = OrdenTrabajo(id_eq1, id_recep, estado_general="Para Revisión", detalles_visuales="tapa superior rayada, bisagra derecha floja")
-    id_ot1 = ot1.registrar()
-    Seguimiento.registrar_hito(id_ot1, "Ingresado", "el equipo ingreso al laboratorio para su revision inicial.")
-
-    # orden 2: en diagnostico
-    eq2 = Equipo("SN-ASUS-222", "ASUS ZenBook 14", "Notebook", id_c1)
-    id_eq2 = eq2.registrar()
-    ot2 = OrdenTrabajo(id_eq2, id_recep, estado_general="En Diagnóstico", detalles_visuales="pantalla con marcas leves, teclado desgastado")
-    id_ot2 = ot2.registrar()
-    Seguimiento.registrar_hito(id_ot2, "Ingresado", "el equipo ingreso al laboratorio para su revision inicial.")
-    Seguimiento.registrar_hito(id_ot2, "En Diagnóstico", "el tecnico comenzo el diagnostico del equipo.")
-
-    # orden 3: esperando respuesta (presupuesto generado)
-    eq3 = Equipo("SN-GIGABYTE-333", "Sentey Gamer Core i5", "PC de Escritorio", id_c1)
-    id_eq3 = eq3.registrar()
-    pres3 = Presupuesto(40500) # diagnostico(10000) + pasta(12500) + limpieza(18000)
-    id_pres3 = pres3.registrar()
-    ot3 = OrdenTrabajo(id_eq3, id_recep, id_presupuesto=id_pres3, estado_general="Esperando Respuesta", detalles_visuales="polvo acumulado en rejillas, le falta un tornillo lateral")
-    id_ot3 = ot3.registrar()
-    DetalleOrden(1, 10000, id_ot3, db_inventario["Diagnostico Tecnico General"]).registrar()
-    DetalleOrden(1, 12500, id_ot3, db_inventario["Pasta Termica Arctic MX-4 (4g)"]).registrar()
-    DetalleOrden(1, 18000, id_ot3, db_inventario["Limpieza Fisica Completa y Pasta Termica"]).registrar()
-    Seguimiento.registrar_hito(id_ot3, "Ingresado", "el equipo ingreso al laboratorio.")
-    Seguimiento.registrar_hito(id_ot3, "En Diagnóstico", "el diagnostico determino fallas por temperatura.")
-    Seguimiento.registrar_hito(id_ot3, "Esperando Respuesta", "presupuesto formal de $40500 enviado al cliente.")
-
-    # orden 4: en reparacion (presupuesto aprobado)
-    eq4 = Equipo("SN-HP-444", "HP Pavilion 15", "Notebook", id_c1)
-    id_eq4 = eq4.registrar()
-    pres4 = Presupuesto(35000) # diagnostico(10000) + ram 8gb(25000)
-    id_pres4 = pres4.registrar()
-    Presupuesto.actualizar_estado(id_pres4, "Aprobado")
-    ot4 = OrdenTrabajo(id_eq4, id_recep, id_presupuesto=id_pres4, estado_general="En Reparación", detalles_visuales="carcasa sin marcas notorias")
-    id_ot4 = ot4.registrar()
-    DetalleOrden(1, 10000, id_ot4, db_inventario["Diagnostico Tecnico General"], estado_detalle="Reservado").registrar()
-    DetalleOrden(1, 25000, id_ot4, db_inventario["Memoria RAM DDR4 8GB Kingston 3200MHz"], estado_detalle="Reservado").registrar()
-    Seguimiento.registrar_hito(id_ot4, "Ingresado", "el equipo ingreso al laboratorio.")
-    Seguimiento.registrar_hito(id_ot4, "En Diagnóstico", "se diagnostico cuello de botella en memoria ram.")
-    Seguimiento.registrar_hito(id_ot4, "Esperando Respuesta", "presupuesto enviado.")
-    Seguimiento.registrar_hito(id_ot4, "En Reparación", "el cliente aprobo. repuestos reservados en stock.")
-
-    # orden 5: listo para entregar
-    eq5 = Equipo("SN-MAC-555", "MacBook Air M1", "Notebook", id_c1)
-    id_eq5 = eq5.registrar()
-    pres5 = Presupuesto(30000) # diagnostico(10000) + windows(20000)
-    id_pres5 = pres5.registrar()
-    Presupuesto.actualizar_estado(id_pres5, "Aprobado")
-    ot5 = OrdenTrabajo(id_eq5, id_recep, id_presupuesto=id_pres5, estado_general="Listo para Entregar", detalles_visuales="rayaduras leves en tapa inferior")
-    id_ot5 = ot5.registrar()
-    DetalleOrden(1, 10000, id_ot5, db_inventario["Diagnostico Tecnico General"], estado_detalle="Reservado").registrar()
-    DetalleOrden(1, 20000, id_ot5, db_inventario["Formateo e Instalacion de Windows 11 + Drivers"], estado_detalle="Reservado").registrar()
-    ControlCalidad(id_ot5, id_tecnico, "38 c en carga", "geekbench completado", "sistema operativo limpio y optimizado.").registrar()
-    Seguimiento.registrar_hito(id_ot5, "Ingresado", "ingreso al taller.")
-    Seguimiento.registrar_hito(id_ot5, "En Diagnóstico", "se requiere formateo y cambio de s.o.")
-    Seguimiento.registrar_hito(id_ot5, "Esperando Respuesta", "presupuesto aprobado.")
-    Seguimiento.registrar_hito(id_ot5, "En Reparación", "formateo realizado.")
-    Seguimiento.registrar_hito(id_ot5, "Listo para Entregar", "control de calidad aprobado. listo para retiro.")
-
-    # orden 6: finalizado (con factura tipo b cobrada)
-    eq6 = Equipo("SN-THINK-666", "Lenovo ThinkPad T480", "Notebook", id_c1)
-    id_eq6 = eq6.registrar()
-    pres6 = Presupuesto(18000) # limpieza(18000)
-    id_pres6 = pres6.registrar()
-    Presupuesto.actualizar_estado(id_pres6, "Aprobado")
-    ot6 = OrdenTrabajo(id_eq6, id_recep, id_presupuesto=id_pres6, estado_general="Finalizado", detalles_visuales="desgaste normal por uso")
-    id_ot6 = ot6.registrar()
-    DetalleOrden(1, 18000, id_ot6, db_inventario["Limpieza Fisica Completa y Pasta Termica"], estado_detalle="Consumido").registrar()
-    fact6 = Factura(id_ot6, 18000, "Transferencia", "B", "45000001")
-    id_fact6 = fact6.registrar()
-    Seguimiento.registrar_hito(id_ot6, "Ingresado", "equipo ingreso.")
-    Seguimiento.registrar_hito(id_ot6, "En Diagnóstico", "se recomendo limpieza preventiva.")
-    Seguimiento.registrar_hito(id_ot6, "Esperando Respuesta", "presupuesto aprobado.")
-    Seguimiento.registrar_hito(id_ot6, "En Reparación", "mantenimiento realizado.")
-    Seguimiento.registrar_hito(id_ot6, "Listo para Entregar", "qa completado con exito.")
-    Seguimiento.registrar_hito(id_ot6, "Finalizado", "factura tipo b generada. pago recibido.")
+            # Insertar cliente (solo una vez)
+            if entry['cliente_idx'] not in ids_clientes:
+                print(f"\n--- Cliente: {cliente_data['nombre']} ---")
+                ids_clientes[entry['cliente_idx']] = insertar_cliente(cursor, cliente_data)
+            
+            id_cliente = ids_clientes[entry['cliente_idx']]
+            
+            # Insertar equipo
+            id_equipo = insertar_equipo(cursor, entry['equipo'], id_cliente)
+            
+            # Insertar orden (usar tecnico para ordenes avanzadas, recepcion para las iniciales)
+            estado = entry['orden']['estado']
+            if estado in ('Para Revisión', 'Ingresado'):
+                id_empleado = id_recepcion
+            else:
+                id_empleado = id_tecnico
+            
+            insertar_orden(cursor, id_equipo, id_empleado, entry['orden'])
+        
+        DB.commit()
+        
+        print("\n" + "=" * 60)
+        print(f"  Seed completado exitosamente!")
+        print(f"  {len(CLIENTES)} clientes | {len(EQUIPOS_Y_ORDENES)} ordenes")
+        print(f"  Password de todos los clientes: '{PASSWORD_TEMPORAL}'")
+        print("=" * 60)
+        
+    except Exception as e:
+        print(f"\n[ERROR] {e}")
+        import traceback
+        traceback.print_exc()
+        try:
+            DB.conexion.rollback()
+        except:
+            pass
+    finally:
+        cursor.close()
 
 
-    # cliente 2: lautaro torres (para revision)
-    eq7 = Equipo("SN-ACER-777", "Acer Aspire 3", "Notebook", id_c2)
-    id_eq7 = eq7.registrar()
-    ot7 = OrdenTrabajo(id_eq7, id_recep, estado_general="Para Revisión", detalles_visuales="no enciende despues de un corte de luz, olor a quemado")
-    id_ot7 = ot7.registrar()
-    Seguimiento.registrar_hito(id_ot7, "Ingresado", "el equipo ingreso con posible corto en placa de video o fuente de alimentacion interna.")
-
-    # cliente 3: julian gonzalez (en diagnostico)
-    eq8 = Equipo("SN-MSI-888", "MSI GF63 Thin", "Notebook", id_c3)
-    id_eq8 = eq8.registrar()
-    ot8 = OrdenTrabajo(id_eq8, id_recep, estado_general="En Diagnóstico", detalles_visuales="calentamiento excesivo, ventiladores ruidosos")
-    id_ot8 = ot8.registrar()
-    Seguimiento.registrar_hito(id_ot8, "Ingresado", "ingreso para mantenimiento térmico.")
-    Seguimiento.registrar_hito(id_ot8, "En Diagnóstico", "tecnico analizando curva de ventilador y estado de pasta termica de fabrica.")
-
-    # cliente 4: maximo gomez (esperando respuesta)
-    eq9 = Equipo("SN-OFFICE-999", "PC de Escritorio Oficina", "PC de Escritorio", id_c4)
-    id_eq9 = eq9.registrar()
-    pres9 = Presupuesto(64000) # ssd 480gb (42000) + diagnostico (10000) + clonacion (12000)
-    id_pres9 = pres9.registrar()
-    ot9 = OrdenTrabajo(id_eq9, id_recep, id_presupuesto=id_pres9, estado_general="Esperando Respuesta", detalles_visuales="lentitud extrema al encender y abrir navegadores")
-    id_ot9 = ot9.registrar()
-    DetalleOrden(1, 10000, id_ot9, db_inventario["Diagnostico Tecnico General"]).registrar()
-    DetalleOrden(1, 42000, id_ot9, db_inventario["Disco SSD Kingston 480GB SATA3"]).registrar()
-    DetalleOrden(1, 12000, id_ot9, db_inventario["Clonacion de Disco a SSD"]).registrar()
-    Seguimiento.registrar_hito(id_ot9, "Ingresado", "el equipo ingreso lento.")
-    Seguimiento.registrar_hito(id_ot9, "En Diagnóstico", "se determino que el disco mecanico esta dañado. se sugiere cambio a ssd y clonacion de datos.")
-    Seguimiento.registrar_hito(id_ot9, "Esperando Respuesta", "presupuesto formal de $64000 generado y enviado.")
-
-    # cliente 5: maria fernandez (en reparacion)
-    eq10 = Equipo("SN-HP14-000", "Notebook HP 14-dq", "Notebook", id_c5)
-    id_eq10 = eq10.registrar()
-    pres10 = Presupuesto(113000) # pantalla (85000) + diagnostico (10000) + cambio (18000)
-    id_pres10 = pres10.registrar()
-    Presupuesto.actualizar_estado(id_pres10, "Aprobado")
-    ot10 = OrdenTrabajo(id_eq10, id_recep, id_presupuesto=id_pres10, estado_general="En Reparación", detalles_visuales="pantalla parpadea y tiene lineas horizontales al mover la tapa")
-    id_ot10 = ot10.registrar()
-    DetalleOrden(1, 10000, id_ot10, db_inventario["Diagnostico Tecnico General"], estado_detalle="Reservado").registrar()
-    DetalleOrden(1, 85000, id_ot10, db_inventario["Pantalla LED 15.6 Slim 30 pines"], estado_detalle="Reservado").registrar()
-    DetalleOrden(1, 18000, id_ot10, db_inventario["Cambio de Pantalla Notebook"], estado_detalle="Reservado").registrar()
-    Seguimiento.registrar_hito(id_ot10, "Ingresado", "ingresado por falla en pantalla.")
-    Seguimiento.registrar_hito(id_ot10, "En Diagnóstico", "se constato daño fisico en la pantalla lcd led.")
-    Seguimiento.registrar_hito(id_ot10, "Esperando Respuesta", "presupuesto de cambio de modulo aprobado por la cliente.")
-    Seguimiento.registrar_hito(id_ot10, "En Reparación", "modulo de repuesto recibido. instalando nueva pantalla.")
-
-    # cliente 6: carlos rodriguez (listo para entregar)
-    eq11 = Equipo("SN-SAMSUNG-123", "Samsung Galaxy Book", "Notebook", id_c6)
-    id_eq11 = eq11.registrar()
-    pres11 = Presupuesto(43000) # teclado (15000) + diagnostico (10000) + cambio (18000)
-    id_pres11 = pres11.registrar()
-    Presupuesto.actualizar_estado(id_pres11, "Aprobado")
-    ot11 = OrdenTrabajo(id_eq11, id_recep, id_presupuesto=id_pres11, estado_general="Listo para Entregar", detalles_visuales="teclado falla en filas enteras, salpicadura de agua")
-    id_ot11 = ot11.registrar()
-    DetalleOrden(1, 10000, id_ot11, db_inventario["Diagnostico Tecnico General"], estado_detalle="Reservado").registrar()
-    DetalleOrden(1, 15000, id_ot11, db_inventario["Teclado Universal Notebook USB"], estado_detalle="Reservado").registrar()
-    DetalleOrden(1, 18000, id_ot11, db_inventario["Cambio de Pantalla Notebook"], estado_detalle="Reservado").registrar()
-    ControlCalidad(id_ot11, id_tecnico, "teclas probadas", "funcionamiento correcto de usb y teclado", "reemplazo exitoso y secado de placa interna.").registrar()
-    Seguimiento.registrar_hito(id_ot11, "Ingresado", "ingreso por corto de teclado.")
-    Seguimiento.registrar_hito(id_ot11, "En Diagnóstico", "teclado dañado por humedad. placa madre intacta.")
-    Seguimiento.registrar_hito(id_ot11, "Esperando Respuesta", "presupuesto aprobado.")
-    Seguimiento.registrar_hito(id_ot11, "En Reparación", "teclado cambiado e internal clean completado.")
-    Seguimiento.registrar_hito(id_ot11, "Listo para Entregar", "qa superado. equipo armado listo para entrega.")
-
-    # cliente 7: ana martinez (finalizado - factura tipo a)
-    eq12 = Equipo("SN-RYZEN-999", "PC de Escritorio Gamer Ryzen 5", "PC de Escritorio", id_c7)
-    id_eq12 = eq12.registrar()
-    pres12 = Presupuesto(43000) # limpieza (18000) + ensamblaje (25000)
-    id_pres12 = pres12.registrar()
-    Presupuesto.actualizar_estado(id_pres12, "Aprobado")
-    ot12 = OrdenTrabajo(id_eq12, id_recep, id_presupuesto=id_pres12, estado_general="Finalizado", detalles_visuales="hacer mantenimiento completo e instalar refrigeracion liquida")
-    id_ot12 = ot12.registrar()
-    DetalleOrden(1, 18000, id_ot12, db_inventario["Limpieza Fisica Completa y Pasta Termica"], estado_detalle="Consumido").registrar()
-    DetalleOrden(1, 25000, id_ot12, db_inventario["Ensamblaje y Optimizacion de Computadora"], estado_detalle="Consumido").registrar()
-    # factura tipo a para cliente inscripto
-    fact12 = Factura(id_ot12, 43000, "Efectivo", "A", "30-45000007-9")
-    id_fact12 = fact12.registrar()
-    Seguimiento.registrar_hito(id_ot12, "Ingresado", "equipo gamer ingresado para optimizacion.")
-    Seguimiento.registrar_hito(id_ot12, "En Diagnóstico", "mantenimiento y ensamblaje planeado.")
-    Seguimiento.registrar_hito(id_ot12, "Esperando Respuesta", "presupuesto aprobado.")
-    Seguimiento.registrar_hito(id_ot12, "En Reparación", "limpieza profunda e instalacion completadas.")
-    Seguimiento.registrar_hito(id_ot12, "Listo para Entregar", "temperaturas maximas de 62 c en estres. qa ok.")
-    Seguimiento.registrar_hito(id_ot12, "Finalizado", "factura tipo a generada bajo cuit 30-45000007-9. pago en efectivo recibido.")
-
-    print("seeding completado con exito!")
-
-if __name__ == "__main__":
-    seed()
+if __name__ == '__main__':
+    main()

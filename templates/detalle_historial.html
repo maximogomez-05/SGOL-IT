@@ -9,7 +9,7 @@
 <body>
     <div class="container py-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold text-white">📄 Ficha Técnica: Orden #{{ orden.id_orden }}</h2>
+            <h2 class="fw-bold text-white">Ficha Técnica: Orden #{{ orden.id_orden }}</h2>
             <a href="/historial_general" class="btn btn-outline-primary fw-bold">Volver al Registro</a>
         </div>
 
@@ -82,7 +82,7 @@
                             <tbody>
                                 {% if detalles %}
                                     {% for d in detalles %}
-                                    <tr style="background: transparent;">
+                                    <tr>
                                         <td class="text-white">{{ d.Descripcion }}</td>
                                         <td class="text-center text-light">{{ d.Cantidad }}</td>
                                         <td class="text-end text-light">${{ d.subtotal }}</td>

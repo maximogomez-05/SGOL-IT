@@ -73,13 +73,15 @@ def dashboard():
             stats['tipo_labels'].append(tipo_bonito)
             stats['tipo_valores'].append(float(row['total']))
 
-        # 6. desempeño de tecnicos
+        # 6. desempeño de tecnicos (solo rol 3 = técnico)
         cursor.execute("""
             SELECT e.Nombre_Completo as tecnico, COUNT(ot.ID_OT) as cantidad
             FROM orden_trabajo ot
             JOIN empleado e ON ot.Empleado_ID_Empleado = e.ID_Empleado
-            WHERE ot.Estado_General = 'Finalizado'
+            JOIN legajo_empleado le ON e.ID_Empleado = le.Empleado_ID_Empleado
+            WHERE ot.Estado_General = 'Finalizado' AND le.Roles_ID_Rol = 3
             GROUP BY e.Nombre_Completo
+            ORDER BY cantidad DESC
         """)
         stats['tecnico_labels'] = []
         stats['tecnico_valores'] = []

@@ -8,7 +8,7 @@
 </head>
 <body>
     <div class="container py-5">
-        <h2 class="fw-bold mb-4 text-center text-white" style="font-family: 'Outfit';">Solicitar Turno y Cotización</h2>
+        <h2 class="fw-bold mb-4 text-center text-white">Solicitar Turno y Cotizacion</h2>
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card glass-panel p-4">
@@ -27,14 +27,14 @@
                         </div>
                         <div class="alert bg-secondary text-white border-0 text-center mb-4 p-3">
                             <span class="fs-5">Presupuesto Estimado: </span>
-                            <span class="fs-3 fw-bold" id="precio_display" style="color: var(--accent-emerald); font-family: 'Outfit'; font-weight: 800;">$0.00</span>
+                            <span class="fs-3 fw-bold" id="precio_display" style="color: var(--accent-emerald);">$0.00</span>
                             <input type="hidden" name="presupuesto_estimado" id="presupuesto_estimado" value="0">
                         </div>
 
                         <!-- Tiempo Estimado de Entrega -->
                         <div id="tiempo_estimado_container" class="alert bg-dark text-white border-0 text-center mb-4 p-3" style="border: 1px solid var(--border-glass) !important; display: none; border-radius: 10px;">
                             <span class="fs-5">Tiempo Estimado de Entrega: </span>
-                            <span class="fs-4 fw-bold" id="tiempo_estimado_display" style="font-family: 'Outfit'; font-weight: 800;">-</span>
+                            <span class="fs-4 fw-bold" id="tiempo_estimado_display">-</span>
                         </div>
 
                         <h5 class="fw-bold text-info mb-3">2. Datos Personales</h5>
@@ -65,7 +65,7 @@
                             </div>
                         </div>
                         <div class="mt-4">
-                            <button type="submit" class="btn btn-primary w-100 fw-bold py-2 text-black">CONFIRMAR TURNO</button>
+                            <button type="submit" class="btn btn-primary w-100 fw-bold py-2">CONFIRMAR TURNO</button>
                             <a href="/" class="btn btn-outline-danger w-100 mt-3 fw-bold">Volver al Inicio</a>
                         </div>
                     </form>
@@ -106,17 +106,17 @@
             var tiempoColor = 'var(--accent-cyan)';
             
             if (garantiaValue === '1') {
-                tiempoTexto = 'Mismo día (Prioritario - Aprox. 2 a 4 horas)';
+                tiempoTexto = 'En el día o próximo día hábil en horario de tarde (14 a 19hs)';
                 tiempoColor = 'var(--accent-emerald)';
             } else {
                 if (servicioValue === 'Limpieza y Mantenimiento' || servicioValue === 'Formateo e Instalación OS') {
-                    tiempoTexto = '24 a 48 horas hábiles';
+                    tiempoTexto = '2 a 4 días hábiles';
                 } else if (servicioValue === 'Lentitud extrema') {
-                    tiempoTexto = '24 a 72 horas hábiles';
+                    tiempoTexto = '3 a 5 días hábiles';
                 } else if (servicioValue === 'No enciende') {
-                    tiempoTexto = '3 a 5 días hábiles (Diagnóstico complejo de hardware)';
+                    tiempoTexto = '5 a 10 días hábiles (diagnóstico complejo de hardware)';
                 } else if (servicioValue === 'Otro') {
-                    tiempoTexto = '3 a 5 días hábiles (Sujeto a diagnóstico en local)';
+                    tiempoTexto = '5 a 10 días hábiles (sujeto a diagnóstico en local)';
                 } else {
                     tiempoTexto = 'Sujeto a diagnóstico técnico';
                 }

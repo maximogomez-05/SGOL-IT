@@ -14,7 +14,7 @@ class Cliente:
         cursor = DB.cursor()
         try:
             hashed_pwd = generate_password_hash(self.password_web)
-            sql = "INSERT INTO cliente (DNI_CUIL, Nombre_Completo, Email, Telefono, Password_web) VALUES (%s, %s, %s, %s, %s)"
+            sql = "INSERT INTO cliente (DNI_CUIL, Nombre_Completo, Email, Telefono, Password_web, Password_Cambiada) VALUES (%s, %s, %s, %s, %s, 0)"
             val = (self.dni, self.nombre, self.email, self.telefono, hashed_pwd)
             cursor.execute(sql, val)
             DB.commit()
@@ -46,10 +46,10 @@ class Cliente:
     def buscar_por_credenciales(dni, password_web):
         cursor = DB.cursor(dictionary=True)
         try:
-            cursor.execute("SELECT ID_Cliente as id, Nombre_Completo as nombre, Password_web FROM cliente WHERE DNI_CUIL = %s", (dni,))
+            cursor.execute("SELECT ID_Cliente as id, Nombre_Completo as nombre, Password_web, IFNULL(Password_Cambiada, 0) as password_cambiada FROM cliente WHERE DNI_CUIL = %s", (dni,))
             client = cursor.fetchone()
             if client and check_password_hash(client['Password_web'], password_web):
-                return {'id': client['id'], 'nombre': client['nombre']}
+                return {'id': client['id'], 'nombre': client['nombre'], 'password_cambiada': client['password_cambiada']}
             return None
         except Exception as e:
             print(f"Error al buscar cliente por credenciales: {e}")
@@ -62,7 +62,7 @@ class Cliente:
         cursor = DB.cursor()
         try:
             hashed_pwd = generate_password_hash(nueva_password)
-            cursor.execute("UPDATE cliente SET Password_web = %s WHERE ID_Cliente = %s", (hashed_pwd, id_cliente))
+            cursor.execute("UPDATE cliente SET Password_web = %s, Password_Cambiada = 1 WHERE ID_Cliente = %s", (hashed_pwd, id_cliente))
             DB.commit()
             return True
         except Exception as e:

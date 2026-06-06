@@ -9,7 +9,7 @@
 <body>
     <div class="container py-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold text-white">📅 Turnos Web Pendientes</h2>
+            <h2 class="fw-bold text-white">Turnos Web Pendientes</h2>
             <a href="/dashboard" class="btn btn-outline-primary fw-bold">Volver al Panel</a>
         </div>
 
@@ -25,7 +25,7 @@
         <div class="card glass-panel mb-4 p-3">
             <form action="/turnos" method="GET" class="d-flex gap-2">
                 <input type="text" name="q" class="form-control" placeholder="Buscar turno por DNI del cliente o número de turno..." value="{{ busqueda if busqueda else '' }}">
-                <button type="submit" class="btn btn-primary fw-bold text-black">Buscar</button>
+                <button type="submit" class="btn btn-primary fw-bold">Buscar</button>
                 {% if busqueda %}
                     <a href="/turnos" class="btn btn-outline-danger fw-bold">Limpiar</a>
                 {% endif %}
@@ -39,7 +39,7 @@
                         <tr>
                             <th class="ps-4">Fecha</th>
                             <th>Cliente</th>
-                            <th>DNI / Teléfono</th>
+                            <th>DNI / Telefono</th>
                             <th>Servicio Solicitado</th>
                             <th>Presup. Estimado</th>
                             <th class="text-center pe-4">Acciones</th>
@@ -48,22 +48,22 @@
                     <tbody>
                         {% if turnos %}
                             {% for t in turnos %}
-                            <tr style="background: transparent;">
+                            <tr>
                                 <td class="ps-4">{{ t.Fecha_Solicitud }}</td>
                                 <td class="fw-bold text-white">{{ t.Nombre_Completo }}</td>
                                 <td>{{ t.DNI_CUIL }} <br> <small class="text-muted">{{ t.Telefono }}</small></td>
                                 <td>
                                     {{ t.Servicio }}
                                     {% if t.Garantia %}
-                                        <br><span class="badge bg-success text-white mt-1">Con Garantía</span>
+                                        <br><span class="badge bg-success text-white mt-1">Con Garantia</span>
                                     {% else %}
-                                        <br><span class="badge bg-secondary text-white mt-1">Sin Garantía</span>
+                                        <br><span class="badge bg-secondary text-white mt-1">Sin Garantia</span>
                                     {% endif %}
                                 </td>
-                                <td class="fw-bold" style="color: var(--accent-emerald);">${{ t.Presupuesto_Estimado }}</td>
+                                <td class="fw-bold text-success">${{ t.Presupuesto_Estimado }}</td>
                                 <td class="text-center pe-4">
                                     <form action="/procesar_turno/{{ t.ID_Turno }}" method="POST">
-                                        <button type="submit" class="btn btn-sm btn-primary px-3 fw-bold text-black">Recibir Equipo</button>
+                                        <button type="submit" class="btn btn-sm btn-primary px-3 fw-bold">Recibir Equipo</button>
                                     </form>
                                 </td>
                             </tr>

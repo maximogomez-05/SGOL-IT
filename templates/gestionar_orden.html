@@ -9,7 +9,7 @@
 <body>
     <div class="container py-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold text-white">🛠️ Gestión de Orden #{{ orden.id_orden }}</h2>
+            <h2 class="fw-bold text-white">Gestión de Orden #{{ orden.id_orden }}</h2>
             <a href="/laboratorio" class="btn btn-outline-primary fw-bold">Volver al Listado</a>
         </div>
 
@@ -26,7 +26,7 @@
             <div class="col-md-6">
                 <div class="card glass-panel h-100">
                     <div class="card-body">
-                        <h5 class="fw-bold text-primary mb-3">📦 Repuestos y Servicios</h5>
+                        <h5 class="fw-bold text-primary mb-3">Repuestos y Servicios</h5>
                         
                         {% if orden.estado in ('Para Revisión', 'En Diagnóstico') %}
                         <form action="/agregar_repuesto/{{ orden.id_orden }}" method="POST" class="d-flex gap-2 mb-4">
@@ -59,14 +59,14 @@
                             <tbody>
                                 {% if detalles %}
                                     {% for d in detalles %}
-                                    <tr style="background: transparent;">
+                                    <tr>
                                         <td>{{ d.descripcion }}</td>
                                         <td class="text-center fw-bold">{{ d.cantidad }}</td>
                                         <td class="text-end fw-bold" style="color: var(--accent-emerald);">${{ d.subtotal }}</td>
                                         {% if orden.estado in ('Para Revisión', 'En Diagnóstico') %}
                                         <td class="text-center">
                                             <form action="/eliminar_repuesto_ot/{{ orden.id_orden }}/{{ d.id_item }}" method="POST" class="d-inline">
-                                                <button type="submit" class="btn btn-sm btn-danger py-0 px-2">🗑️</button>
+                                                <button type="submit" class="btn btn-sm btn-danger py-0 px-2">Quitar</button>
                                             </form>
                                         </td>
                                         {% endif %}
@@ -101,7 +101,7 @@
 
                         <!-- detalles visuales y fotos de recepcion -->
                         <div class="mb-4 p-3 rounded shadow-sm" style="border: 1px solid var(--border-glass); background: rgba(255,255,255,0.01);">
-                            <h6 class="fw-bold text-info mb-2">🔍 Detalles Físicos de Recepción:</h6>
+                            <h6 class="fw-bold text-info mb-2">Detalles Físicos de Recepción:</h6>
                             <p class="text-white small mb-3">
                                 {% if orden.detalles_visuales %}
                                     {{ orden.detalles_visuales }}
@@ -123,10 +123,10 @@
                             {% endif %}
                             
                             <div class="pt-3 border-top border-secondary">
-                                <label class="form-label text-muted small fw-bold mb-1">📸 Agregar Fotos de la Reparación/Estado:</label>
+                                <label class="form-label text-muted small fw-bold mb-1">Agregar Fotos de la Reparación/Estado:</label>
                                 <form action="/subir_fotos_tecnico/{{ orden.id_orden }}" method="POST" enctype="multipart/form-data" class="d-flex gap-2">
                                     <input type="file" name="fotos" class="form-control form-control-sm" accept="image/*" multiple id="fotos-tecnico-input" required>
-                                    <button type="submit" class="btn btn-primary btn-sm fw-bold px-3 text-black">Subir</button>
+                                    <button type="submit" class="btn btn-primary btn-sm fw-bold px-3">Subir</button>
                                 </form>
                                 <div class="form-text text-light-gray mt-1" style="font-size: 0.7rem;">Formatos: png, jpg, jpeg, webp. Máximo 4 por vez.</div>
                             </div>
@@ -156,7 +156,7 @@
                         {% endif %}
 
                         {% if orden.estado in ('Para Revisión', 'En Diagnóstico') %}
-                            <h5 class="fw-bold mb-3 text-info">📋 Informe Técnico Inicial</h5>
+                            <h5 class="fw-bold mb-3 text-info">Informe Técnico Inicial</h5>
                             <form action="/gestionar_orden/{{ orden.id_orden }}" method="POST">
                                 <div class="mb-3">
                                     <label class="form-label text-muted small">Diagnóstico Detallado:</label>
@@ -166,7 +166,7 @@
                             </form>
 
                         {% elif orden.estado in ('En Reparación', 'Esperando Repuestos', 'Reparando', 'En Testing') %}
-                            <h5 class="fw-bold mb-3" style="color: var(--accent-emerald);">✅ Control de Calidad (QA)</h5>
+                            <h5 class="fw-bold mb-3" style="color: var(--accent-emerald);">Control de Calidad (QA)</h5>
                             <form action="/gestionar_orden/{{ orden.id_orden }}" method="POST">
                                 <div class="row g-3 mb-3">
                                     <div class="col-6">
@@ -182,7 +182,7 @@
                                         <textarea name="observaciones" class="form-control" rows="3" placeholder="Todo funcionando correctamente..." required></textarea>
                                     </div>
                                 </div>
-                                <button type="submit" class="btn btn-success w-100 fw-bold text-black">APROBAR QA Y LISTO PARA ENTREGAR</button>
+                                <button type="submit" class="btn btn-success w-100 fw-bold">APROBAR QA Y LISTO PARA ENTREGAR</button>
                             </form>
                         {% endif %}
 
@@ -194,7 +194,7 @@
             <div class="col-12 mt-4">
                 <div class="card glass-panel">
                     <div class="card-header border-0 bg-transparent pt-4 pb-0">
-                        <h5 class="fw-bold text-info mb-0">💬 Canal de Comunicación Directa con el Cliente</h5>
+                        <h5 class="fw-bold text-info mb-0">Canal de Comunicación Directa con el Cliente</h5>
                     </div>
                     <div class="card-body">
                         <div class="chat-box glass-panel p-3 mb-3" id="chat-box-{{ orden.id_orden }}" style="height: 250px; overflow-y: auto; background: rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 8px;">
@@ -205,7 +205,7 @@
                                 Remitente: <strong>{{ session['nombre'] }} ({{ session['nombre_rol'] }})</strong>
                             </span>
                             <input type="text" id="chat-input-{{ orden.id_orden }}" class="form-control bg-dark border-secondary text-white" placeholder="Escribe un mensaje de respuesta para el cliente..." onkeydown="if(event.key === 'Enter') enviarMensajeEmpleado({{ orden.id_orden }})">
-                            <button class="btn btn-success fw-bold text-black" onclick="enviarMensajeEmpleado({{ orden.id_orden }})">Enviar Mensaje</button>
+                            <button class="btn btn-success fw-bold" onclick="enviarMensajeEmpleado({{ orden.id_orden }})">Enviar Mensaje</button>
                         </div>
                     </div>
                 </div>

@@ -14,71 +14,78 @@
             <div class="sidebar-logo">SGOL-IT</div>
             
             <div class="sidebar-user">
-                <div class="sidebar-user-name">👤 {{ session['nombre'] }}</div>
+                <div class="sidebar-user-name">{{ session['nombre'] }}</div>
                 <div class="sidebar-user-role">{{ session['nombre_rol'] }}</div>
             </div>
             
             <ul class="sidebar-menu">
                 <li>
                     <a href="/dashboard" class="sidebar-link active">
-                        <span>🏠 Dashboard</span>
+                        <span>Dashboard</span>
                     </a>
                 </li>
                 {% if session['rol_id']|int in (1, 2) %}
                 <li>
                     <a href="/turnos" class="sidebar-link">
-                        <span>📅 Turnos Web</span>
+                        <span>Turnos Web</span>
                     </a>
                 </li>
                 <li>
                     <a href="/ingreso_equipo" class="sidebar-link">
-                        <span>📥 Ingresar Equipo</span>
+                        <span>Ingresar Equipo</span>
                     </a>
                 </li>
                 <li>
                     <a href="/presupuestos_pendientes" class="sidebar-link">
-                        <span>📋 Presupuestos</span>
+                        <span>Presupuestos</span>
                     </a>
                 </li>
                 <li>
                     <a href="/entregas_pendientes" class="sidebar-link">
-                        <span>📦 Entregas</span>
+                        <span>Entregas</span>
                     </a>
                 </li>
                 <li>
                     <a href="/facturas" class="sidebar-link">
-                        <span>💵 Historial Facturas</span>
+                        <span>Historial Facturas</span>
                     </a>
                 </li>
                 {% endif %}
                 {% if session['rol_id']|int in (1, 3) %}
                 <li>
                     <a href="/laboratorio" class="sidebar-link">
-                        <span>🔬 Laboratorio</span>
+                        <span>Laboratorio</span>
                     </a>
                 </li>
                 {% endif %}
                 {% if session['rol_id'] == 1 %}
                 <li>
                     <a href="/gestion_personal" class="sidebar-link">
-                        <span>👥 Personal</span>
+                        <span>Personal</span>
                     </a>
                 </li>
                 <li>
                     <a href="/inventario" class="sidebar-link">
-                        <span>⚙️ Inventario</span>
+                        <span>Inventario</span>
                     </a>
                 </li>
                 {% endif %}
                 <li>
                     <a href="/historial_general" class="sidebar-link">
-                        <span>📜 Historial General</span>
+                        <span>Historial General</span>
                     </a>
                 </li>
+                {% if session['rol_id']|int in (1, 2) %}
+                <li>
+                    <a href="#" class="sidebar-link" data-bs-toggle="modal" data-bs-target="#modalResetPassword">
+                        <span>Clave Cliente</span>
+                    </a>
+                </li>
+                {% endif %}
                 
                 <li class="mt-auto">
                     <a href="/logout" class="sidebar-link sidebar-link-logout">
-                        <span>🚪 Cerrar Sesión</span>
+                        <span>Cerrar Sesión</span>
                     </a>
                 </li>
             </ul>
@@ -88,20 +95,20 @@
         <main class="main-content">
             <div class="d-flex justify-content-between align-items-center mb-5">
                 <div>
-                    <h1 class="fw-bold mb-1" style="font-family: 'Outfit';">
+                    <h1 class="fw-bold mb-1">
                         {% if session['rol_id'] == 1 %}
-                            🛡️ Panel de Administración
+                            Panel de Administracion
                         {% elif session['rol_id'] == 2 %}
-                            👋 Panel de Recepción
+                            Panel de Recepcion
                         {% else %}
-                            👨‍🔧 Panel Técnico
+                            Panel Tecnico
                         {% endif %}
                     </h1>
-                    <p class="text-secondary mb-0">Bienvenido al sistema ciber-laboratorio de SGOL-IT</p>
+                    <p class="text-muted mb-0">Bienvenido al sistema de gestion de SGOL-IT</p>
                 </div>
                 <div class="d-none d-md-block text-end">
-                    <div class="text-info fw-bold" id="current-time" style="font-family: 'Outfit';"></div>
-                    <div class="small text-secondary">{{ session['nombre_rol'] }}</div>
+                    <div class="fw-bold text-muted" id="current-time"></div>
+                    <div class="small text-muted">{{ session['nombre_rol'] }}</div>
                 </div>
             </div>
 
@@ -115,7 +122,7 @@
 
             {% if session['rol_id'] == 1 and alertas_stock %}
                 <div class="alert alert-danger shadow-sm mb-4">
-                    <h5 class="fw-bold mb-2">⚠️ Alertas de Stock Crítico</h5>
+                    <h5 class="fw-bold mb-2">Alertas de Stock Crítico</h5>
                     <ul class="mb-0">
                         {% for alerta in alertas_stock %}
                             <li>El ítem <strong>{{ alerta.Descripcion }}</strong> está en nivel crítico (Stock: {{ alerta.Stock_Disponible }}, Mínimo: {{ alerta.Stock_Minimo }}).</li>
@@ -128,58 +135,58 @@
             {% if session['rol_id'] == 1 %}
             <div class="row g-4 mb-5">
                 <div class="col-md-6 col-lg-3">
-                    <div class="card glass-panel p-4 text-center border-start border-4 border-info h-100">
-                        <h6 class="text-muted small fw-bold text-uppercase mb-2" style="color: #cbd5e1 !important;">Ingresos Totales</h6>
-                        <h2 class="fw-bold text-white mb-0" style="font-family: 'Outfit'; font-size: 1.6rem;">${{ "{:,.2f}".format(stats.total_ingresos) }}</h2>
-                        <p class="text-muted small mt-2 mb-0" style="font-size: 0.75rem;">Facturas cobradas</p>
+                    <div class="card glass-panel p-4 text-center border-start border-3 border-info h-100">
+                        <h6 class="text-muted small fw-bold text-uppercase mb-2">Ingresos Totales</h6>
+                        <h2 class="fw-bold text-white mb-0" style="font-size: 1.5rem;">${{ "{:,.2f}".format(stats.total_ingresos) }}</h2>
+                        <p class="text-muted small mt-2 mb-0">Facturas cobradas</p>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3">
-                    <div class="card glass-panel p-4 text-center border-start border-4 border-success h-100">
-                        <h6 class="text-muted small fw-bold text-uppercase mb-2" style="color: #cbd5e1 !important;">Órdenes Entregadas</h6>
-                        <h2 class="fw-bold text-white mb-0" style="font-family: 'Outfit'; font-size: 1.6rem;">{{ stats.total_finalizados }}</h2>
-                        <p class="text-muted small mt-2 mb-0" style="font-size: 0.75rem;">Equipos finalizados</p>
+                    <div class="card glass-panel p-4 text-center border-start border-3 border-success h-100">
+                        <h6 class="text-muted small fw-bold text-uppercase mb-2">Ordenes Entregadas</h6>
+                        <h2 class="fw-bold text-white mb-0" style="font-size: 1.5rem;">{{ stats.total_finalizados }}</h2>
+                        <p class="text-muted small mt-2 mb-0">Equipos finalizados</p>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3">
-                    <div class="card glass-panel p-4 text-center border-start border-4 border-warning h-100">
-                        <h6 class="text-muted small fw-bold text-uppercase mb-2" style="color: #cbd5e1 !important;">Listos para Entregar</h6>
-                        <h2 class="fw-bold text-white mb-0" style="font-family: 'Outfit'; font-size: 1.6rem;">{{ listos_entrega }}</h2>
-                        <p class="text-muted small mt-2 mb-0" style="font-size: 0.75rem;">Equipos en espera</p>
+                    <div class="card glass-panel p-4 text-center border-start border-3 border-warning h-100">
+                        <h6 class="text-muted small fw-bold text-uppercase mb-2">Listos para Entregar</h6>
+                        <h2 class="fw-bold text-white mb-0" style="font-size: 1.5rem;">{{ listos_entrega }}</h2>
+                        <p class="text-muted small mt-2 mb-0">Equipos en espera</p>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3">
-                    <div class="card glass-panel p-4 text-center border-start border-4 border-danger h-100">
-                        <h6 class="text-muted small fw-bold text-uppercase mb-2" style="color: #cbd5e1 !important;">Stock Crítico</h6>
-                        <h2 class="fw-bold text-white mb-0" style="font-family: 'Outfit'; font-size: 1.6rem;">{{ alertas_stock|length }}</h2>
-                        <p class="text-muted small mt-2 mb-0" style="font-size: 0.75rem;">Repuestos con bajo stock</p>
+                    <div class="card glass-panel p-4 text-center border-start border-3 border-danger h-100">
+                        <h6 class="text-muted small fw-bold text-uppercase mb-2">Stock Critico</h6>
+                        <h2 class="fw-bold text-white mb-0" style="font-size: 1.5rem;">{{ alertas_stock|length }}</h2>
+                        <p class="text-muted small mt-2 mb-0">Repuestos con bajo stock</p>
                     </div>
                 </div>
             </div>
             {% elif session['rol_id'] == 2 %}
             <div class="row g-4 mb-5">
                 <div class="col-md-6">
-                    <div class="card glass-panel p-4 text-center border-start border-4 border-warning h-100">
-                        <h6 class="text-muted small fw-bold text-uppercase mb-2" style="color: #cbd5e1 !important;">Equipos Listos para Entregar</h6>
-                        <h2 class="fw-bold text-white mb-0" style="font-family: 'Outfit'; font-size: 2.2rem;">{{ listos_entrega }}</h2>
-                        <p class="text-muted small mt-2 mb-0" style="font-size: 0.8rem;">Órdenes en espera de retiro y cobro por caja</p>
+                    <div class="card glass-panel p-4 text-center border-start border-3 border-warning h-100">
+                        <h6 class="text-muted small fw-bold text-uppercase mb-2">Equipos Listos para Entregar</h6>
+                        <h2 class="fw-bold text-white mb-0" style="font-size: 2rem;">{{ listos_entrega }}</h2>
+                        <p class="text-muted small mt-2 mb-0">Ordenes en espera de retiro y cobro por caja</p>
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="card glass-panel p-4 text-center border-start border-4 border-info h-100">
-                        <h6 class="text-muted small fw-bold text-uppercase mb-2" style="color: #cbd5e1 !important;">Módulo Activo</h6>
-                        <h2 class="fw-bold text-white mb-0" style="font-family: 'Outfit'; font-size: 2.2rem;">Recepción</h2>
-                        <p class="text-muted small mt-2 mb-0" style="font-size: 0.8rem;">Carga de equipos, turnos y presupuestos</p>
+                    <div class="card glass-panel p-4 text-center border-start border-3 border-info h-100">
+                        <h6 class="text-muted small fw-bold text-uppercase mb-2">Modulo Activo</h6>
+                        <h2 class="fw-bold text-white mb-0" style="font-size: 2rem;">Recepcion</h2>
+                        <p class="text-muted small mt-2 mb-0">Carga de equipos, turnos y presupuestos</p>
                     </div>
                 </div>
             </div>
             {% elif session['rol_id'] == 3 %}
             <div class="row g-4 mb-5">
                 <div class="col-md-12">
-                    <div class="card glass-panel p-4 text-center border-start border-4 border-danger h-100">
-                        <h6 class="text-muted small fw-bold text-uppercase mb-2" style="color: #cbd5e1 !important;">Área de Reparaciones y Diagnóstico</h6>
-                        <h2 class="fw-bold text-white mb-0" style="font-family: 'Outfit'; font-size: 2.2rem;">Laboratorio Activo</h2>
-                        <p class="text-muted small mt-2 mb-0" style="font-size: 0.8rem;">Seleccione "Laboratorio" en el menú de la izquierda para ver su cola de trabajo.</p>
+                    <div class="card glass-panel p-4 text-center border-start border-3 border-danger h-100">
+                        <h6 class="text-muted small fw-bold text-uppercase mb-2">Area de Reparaciones y Diagnostico</h6>
+                        <h2 class="fw-bold text-white mb-0" style="font-size: 2rem;">Laboratorio Activo</h2>
+                        <p class="text-muted small mt-2 mb-0">Seleccione "Laboratorio" en el menu de la izquierda para ver su cola de trabajo.</p>
                     </div>
                 </div>
             </div>
@@ -191,7 +198,7 @@
                 <div class="col-xl-7">
                     <div class="card glass-panel p-4 h-100">
                         <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h5 class="fw-bold text-white mb-0" style="font-family: 'Outfit';">🔬 Monitoreo de Laboratorio (Órdenes Activas)</h5>
+                            <h5 class="fw-bold text-white mb-0">Monitoreo de Laboratorio (Ordenes Activas)</h5>
                             <span class="badge bg-danger">En Progreso</span>
                         </div>
                         
@@ -254,7 +261,7 @@
                     {% if session['rol_id']|int in (1, 2) %}
                     <div class="card glass-panel p-4 h-100">
                         <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h5 class="fw-bold text-white mb-0" style="font-family: 'Outfit';">📅 Citas y Turnos Web por Validar</h5>
+                            <h5 class="fw-bold text-white mb-0">Citas y Turnos Web por Validar</h5>
                             <span class="badge bg-info text-dark">Pendientes</span>
                         </div>
                         
@@ -297,18 +304,18 @@
                     </div>
                     {% else %}
                     <!-- Si es técnico, en lugar de turnos web, mostramos un widget informativo del estado de repuestos / laboratorio -->
-                    <div class="card glass-panel p-4 h-100 border-start border-4 border-info">
-                        <h5 class="fw-bold text-white mb-3" style="font-family: 'Outfit';">📋 Recordatorio de Diagnósticos</h5>
-                        <p class="text-secondary mb-4" style="font-size: 0.95rem;">
-                            Recuerda registrar cada diagnóstico a tiempo y reservar los repuestos necesarios en el inventario para evitar demoras en las reparaciones.
+                    <div class="card glass-panel p-4 h-100 border-start border-3 border-info">
+                        <h5 class="fw-bold text-white mb-3">Recordatorio de Diagnosticos</h5>
+                        <p class="text-muted mb-4" style="font-size: 0.95rem;">
+                            Recuerda registrar cada diagnostico a tiempo y reservar los repuestos necesarios en el inventario para evitar demoras en las reparaciones.
                         </p>
-                        <hr style="border-color: var(--border-glass);">
+                        <hr>
                         <div class="mt-3">
                             <h6 class="text-info fw-bold mb-2">Flujo del Laboratorio:</h6>
-                            <ul class="text-secondary small ps-3">
-                                <li class="mb-2">Revisar los equipos asignados en la pestaña **Laboratorio**.</li>
-                                <li class="mb-2">Cargar el diagnóstico y armar el presupuesto detallado.</li>
-                                <li class="mb-2">Una vez aprobado, realizar la reparación y aplicar el **Control de Calidad (QA)** para habilitar la facturación.</li>
+                            <ul class="text-muted small ps-3">
+                                <li class="mb-2">Revisar los equipos asignados en la pestana **Laboratorio**.</li>
+                                <li class="mb-2">Cargar el diagnostico y armar el presupuesto detallado.</li>
+                                <li class="mb-2">Una vez aprobado, realizar la reparacion y aplicar el **Control de Calidad (QA)** para habilitar la facturacion.</li>
                             </ul>
                         </div>
                     </div>
@@ -316,18 +323,20 @@
                 </div>
             </div>
 
-            <!-- Gráficos del Administrador -->
+
+
+            <!-- Graficos del Administrador -->
             {% if session['rol_id'] == 1 %}
             <div class="mt-5 mb-4">
-                <h3 class="text-info fw-bold mb-2" style="font-family: 'Outfit';">📊 Estadísticas del Ciber-Laboratorio</h3>
-                <p class="text-secondary mb-4">Métricas operativas y financieras del negocio en tiempo real</p>
+                <h3 class="text-info fw-bold mb-2">Estadisticas del Laboratorio</h3>
+                <p class="text-muted mb-4">Metricas operativas y financieras del negocio en tiempo real</p>
             </div>
             
             <div class="row g-4">
                 <!-- 1. Facturación Mensual -->
                 <div class="col-lg-6">
                     <div class="card glass-panel p-4 h-100">
-                        <h5 class="fw-bold text-white mb-3" style="font-family: 'Outfit';">📈 Facturación Mensual</h5>
+                        <h5 class="fw-bold text-white mb-3">Facturación Mensual</h5>
                         <div style="position: relative; height:280px; width:100%">
                             <canvas id="chartMensual"></canvas>
                         </div>
@@ -336,7 +345,7 @@
                 <!-- 2. Repuestos vs Mano de Obra -->
                 <div class="col-lg-6">
                     <div class="card glass-panel p-4 h-100">
-                        <h5 class="fw-bold text-white mb-3" style="font-family: 'Outfit';">⚙️ Repuestos vs. Mano de Obra</h5>
+                        <h5 class="fw-bold text-white mb-3">Repuestos vs. Mano de Obra</h5>
                         <div style="position: relative; height:280px; width:100%">
                             <canvas id="chartTipo"></canvas>
                         </div>
@@ -345,7 +354,7 @@
                 <!-- 3. Métodos de Pago -->
                 <div class="col-lg-6">
                     <div class="card glass-panel p-4 h-100">
-                        <h5 class="fw-bold text-white mb-3" style="font-family: 'Outfit';">💳 Métodos de Pago</h5>
+                        <h5 class="fw-bold text-white mb-3">Métodos de Pago</h5>
                         <div style="position: relative; height:280px; width:100%">
                             <canvas id="chartMetodo"></canvas>
                         </div>
@@ -354,7 +363,7 @@
                 <!-- 4. Desempeño de Técnicos -->
                 <div class="col-lg-6">
                     <div class="card glass-panel p-4 h-100">
-                        <h5 class="fw-bold text-white mb-3" style="font-family: 'Outfit';">👨‍🔧 Eficiencia de Técnicos (Equipos Listos)</h5>
+                        <h5 class="fw-bold text-white mb-3">Ordenes Finalizadas por Tecnico</h5>
                         <div style="position: relative; height:280px; width:100%">
                             <canvas id="chartTecnicos"></canvas>
                         </div>
@@ -363,7 +372,7 @@
                 <!-- 5. Distribución de Dispositivos -->
                 <div class="col-lg-6">
                     <div class="card glass-panel p-4 h-100">
-                        <h5 class="fw-bold text-white mb-3" style="font-family: 'Outfit';">💻 Distribución de Dispositivos</h5>
+                        <h5 class="fw-bold text-white mb-3">Distribución de Dispositivos</h5>
                         <div style="position: relative; height:280px; width:100%">
                             <canvas id="chartDispositivos"></canvas>
                         </div>
@@ -372,7 +381,7 @@
                 <!-- 6. Estado de la Cola de Trabajo -->
                 <div class="col-lg-6">
                     <div class="card glass-panel p-4 h-100">
-                        <h5 class="fw-bold text-white mb-3" style="font-family: 'Outfit';">📊 Estado de la Cola de Trabajo</h5>
+                        <h5 class="fw-bold text-white mb-3">Estado de la Cola de Trabajo</h5>
                         <div style="position: relative; height:280px; width:100%">
                             <canvas id="chartEstados"></canvas>
                         </div>
@@ -392,7 +401,7 @@
             const horaStr = ahora.toLocaleTimeString('es-ES');
             const elClock = document.getElementById('current-time');
             if (elClock) {
-                elClock.innerHTML = `📅 ${fechaStr} | ⏰ ${horaStr}`;
+                elClock.innerHTML = `${fechaStr} | ${horaStr}`;
             }
         }
         setInterval(actualizarReloj, 1000);
@@ -439,8 +448,8 @@
         // 1. Facturación Mensual (Línea / Área)
         const ctxMensual = document.getElementById('chartMensual').getContext('2d');
         const gradientBlue = ctxMensual.createLinearGradient(0, 0, 0, 200);
-        gradientBlue.addColorStop(0, 'rgba(79, 172, 254, 0.4)');
-        gradientBlue.addColorStop(1, 'rgba(0, 242, 254, 0.0)');
+        gradientBlue.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
+        gradientBlue.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
 
         new Chart(ctxMensual, {
             type: 'line',
@@ -449,14 +458,14 @@
                 datasets: [{
                     label: 'Ingresos ($)',
                     data: mensualValores,
-                    borderColor: '#00f2fe',
-                    borderWidth: 3,
+                    borderColor: '#3b82f6',
+                    borderWidth: 2,
                     backgroundColor: gradientBlue,
                     fill: true,
                     tension: 0.3,
-                    pointBackgroundColor: '#4facfe',
-                    pointBorderColor: '#fff',
-                    pointHoverRadius: 6
+                    pointBackgroundColor: '#3b82f6',
+                    pointBorderColor: '#1a1d26',
+                    pointHoverRadius: 5
                 }]
             },
             options: {
@@ -482,8 +491,8 @@
                 labels: tipoLabels,
                 datasets: [{
                     data: tipoValores,
-                    backgroundColor: ['#ff4a6b', '#00ff9d'],
-                    borderColor: '#131b2e',
+                    backgroundColor: ['#ef4444', '#22c55e'],
+                    borderColor: '#1a1d26',
                     borderWidth: 2,
                     hoverOffset: 8
                 }]
@@ -508,8 +517,8 @@
                 labels: metodoLabels,
                 datasets: [{
                     data: metodoValores,
-                    backgroundColor: ['#9d4edd', '#ffb703', '#4facfe', '#00ff9d'],
-                    borderColor: '#131b2e',
+                    backgroundColor: ['#8b5cf6', '#f59e0b', '#3b82f6', '#22c55e'],
+                    borderColor: '#1a1d26',
                     borderWidth: 2,
                     hoverOffset: 8
                 }]
@@ -534,10 +543,10 @@
                 labels: tecnicoLabels,
                 datasets: [{
                     data: tecnicoValores,
-                    backgroundColor: 'rgba(0, 242, 254, 0.25)',
-                    borderColor: '#00f2fe',
-                    borderWidth: 2,
-                    borderRadius: 6
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                    borderColor: '#3b82f6',
+                    borderWidth: 1,
+                    borderRadius: 4
                 }]
             },
             options: {
@@ -564,8 +573,8 @@
                 labels: dispositivosLabels,
                 datasets: [{
                     data: dispositivosValores,
-                    backgroundColor: ['#4facfe', '#00ff9d', '#ffb703', '#ff4a6b', '#9d4edd'],
-                    borderColor: '#131b2e',
+                    backgroundColor: ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'],
+                    borderColor: '#1a1d26',
                     borderWidth: 2
                 }]
             },
@@ -590,10 +599,10 @@
                 datasets: [{
                     label: 'Órdenes',
                     data: estadosValores,
-                    backgroundColor: 'rgba(157, 78, 221, 0.35)',
-                    borderColor: '#9d4edd',
-                    borderWidth: 2,
-                    borderRadius: 6
+                    backgroundColor: 'rgba(139, 92, 246, 0.2)',
+                    borderColor: '#8b5cf6',
+                    borderWidth: 1,
+                    borderRadius: 4
                 }]
             },
             options: {
@@ -612,5 +621,37 @@
         });
     </script>
     {% endif %}
+
+    {% if session['rol_id']|int in (1, 2) %}
+    <div class="modal fade" id="modalResetPassword" tabindex="-1" aria-labelledby="modalResetPasswordLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="modalResetPasswordLabel">Restablecer Contrasena de Cliente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/resetear_password_cliente" method="POST">
+                    <div class="modal-body">
+                        <p class="text-muted small mb-3">Ingresa el DNI del cliente y una nueva contrasena temporal para que pueda volver a acceder al portal.</p>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-bold">DNI del Cliente</label>
+                            <input type="text" name="dni_reset" class="form-control" placeholder="Ej: 40123456" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-bold">Nueva Contrasena Temporal</label>
+                            <input type="text" name="nueva_password_reset" class="form-control" placeholder="Minimo 6 caracteres" minlength="6" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-danger fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary fw-bold">Restablecer Contrasena</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

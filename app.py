@@ -32,6 +32,24 @@ app.register_blueprint(bp_chat)
 # crea la carpeta de fotos si no existe
 os.makedirs(os.path.join(app.root_path, UPLOAD_FOLDER), exist_ok=True)
 
+# migraciones de base de datos al iniciar
+def ejecutar_migraciones():
+    from config.database import DB
+    cursor = DB.cursor()
+    try:
+        cursor.execute("SHOW COLUMNS FROM cliente LIKE 'Password_Cambiada'")
+        if not cursor.fetchone():
+            cursor.execute("ALTER TABLE cliente ADD COLUMN Password_Cambiada TINYINT(1) DEFAULT 0")
+            DB.commit()
+            print("[MIGRACIÓN] Columna Password_Cambiada agregada a tabla cliente.")
+    except Exception as e:
+        print(f"[MIGRACIÓN] Error: {e}")
+    finally:
+        cursor.close()
+
+with app.app_context():
+    ejecutar_migraciones()
+
 @app.before_request
 def check_forced_password_change():
     # rutas libres al cambiar password

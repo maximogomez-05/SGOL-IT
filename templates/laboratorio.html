@@ -9,7 +9,7 @@
 <body>
     <div class="container py-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold text-white">🛠️ Laboratorio Técnico</h2>
+            <h2 class="fw-bold text-white">Laboratorio Técnico</h2>
             <a href="/dashboard" class="btn btn-outline-primary fw-bold">Panel de Control</a>
         </div>
 
@@ -23,7 +23,7 @@
 
         <div class="card glass-panel mb-5">
             <div class="card-header border-0 bg-transparent pt-4 pb-0 fw-bold fs-5 text-info">
-                🔍 Consultar Historial Técnico
+                Consultar Historial Técnico
             </div>
             <div class="card-body">
                 <form action="/historial_equipo" method="POST" class="d-flex gap-3">
@@ -75,7 +75,7 @@
                     </thead>
                     <tbody>
                         {% for t in trabajos %}
-                        <tr style="background: transparent;">
+                        <tr>
                             <td class="ps-4"><span class="badge bg-secondary">#{{ t.id_orden }}</span></td>
                             <td class="fw-bold text-white">{{ t.equipo }}</td>
                             <td>
@@ -86,7 +86,7 @@
                                 {% endif %}
                             </td>
                             <td class="text-center pe-4">
-                                <a href="/gestionar_orden/{{ t.id_orden }}" class="btn btn-sm btn-success px-4 text-black fw-bold">Gestionar</a>
+                                <a href="/gestionar_orden/{{ t.id_orden }}" class="btn btn-sm btn-success px-4 fw-bold">Gestionar</a>
                             </td>
                         </tr>
                         {% endfor %}
