@@ -6,14 +6,18 @@ bp_inventario = Blueprint('inventario', __name__)
 
 @bp_inventario.route('/inventario', methods=['GET', 'POST'])
 def inventario():
-    if 'usuario_id' not in session or session['rol_id'] != 1: 
+    if 'usuario_id' not in session or int(session.get('rol_id', 0) or 0) != 1: 
         return redirect(url_for('auth.inicio'))
     if request.method == 'POST':
         t = request.form.get('tipo')
         d = request.form.get('descripcion')
-        p = float(request.form.get('precio') or 0)
-        s = int(request.form.get('stock') or 0)
-        sm = int(request.form.get('stock_minimo') or 0)
+        try:
+            p = float(request.form.get('precio') or 0)
+            s = int(request.form.get('stock') or 0)
+            sm = int(request.form.get('stock_minimo') or 0)
+        except (ValueError, TypeError):
+            flash("Precio, stock y stock mínimo deben ser números válidos.", "danger")
+            return redirect(url_for('inventario.inventario'))
         
         url = request.form.get('url_referencia', '')
         
@@ -37,12 +41,16 @@ def inventario():
 
 @bp_inventario.route('/editar_item/<int:id_item>', methods=['POST'])
 def editar_item(id_item):
-    if 'usuario_id' not in session or session['rol_id'] != 1: 
+    if 'usuario_id' not in session or int(session.get('rol_id', 0) or 0) != 1: 
         return redirect(url_for('auth.inicio'))
     d = request.form.get('descripcion')
-    p = float(request.form.get('precio') or 0)
-    s = int(request.form.get('stock') or 0)
-    sm = int(request.form.get('stock_minimo') or 0)
+    try:
+        p = float(request.form.get('precio') or 0)
+        s = int(request.form.get('stock') or 0)
+        sm = int(request.form.get('stock_minimo') or 0)
+    except (ValueError, TypeError):
+        flash("Precio, stock y stock mínimo deben ser números válidos.", "danger")
+        return redirect(url_for('inventario.inventario'))
     url = request.form.get('url_referencia', '')
     
     item = Inventario.buscar_por_id(id_item)
@@ -62,7 +70,7 @@ def editar_item(id_item):
 
 @bp_inventario.route('/eliminar_item/<int:id_item>', methods=['POST'])
 def eliminar_item(id_item):
-    if 'usuario_id' not in session or session['rol_id'] != 1: 
+    if 'usuario_id' not in session or int(session.get('rol_id', 0) or 0) != 1: 
         return redirect(url_for('auth.inicio'))
     try:
         Inventario.eliminar(id_item)
@@ -73,7 +81,7 @@ def eliminar_item(id_item):
 
 @bp_inventario.route('/inventario/scrapear/<int:id_item>', methods=['GET'])
 def scrapear_item(id_item):
-    if 'usuario_id' not in session or session['rol_id'] != 1: 
+    if 'usuario_id' not in session or int(session.get('rol_id', 0) or 0) != 1: 
         return jsonify({"error": "No autorizado"}), 401
     
     item = Inventario.buscar_por_id(id_item)

@@ -62,13 +62,6 @@ def gestionar_turnos():
     except Exception as e:
         print(f"Error al verificar/agregar Garantia a orden_trabajo: {e}")
 
-    try:
-        cursor.execute("SHOW COLUMNS FROM orden_trabajo LIKE 'Servicio'")
-        if not cursor.fetchone():
-            cursor.execute("ALTER TABLE orden_trabajo ADD COLUMN Servicio VARCHAR(100)")
-            DB.commit()
-    except Exception as e:
-        print(f"Error al verificar/agregar Servicio a orden_trabajo: {e}")
         
     if q:
         sql = """SELECT t.ID_Turno, t.Servicio, t.Presupuesto_Estimado, t.Fecha_Solicitud, t.Estado, t.Garantia,
@@ -136,8 +129,12 @@ def ingreso_equipo():
         mod = request.form.get('modelo')
         tip = request.form.get('tipo')
         detalles_visuales = request.form.get('detalles_visuales', '').strip()
-        garantia = int(request.form.get('garantia', '0'))
+        try:
+            garantia = int(request.form.get('garantia', '0'))
+        except (ValueError, TypeError):
+            garantia = 0
         servicio = request.form.get('servicio', '').strip()
+        marca = request.form.get('marca', 'Desconocida').strip()
         
         # validaciones basicas
         if not dni or not dni.isdigit() or not (7 <= len(dni) <= 11):
@@ -209,7 +206,7 @@ def ingreso_equipo():
             if eq_existente:
                 id_eq = eq_existente['id']
             else:
-                id_eq = Equipo(ns, mod, tip, id_c).registrar()
+                id_eq = Equipo(ns, marca, mod, tip, id_c).registrar()
             
             # crea la orden de trabajo (guarda Detalles_Visuales y Fotos aquí) usando OOP
             orden = OrdenTrabajo(
@@ -288,7 +285,7 @@ def cotizar_orden(id_orden):
                       WHERE d.Orden_Trabajo_ID_OT = %s""", (id_orden,))
     detalles = cursor.fetchall()
     cursor.execute("""SELECT ot.ID_OT as id_orden, ot.Diagnostico_Final as diagnostico_final, 
-                      CONCAT(e.Marca_Modelo, ' - ', e.Tipo_Dispositivo) as equipo, ot.ID_OT as codigo
+                      CONCAT(e.Marca, ' ', e.Modelo, ' - ', e.Tipo_Dispositivo) as equipo, ot.ID_OT as codigo
                       FROM orden_trabajo ot JOIN equipo e ON ot.Equipo_ID_Equipo = e.ID_Equipo WHERE ot.ID_OT = %s""", (id_orden,))
     orden = cursor.fetchone()
     cursor.close()
@@ -466,7 +463,15 @@ def agregar_repuesto(id_orden):
         return redirect(url_for('ordenes.gestionar_orden', id_orden=id_orden))
         
     id_i = request.form.get('id_item')
-    cant = int(request.form.get('cantidad') or 0)
+    try:
+        cant = int(request.form.get('cantidad') or 0)
+    except (ValueError, TypeError):
+        flash("Cantidad inválida.", "danger")
+        return redirect(url_for('ordenes.gestionar_orden', id_orden=id_orden))
+    
+    if cant <= 0:
+        flash("La cantidad debe ser mayor a 0.", "danger")
+        return redirect(url_for('ordenes.gestionar_orden', id_orden=id_orden))
     
     it = Inventario.buscar_por_id(id_i)
     if it and (it['tipo_item'] != 'Repuesto_Fisico' or cant <= it['stock']):

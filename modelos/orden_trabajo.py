@@ -49,7 +49,7 @@ class OrdenTrabajo:
         cursor = DB.cursor(dictionary=True)
         try:
             sql = """SELECT ot.ID_OT as id_orden, ot.Codigo_Tracking_web as codigo, 
-                     CONCAT(e.Marca_Modelo, ' - ', e.Tipo_Dispositivo) as equipo, 
+                     CONCAT(e.Marca, ' ', e.Modelo, ' - ', e.Tipo_Dispositivo) as equipo, 
                      ot.Estado_General as estado, ot.Diagnostico_Final as diagnostico_final,
                      ot.Equipo_ID_Equipo as id_equipo
                      FROM orden_trabajo ot 
@@ -105,14 +105,14 @@ class OrdenTrabajo:
                 ot = cls(
                     id_equipo=row['Equipo_ID_Equipo'],
                     id_empleado=row['Empleado_ID_Empleado'],
-                    id_presupuesto=row['Presupuesto_ID_Presupuesto'],
+                    id_presupuesto=row['Presupuesto_ID_Presupuesto'] if 'Presupuesto_ID_Presupuesto' in row else None,
                     codigo_tracking=row['Codigo_Tracking_web'],
                     estado_general=row['Estado_General'],
                     detalles_visuales=row['Detalles_Visuales'],
                     fotos=row['Fotos'],
                     id_ot=row['ID_OT'],
                     garantia=row['Garantia'],
-                    servicio=row['Servicio']
+                    servicio=row['Servicio'] if 'Servicio' in row else None
                 )
                 if 'Fecha_Creacion' in row and row['Fecha_Creacion']:
                     ot.fecha_creacion = row['Fecha_Creacion']
@@ -170,7 +170,7 @@ class OrdenTrabajo:
         try:
             sql = """SELECT ot.ID_OT as id_orden, ot.Estado_General as estado, ot.Diagnostico_Final as diagnostico,
                      ot.Codigo_Tracking_web as codigo, ot.Fecha_Creacion as fecha, ot.Equipo_ID_Equipo as id_equipo,
-                     CONCAT(e.Marca_Modelo, ' - ', e.Tipo_Dispositivo) as equipo, e.Numero_Serie as nro_serie,
+                     CONCAT(e.Marca, ' ', e.Modelo, ' - ', e.Tipo_Dispositivo) as equipo, e.Numero_Serie as nro_serie,
                      p.Monto_Total_Cotizado as costo, ot.Presupuesto_ID_Presupuesto as id_presupuesto,
                      ot.Garantia as garantia, ot.Servicio as servicio
                      FROM orden_trabajo ot 
@@ -191,7 +191,7 @@ class OrdenTrabajo:
         cursor = DB.cursor(dictionary=True)
         try:
             sql = """SELECT ot.ID_OT as id_orden, ot.Estado_General as estado, ot.Diagnostico_Final as diagnostico,
-                     ot.Fecha_Creacion as fecha, CONCAT(e.Marca_Modelo, ' - ', e.Tipo_Dispositivo) as equipo,
+                     ot.Fecha_Creacion as fecha, CONCAT(e.Marca, ' ', e.Modelo, ' - ', e.Tipo_Dispositivo) as equipo,
                      ot.Detalles_Visuales as detalles_visuales, ot.Fotos as fotos,
                      p.Monto_Total_Cotizado as costo, p.Presupuesto_Preliminar_Web as preliminar,
                      ot.Garantia as garantia, ot.Servicio as servicio
@@ -212,7 +212,7 @@ class OrdenTrabajo:
     def buscar_por_cliente(id_cliente):
         cursor = DB.cursor(dictionary=True)
         try:
-            sql = """SELECT ot.ID_OT as id_orden, CONCAT(e.Marca_Modelo, ' - ', e.Tipo_Dispositivo) as equipo, 
+            sql = """SELECT ot.ID_OT as id_orden, CONCAT(e.Marca, ' ', e.Modelo, ' - ', e.Tipo_Dispositivo) as equipo, 
                      ot.Estado_General as estado, p.Monto_Total_Cotizado as costo, p.Presupuesto_Preliminar_Web as preliminar,
                      ot.Codigo_Tracking_web as codigo, ot.Detalles_Visuales as detalles_visuales, ot.Fotos as fotos,
                      ot.Garantia as garantia, ot.Servicio as servicio
@@ -232,7 +232,7 @@ class OrdenTrabajo:
     def buscar_listos_para_entregar():
         cursor = DB.cursor(dictionary=True)
         try:
-            sql = """SELECT ot.ID_OT as id_orden, CONCAT(e.Marca_Modelo, ' - ', e.Tipo_Dispositivo) as equipo, p.Monto_Total_Cotizado as costo 
+            sql = """SELECT ot.ID_OT as id_orden, CONCAT(e.Marca, ' ', e.Modelo, ' - ', e.Tipo_Dispositivo) as equipo, p.Monto_Total_Cotizado as costo 
                      FROM orden_trabajo ot JOIN equipo e ON ot.Equipo_ID_Equipo = e.ID_Equipo 
                      JOIN presupuesto p ON ot.Presupuesto_ID_Presupuesto = p.ID_Presupuesto 
                      WHERE ot.Estado_General = 'Listo para Entregar'"""
@@ -249,7 +249,7 @@ class OrdenTrabajo:
         cursor = DB.cursor(dictionary=True)
         try:
             sql = """SELECT ot.ID_OT as id_orden, ot.Estado_General as estado, ot.Fecha_Creacion as fecha, 
-                             ot.Diagnostico_Final as diagnostico, e.Marca_Modelo as equipo 
+                             ot.Diagnostico_Final as diagnostico, CONCAT(e.Marca, ' ', e.Modelo) as equipo 
                       FROM orden_trabajo ot 
                       JOIN equipo e ON ot.Equipo_ID_Equipo = e.ID_Equipo 
                       WHERE e.Numero_Serie = %s ORDER BY ot.Fecha_Creacion DESC"""
@@ -266,7 +266,7 @@ class OrdenTrabajo:
         cursor = DB.cursor(dictionary=True)
         try:
             sql = """SELECT ot.ID_OT as id_orden, ot.Fecha_Creacion as fecha, ot.Estado_General as estado, 
-                       CONCAT(e.Marca_Modelo, ' - ', e.Tipo_Dispositivo) as equipo, 
+                       CONCAT(e.Marca, ' ', e.Modelo, ' - ', e.Tipo_Dispositivo) as equipo, 
                        c.Nombre_Completo as cliente, e.Numero_Serie as nro_serie 
                 FROM orden_trabajo ot 
                 JOIN equipo e ON ot.Equipo_ID_Equipo = e.ID_Equipo 
@@ -287,8 +287,8 @@ class OrdenTrabajo:
         try:
             sql = """SELECT ot.ID_OT as id_orden, ot.Fecha_Creacion as fecha, ot.Estado_General as estado, 
                        ot.Diagnostico_Final as diagnostico, 
-                       CONCAT(e.Marca_Modelo, ' - ', e.Tipo_Dispositivo) as equipo, 
-                       e.Marca_Modelo as modelo,
+                       CONCAT(e.Marca, ' ', e.Modelo, ' - ', e.Tipo_Dispositivo) as equipo, 
+                       e.Marca as marca, e.Modelo as modelo,
                        e.Tipo_Dispositivo as tipo_dispositivo,
                        e.Numero_Serie as nro_serie, 
                        ot.Detalles_Visuales as detalles_visuales,

@@ -82,6 +82,10 @@ def cambiar_password_obligatorio():
             flash("Las contraseñas no coinciden.", "danger")
             return render_template('cambiar_password_obligatorio.html')
 
+        if len(nueva) < 6:
+            flash("La contraseña debe tener al menos 6 caracteres.", "danger")
+            return render_template('cambiar_password_obligatorio.html')
+
         # evitar volver a usar las default
         if nueva in ('123', '1234', 'admin123', 'recep123', 'tecnico123'):
             flash("Por favor, ingrese una contraseña personalizada que no sea por defecto.", "danger")
@@ -118,11 +122,28 @@ def portal_cliente():
 def responder_presupuesto(id_orden, respuesta):
     if 'cliente_id' not in session:
         return redirect(url_for('auth.inicio'))
+    
+    # validar que la respuesta sea una de las permitidas
+    if respuesta not in ('aprobar', 'rechazar'):
+        flash("Acción no válida.", "danger")
+        return redirect(url_for('auth.portal_cliente'))
         
     orden_completa = OrdenTrabajo.buscar_detalle_completo(id_orden)
     if not orden_completa or orden_completa['estado'] not in ('Esperando Aprobación', 'Esperando Respuesta'):
         flash("La orden no se encuentra en estado de aprobación.", "danger")
         return redirect(url_for('auth.portal_cliente'))
+    
+    # validar que la orden pertenezca al cliente logueado
+    from modelos.equipo import Equipo
+    cursor_check = DB.cursor(dictionary=True)
+    try:
+        cursor_check.execute("SELECT e.Cliente_ID_Cliente FROM orden_trabajo ot JOIN equipo e ON ot.Equipo_ID_Equipo = e.ID_Equipo WHERE ot.ID_OT = %s", (id_orden,))
+        row = cursor_check.fetchone()
+        if not row or row['Cliente_ID_Cliente'] != session['cliente_id']:
+            flash("No tiene permiso para responder esta orden.", "danger")
+            return redirect(url_for('auth.portal_cliente'))
+    finally:
+        cursor_check.close()
         
     est = "En Reparación" if respuesta == 'aprobar' else "Rechazado"
     est_presupuesto = "Aprobado" if respuesta == 'aprobar' else "Rechazado"
@@ -137,7 +158,9 @@ def responder_presupuesto(id_orden, respuesta):
         
     if orden_obj:
         orden_obj.actualizar_estado(est)
-    Seguimiento.registrar_hito(id_orden, est, f"El cliente {respuesta}ó el presupuesto.")
+    
+    accion_texto = "aprobó" if respuesta == 'aprobar' else "rechazó"
+    Seguimiento.registrar_hito(id_orden, est, f"El cliente {accion_texto} el presupuesto.")
     return redirect(url_for('auth.portal_cliente'))
 
 @bp_auth.route('/cambiar_password_cliente', methods=['POST'])
@@ -147,6 +170,14 @@ def cambiar_password_cliente():
     
     nueva = request.form.get('nueva_password')
     confirmar = request.form.get('confirmar_password')
+    
+    if not nueva or not confirmar:
+        flash("Todos los campos son obligatorios.", "danger")
+        return redirect(url_for('auth.portal_cliente'))
+    
+    if len(nueva) < 6:
+        flash("La contraseña debe tener al menos 6 caracteres.", "danger")
+        return redirect(url_for('auth.portal_cliente'))
     
     if nueva != confirmar:
         flash("Las contraseñas no coinciden.", "danger")
@@ -186,7 +217,10 @@ def solicitar_turno():
         email = request.form.get('email', '').strip()
         servicio = request.form.get('servicio', '').strip()
         presupuesto = request.form.get('presupuesto_estimado', '0')
-        garantia = int(request.form.get('garantia', '0'))
+        try:
+            garantia = int(request.form.get('garantia', '0'))
+        except (ValueError, TypeError):
+            garantia = 0
         
         # validaciones de entrada del cliente
         if not dni or not dni.isdigit() or not (7 <= len(dni) <= 11):

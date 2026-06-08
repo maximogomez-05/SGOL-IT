@@ -29,7 +29,7 @@ def crear_rutinas():
     CREATE PROCEDURE sp_obtener_ordenes_recientes()
     BEGIN
         SELECT ot.ID_OT, ot.Codigo_Tracking_web as Codigo_Tracking, 
-               eq.Marca_Modelo as Marca, eq.Tipo_Dispositivo as Modelo, ot.Estado_General, 
+               eq.Marca, eq.Modelo, ot.Estado_General, 
                DATE_FORMAT(ot.Fecha_Creacion, '%d/%m/%Y %H:%i') as fecha, cl.Nombre_Completo as Cliente
         FROM orden_trabajo ot
         JOIN equipo eq ON ot.Equipo_ID_Equipo = eq.ID_Equipo

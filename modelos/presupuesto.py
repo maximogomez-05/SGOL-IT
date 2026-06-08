@@ -9,18 +9,24 @@ class Presupuesto:
 
     def registrar(self):
         cursor = DB.cursor()
-        sql = """INSERT INTO Presupuesto 
-                 (Monto_Total_Cotizado, Estado_Presupuesto, Comprobante_Impreso, Presupuesto_Preliminar_Web) 
-                 VALUES (%s, %s, %s, %s)"""
-        val = (self.monto_total_cotizado, self.estado_presupuesto, self.comprobante_impreso, 
-               self.presupuesto_preliminar_web)
-        cursor.execute(sql, val)
-        DB.commit()
-        
-        # Necesitamos devolver el ID que MySQL le dio a este presupuesto para vincularlo a la OT
-        id_generado = cursor.lastrowid 
-        cursor.close()
-        return id_generado
+        try:
+            sql = """INSERT INTO Presupuesto 
+                     (Monto_Total_Cotizado, Estado_Presupuesto, Comprobante_Impreso, Presupuesto_Preliminar_Web) 
+                     VALUES (%s, %s, %s, %s)"""
+            val = (self.monto_total_cotizado, self.estado_presupuesto, self.comprobante_impreso, 
+                   self.presupuesto_preliminar_web)
+            cursor.execute(sql, val)
+            DB.commit()
+            return cursor.lastrowid
+        except Exception as e:
+            print(f"Error al registrar presupuesto: {e}")
+            try:
+                DB.conexion.rollback()
+            except:
+                pass
+            return None
+        finally:
+            cursor.close()
 
     @staticmethod
     def actualizar_estado(id_presupuesto, estado):

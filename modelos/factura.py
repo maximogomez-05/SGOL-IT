@@ -90,7 +90,7 @@ class Factura:
                             f.Orden_Trabajo_ID_OT as id_orden, f.Subtotal as subtotal, f.Monto_IVA as monto_iva,
                             COALESCE(f.Nro_Factura, '') as nro_factura,
                             CONCAT(c.Nombre_Completo, ' (', c.DNI_CUIL, ')') as cliente,
-                            e.Marca_Modelo as equipo
+                            CONCAT(e.Marca, ' ', e.Modelo) as equipo
                      FROM factura f
                      JOIN orden_trabajo ot ON f.Orden_Trabajo_ID_OT = ot.ID_OT
                      JOIN equipo e ON ot.Equipo_ID_Equipo = e.ID_Equipo
@@ -131,7 +131,7 @@ class Factura:
                             f.Orden_Trabajo_ID_OT as id_orden, f.Subtotal as subtotal, f.Monto_IVA as monto_iva,
                             COALESCE(f.Nro_Factura, '') as nro_factura,
                             c.Nombre_Completo as cliente_nombre, c.DNI_CUIL as cliente_doc, c.Email as cliente_email, c.Telefono as cliente_tel,
-                            e.Marca_Modelo as equipo, ot.Diagnostico_Final as diagnostico
+                            CONCAT(e.Marca, ' ', e.Modelo) as equipo, ot.Diagnostico_Final as diagnostico
                      FROM factura f
                      JOIN orden_trabajo ot ON f.Orden_Trabajo_ID_OT = ot.ID_OT
                      JOIN equipo e ON ot.Equipo_ID_Equipo = e.ID_Equipo

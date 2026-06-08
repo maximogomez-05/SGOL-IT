@@ -39,7 +39,7 @@ def gestion_personal():
 
 @bp_personal.route('/toggle_empleado/<int:id_emp>/<accion>', methods=['POST'])
 def toggle_empleado(id_emp, accion):
-    if 'usuario_id' not in session or session['rol_id'] != 1: 
+    if 'usuario_id' not in session or int(session.get('rol_id', 0) or 0) != 1: 
         return redirect(url_for('auth.inicio'))
     if id_emp == session['usuario_id']:
         flash("No puedes modificar tu propia cuenta.", "danger")

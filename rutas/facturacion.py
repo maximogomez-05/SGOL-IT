@@ -29,6 +29,12 @@ def facturar_orden(id_orden):
     if 'usuario_id' not in session or int(session.get('rol_id', 0) or 0) not in (1, 2): 
         return redirect(url_for('auth.inicio'))
     orden = OrdenTrabajo.buscar_por_id(id_orden)
+    if not orden:
+        flash("La orden no existe.", "danger")
+        return redirect(url_for('ordenes.entregas_pendientes'))
+    if orden.get('estado') != 'Listo para Entregar':
+        flash("Solo se pueden facturar órdenes en estado 'Listo para Entregar'.", "danger")
+        return redirect(url_for('ordenes.entregas_pendientes'))
     return render_template('facturar_orden.html', orden=orden)
 
 @bp_facturacion.route('/procesar_pago_avanzado/<int:id_orden>', methods=['POST'])
@@ -40,8 +46,40 @@ def procesar_pago_avanzado(id_orden):
     tipo_factura = request.form.get('tipo_factura', 'B')
     documento = request.form.get('documento_cliente', '')
     
+    # validar método de pago contra whitelist
+    metodos_validos = ('Efectivo', 'Tarjeta Débito', 'Tarjeta Crédito', 'Transferencia')
+    if not metodo or metodo not in metodos_validos:
+        flash("Método de pago inválido.", "danger")
+        return redirect(url_for('facturacion.facturar_orden', id_orden=id_orden))
+    
+    # validar tipo de factura
+    if tipo_factura not in ('A', 'B', 'C'):
+        flash("Tipo de factura inválido. Debe ser A, B o C.", "danger")
+        return redirect(url_for('facturacion.facturar_orden', id_orden=id_orden))
+    
     orden = OrdenTrabajo.buscar_por_id(id_orden)
+    if not orden:
+        flash("La orden no existe.", "danger")
+        return redirect(url_for('ordenes.entregas_pendientes'))
+    
+    # validar que la orden esté en estado correcto
+    if orden.get('estado') != 'Listo para Entregar':
+        flash("Solo se pueden facturar órdenes en estado 'Listo para Entregar'.", "danger")
+        return redirect(url_for('ordenes.entregas_pendientes'))
+    
+    # verificar que no exista ya una factura para esta orden (previene duplicados)
+    facturas_existentes = Factura.listar_todas()
+    for f in facturas_existentes:
+        if f.get('id_orden') == id_orden:
+            flash("Esta orden ya fue facturada.", "warning")
+            return redirect(url_for('facturacion.ver_factura', id_factura=f['id_factura']))
+    
     monto = orden['costo'] if orden and orden['costo'] else 0.0
+    
+    # validar monto > 0
+    if not monto or float(monto) <= 0:
+        flash("Error: El monto a facturar debe ser mayor a $0. Verifique que la orden tenga un presupuesto aprobado.", "danger")
+        return redirect(url_for('facturacion.facturar_orden', id_orden=id_orden))
     
     fact = Factura(id_orden, monto, metodo, tipo_factura, documento)
     id_factura = fact.registrar()

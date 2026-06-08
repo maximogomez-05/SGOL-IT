@@ -114,10 +114,12 @@ class DetalleOrden:
 
             for item in items:
                 if item['tipo_item'] == 'Repuesto_Fisico':
-                    # Descontar stock
+                    # Descontar stock solo si hay suficiente para evitar stock negativo
                     cursor.execute("""UPDATE catalogo_inventario 
                                      SET Stock_Disponible = Stock_Disponible - %s 
-                                     WHERE ID_Item = %s""", (item['cantidad'], item['id_item']))
+                                     WHERE ID_Item = %s AND Stock_Disponible >= %s""", (item['cantidad'], item['id_item'], item['cantidad']))
+                    if cursor.rowcount == 0:
+                        raise Exception(f"Stock insuficiente para el ítem ID {item['id_item']}. No se pudo consumir.")
 
             # Marcar detalles como Consumido
             cursor.execute("UPDATE detalle_orden SET Estado_Detalle = 'Consumido' WHERE Orden_Trabajo_ID_OT = %s AND Estado_Detalle IN ('Reservado', 'Pendiente')", (id_orden,))

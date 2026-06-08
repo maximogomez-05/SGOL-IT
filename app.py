@@ -73,4 +73,4 @@ def pagina_no_encontrada(e):
     return render_template('login.html', error="Página no encontrada."), 404
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5050)

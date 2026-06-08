@@ -37,41 +37,41 @@ PASSWORD_TEMPORAL = "123"
 # Equipos variados con servicios asignados
 EQUIPOS_Y_ORDENES = [
     # Juan Carlos Martinez - 2 ordenes (una finalizada, una en curso)
-    {"cliente_idx": 0, "equipo": {"nro_serie": "SN-DELL-001", "modelo": "Dell Inspiron 3510", "tipo": "Notebook"},
+    {"cliente_idx": 0, "equipo": {"nro_serie": "SN-DELL-001", "marca": "Dell", "modelo": "Inspiron 3510", "tipo": "Notebook"},
      "orden": {"servicio": "Limpieza y Mantenimiento", "estado": "Finalizado", "garantia": 0, "diagnostico": "Equipo con acumulacion de polvo en ventiladores y disipador. Se realizo limpieza integral y cambio de pasta termica. Temperaturas normalizadas.", "dias_atras": 15}},
-    {"cliente_idx": 0, "equipo": {"nro_serie": "SN-DELL-002", "modelo": "Dell Latitude 5420", "tipo": "Notebook"},
+    {"cliente_idx": 0, "equipo": {"nro_serie": "SN-DELL-002", "marca": "Dell", "modelo": "Latitude 5420", "tipo": "Notebook"},
      "orden": {"servicio": "Lentitud extrema", "estado": "En Diagnóstico", "garantia": 0, "diagnostico": None, "dias_atras": 2}},
 
     # Maria Laura Gonzalez - 3 ordenes (2 finalizadas, 1 esperando respuesta)
-    {"cliente_idx": 1, "equipo": {"nro_serie": "SN-HP-003", "modelo": "HP Pavilion 15-eh1023", "tipo": "Notebook"},
+    {"cliente_idx": 1, "equipo": {"nro_serie": "SN-HP-003", "marca": "HP", "modelo": "Pavilion 15-eh1023", "tipo": "Notebook"},
      "orden": {"servicio": "Formateo e Instalación OS", "estado": "Finalizado", "garantia": 0, "diagnostico": "Se realizo backup de datos, formateo completo e instalacion de Windows 11 Pro con drivers actualizados.", "dias_atras": 30}},
-    {"cliente_idx": 1, "equipo": {"nro_serie": "SN-HP-004", "modelo": "HP ProDesk 400 G7", "tipo": "PC de Escritorio"},
+    {"cliente_idx": 1, "equipo": {"nro_serie": "SN-HP-004", "marca": "HP", "modelo": "ProDesk 400 G7", "tipo": "PC de Escritorio"},
      "orden": {"servicio": "No enciende", "estado": "Finalizado", "garantia": 0, "diagnostico": "Fuente de alimentacion defectuosa (capacitor inflado). Se reemplazo fuente ATX 500W. Equipo operativo.", "dias_atras": 20}},
-    {"cliente_idx": 1, "equipo": {"nro_serie": "SN-HP-005", "modelo": "HP 205 G4 AiO", "tipo": "All-in-One"},
+    {"cliente_idx": 1, "equipo": {"nro_serie": "SN-HP-005", "marca": "HP", "modelo": "205 G4 AiO", "tipo": "All-in-One"},
      "orden": {"servicio": "Lentitud extrema", "estado": "Esperando Respuesta", "garantia": 0, "diagnostico": "Disco HDD con sectores defectuosos. Se recomienda reemplazo por SSD 480GB.", "dias_atras": 3}},
 
     # Lucas Andres Fernandez - 1 orden (en reparacion)
-    {"cliente_idx": 2, "equipo": {"nro_serie": "SN-LEN-006", "modelo": "Lenovo IdeaPad 3 15ALC6", "tipo": "Notebook"},
+    {"cliente_idx": 2, "equipo": {"nro_serie": "SN-LEN-006", "marca": "Lenovo", "modelo": "IdeaPad 3 15ALC6", "tipo": "Notebook"},
      "orden": {"servicio": "No enciende", "estado": "En Reparación", "garantia": 1, "diagnostico": "Falla en chip de carga del motherboard. Se procede a microsoldadura BGA.", "dias_atras": 5}},
 
     # Valentina Lopez Suarez - 2 ordenes (1 finalizada, 1 listo para entregar)
-    {"cliente_idx": 3, "equipo": {"nro_serie": "SN-ASUS-007", "modelo": "ASUS VivoBook X515JA", "tipo": "Notebook"},
+    {"cliente_idx": 3, "equipo": {"nro_serie": "SN-ASUS-007", "marca": "ASUS", "modelo": "VivoBook X515JA", "tipo": "Notebook"},
      "orden": {"servicio": "Limpieza y Mantenimiento", "estado": "Finalizado", "garantia": 0, "diagnostico": "Limpieza preventiva completa. Sin fallas detectadas.", "dias_atras": 45}},
-    {"cliente_idx": 3, "equipo": {"nro_serie": "SN-EPSON-008", "modelo": "Epson L3250 EcoTank", "tipo": "Impresora"},
+    {"cliente_idx": 3, "equipo": {"nro_serie": "SN-EPSON-008", "marca": "Epson", "modelo": "L3250 EcoTank", "tipo": "Impresora"},
      "orden": {"servicio": "Otro", "estado": "Listo para Entregar", "garantia": 0, "diagnostico": "Cabezal de impresion obstruido. Se realizo limpieza quimica y purga de tintas. Test de impresion satisfactorio.", "dias_atras": 4}},
 
     # Santiago Nicolas Ramirez - 1 orden (para revision)
-    {"cliente_idx": 4, "equipo": {"nro_serie": "SN-ACER-009", "modelo": "Acer Nitro 5 AN515-57", "tipo": "Notebook"},
+    {"cliente_idx": 4, "equipo": {"nro_serie": "SN-ACER-009", "marca": "Acer", "modelo": "Nitro 5 AN515-57", "tipo": "Notebook"},
      "orden": {"servicio": "Lentitud extrema", "estado": "Para Revisión", "garantia": 0, "diagnostico": None, "dias_atras": 1}},
 
     # Camila Sofia Torres - 2 ordenes (ambas finalizadas)
-    {"cliente_idx": 5, "equipo": {"nro_serie": "SN-MSI-010", "modelo": "MSI Modern 14 B11MOU", "tipo": "Notebook"},
+    {"cliente_idx": 5, "equipo": {"nro_serie": "SN-MSI-010", "marca": "MSI", "modelo": "Modern 14 B11MOU", "tipo": "Notebook"},
      "orden": {"servicio": "Formateo e Instalación OS", "estado": "Finalizado", "garantia": 0, "diagnostico": "Formateo completo con instalacion dual boot Windows 11 / Ubuntu 22.04.", "dias_atras": 60}},
-    {"cliente_idx": 5, "equipo": {"nro_serie": "SN-CUSTOM-011", "modelo": "PC Gamer Custom (Ryzen 5 5600X)", "tipo": "PC de Escritorio"},
+    {"cliente_idx": 5, "equipo": {"nro_serie": "SN-CUSTOM-011", "marca": "Custom", "modelo": "PC Gamer (Ryzen 5 5600X)", "tipo": "PC de Escritorio"},
      "orden": {"servicio": "Limpieza y Mantenimiento", "estado": "Finalizado", "garantia": 0, "diagnostico": "Limpieza integral, cambio de pasta termica en CPU y GPU, reorganizacion de cables internos.", "dias_atras": 25}},
 
     # Mateo Agustin Diaz - 1 orden (en diagnostico)
-    {"cliente_idx": 6, "equipo": {"nro_serie": "SN-SAMSUNG-012", "modelo": "Samsung Galaxy Book2 Pro", "tipo": "Notebook"},
+    {"cliente_idx": 6, "equipo": {"nro_serie": "SN-SAMSUNG-012", "marca": "Samsung", "modelo": "Galaxy Book2 Pro", "tipo": "Notebook"},
      "orden": {"servicio": "No enciende", "estado": "En Diagnóstico", "garantia": 1, "diagnostico": None, "dias_atras": 1}},
 ]
 
@@ -111,11 +111,11 @@ def insertar_equipo(cursor, datos, id_cliente):
         return existente[0]
     
     cursor.execute(
-        "INSERT INTO equipo (Numero_Serie, Marca_Modelo, Tipo_Dispositivo, Cliente_ID_Cliente) VALUES (%s, %s, %s, %s)",
-        (datos['nro_serie'], datos['modelo'], datos['tipo'], id_cliente)
+        "INSERT INTO equipo (Numero_Serie, Marca, Modelo, Tipo_Dispositivo, Cliente_ID_Cliente) VALUES (%s, %s, %s, %s, %s)",
+        (datos['nro_serie'], datos['marca'], datos['modelo'], datos['tipo'], id_cliente)
     )
     id_equipo = cursor.lastrowid
-    print(f"  [NUEVO] Equipo {datos['modelo']} ({datos['tipo']}) creado con ID {id_equipo}")
+    print(f"  [NUEVO] Equipo {datos['marca']} {datos['modelo']} ({datos['tipo']}) creado con ID {id_equipo}")
     return id_equipo
 
 
@@ -169,7 +169,7 @@ def insertar_orden(cursor, id_equipo, id_empleado, datos_orden):
            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
         (datos_orden['estado'], fecha_creacion.strftime('%Y-%m-%d %H:%M:%S'), 
          id_equipo, id_empleado, codigo, datos_orden['garantia'], 
-         datos_orden['servicio'], datos_orden.get('diagnostico'))
+         datos_orden.get('servicio'), datos_orden.get('diagnostico'))
     )
     id_ot = cursor.lastrowid
     print(f"  [ORDEN] OT #{id_ot} - {datos_orden['servicio']} - Estado: {datos_orden['estado']} - Codigo: {codigo}")

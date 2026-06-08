@@ -24,6 +24,7 @@ class Empleado:
             self.id_empleado = cursor.lastrowid
             
             # Registrar el legajo
+            import datetime
             fecha_hoy = datetime.date.today().strftime('%Y-%m-%d')
             sql_legajo = """INSERT INTO legajo_empleado (Empleado_ID_Empleado, Roles_ID_Rol, Fecha_Ingreso) 
                             VALUES (%s, %s, %s)"""
