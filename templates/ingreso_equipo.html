@@ -51,15 +51,19 @@
 
                     <h5 class="text-info fw-bold mb-3">Información del Equipo</h5>
                     <div class="row g-3 mb-4">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label text-muted small">Número de Serie</label>
-                            <input type="text" name="nro_serie" class="form-control" placeholder="Ej: SN-987654321" required>
+                            <input type="text" name="nro_serie" class="form-control" placeholder="Ej: SN-98765" required>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label text-muted small">Marca y Modelo</label>
-                            <input type="text" name="modelo" class="form-control" placeholder="Ej: Dell Inspiron 3000" required>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small">Marca</label>
+                            <input type="text" name="marca" class="form-control" placeholder="Ej: Dell" required>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small">Modelo</label>
+                            <input type="text" name="modelo" class="form-control" placeholder="Ej: Inspiron 3000" required>
+                        </div>
+                        <div class="col-md-3">
                             <label class="form-label text-muted small">Tipo de Dispositivo</label>
                             <select name="tipo" class="form-select" required>
                                 <option value="" disabled selected>Seleccione...</option>
