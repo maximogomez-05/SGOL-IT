@@ -138,6 +138,55 @@
         
         // Ejecutar al cargar la página por si hay valores preseleccionados
         actualizarEstimacion();
+
+        // Lógica de Autocompletado de Cliente
+        document.querySelector('input[name="dni"]').addEventListener('blur', function() {
+            var dni = this.value.trim();
+            if(dni.length >= 7) {
+                fetch('/api/cliente/' + dni)
+                .then(response => response.json())
+                .then(data => {
+                    const nombre = document.querySelector('input[name="nombre"]');
+                    const email = document.querySelector('input[name="email"]');
+                    const telefono = document.querySelector('input[name="telefono"]');
+                    
+                    if(data.encontrado) {
+                        nombre.value = data.nombre;
+                        nombre.readOnly = true;
+                        nombre.classList.add('bg-secondary', 'text-white', 'border-0');
+                        
+                        email.value = data.email;
+                        email.readOnly = true;
+                        email.classList.add('bg-secondary', 'text-white', 'border-0');
+                        
+                        telefono.value = data.telefono;
+                        telefono.readOnly = true;
+                        telefono.classList.add('bg-secondary', 'text-white', 'border-0');
+                    } else {
+                        nombre.readOnly = false;
+                        nombre.classList.remove('bg-secondary', 'text-white', 'border-0');
+                        email.readOnly = false;
+                        email.classList.remove('bg-secondary', 'text-white', 'border-0');
+                        telefono.readOnly = false;
+                        telefono.classList.remove('bg-secondary', 'text-white', 'border-0');
+                    }
+                })
+                .catch(err => console.error("Error al buscar cliente:", err));
+            } else {
+                const nombre = document.querySelector('input[name="nombre"]');
+                const email = document.querySelector('input[name="email"]');
+                const telefono = document.querySelector('input[name="telefono"]');
+                
+                if(nombre) {
+                    nombre.readOnly = false;
+                    nombre.classList.remove('bg-secondary', 'text-white', 'border-0');
+                    email.readOnly = false;
+                    email.classList.remove('bg-secondary', 'text-white', 'border-0');
+                    telefono.readOnly = false;
+                    telefono.classList.remove('bg-secondary', 'text-white', 'border-0');
+                }
+            }
+        });
     </script>
 </body>
 </html>

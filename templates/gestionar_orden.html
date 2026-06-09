@@ -146,7 +146,7 @@
                                     {% elif orden.estado in ('En Reparación', 'Esperando Repuestos', 'Reparando', 'En Testing') %}
                                         <option value="En Reparación" {% if orden.estado == 'En Reparación' %}selected{% endif %}>En Reparación (General)</option>
                                         <option value="Esperando Repuestos" {% if orden.estado == 'Esperando Repuestos' %}selected{% endif %}>Esperando Repuestos</option>
-                                        <option value="Reparando" {% if orden.estado == 'Reparando' %}selected{% endif %}>Reparando</option>
+
                                         <option value="En Testing" {% if orden.estado == 'En Testing' %}selected{% endif %}>En Testing</option>
                                     {% endif %}
                                 </select>

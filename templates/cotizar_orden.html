@@ -74,9 +74,10 @@
 
                         <form action="/cotizar_orden/{{ orden.id_orden }}" method="POST" class="mt-4">
                             {% if detalles %}
-                                <button type="submit" class="btn btn-success w-100 fw-bold py-2 fs-5">CONFIRMAR Y ENVIAR AL CLIENTE</button>
+                                <button type="submit" name="action" value="cotizar" class="btn btn-success w-100 fw-bold py-2 fs-5">CONFIRMAR Y ENVIAR AL CLIENTE</button>
                             {% else %}
-                                <button type="submit" class="btn btn-warning w-100 fw-bold py-2" disabled>NO SE PUEDE PRESUPUESTAR SIN ÍTEMS</button>
+                                <button type="button" class="btn btn-warning w-100 fw-bold py-2 mb-2" disabled>NO SE PUEDE PRESUPUESTAR SIN ÍTEMS</button>
+                                <button type="submit" name="action" value="devolver" class="btn btn-outline-danger w-100 fw-bold py-2">DEVOLVER A LABORATORIO (Faltan ítems)</button>
                             {% endif %}
                         </form>
                     </div>

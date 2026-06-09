@@ -43,7 +43,7 @@
                             <label class="form-label text-muted small">Teléfono</label>
                             <input type="text" name="telefono" class="form-control" pattern="\d{8,15}" title="Ingrese código de área y número, sin espacios ni guiones" value="{{ datos.telefono if datos else '' }}" required>
                         </div>
-                        <div class="col-md-12">
+                        <div class="col-md-12" id="password_container">
                             <label class="form-label text-muted small">Contraseña Web (Para que el cliente siga su trámite)</label>
                             <input type="password" name="password_web" class="form-control" placeholder="Cree una contraseña temporal..." minlength="6" required>
                         </div>
@@ -173,6 +173,68 @@
         
         // Ejecutar al cargar la página para procesar datos preseleccionados
         document.addEventListener('DOMContentLoaded', actualizarEstimacion);
+
+        // Lógica de Autocompletado de Cliente
+        document.querySelector('input[name="dni"]').addEventListener('blur', function() {
+            var dni = this.value.trim();
+            if(dni.length >= 7) {
+                fetch('/api/cliente/' + dni)
+                .then(response => response.json())
+                .then(data => {
+                    const nombre = document.querySelector('input[name="nombre"]');
+                    const email = document.querySelector('input[name="email"]');
+                    const telefono = document.querySelector('input[name="telefono"]');
+                    const passContainer = document.getElementById('password_container');
+                    const passInput = document.querySelector('input[name="password_web"]');
+                    
+                    if(data.encontrado) {
+                        nombre.value = data.nombre;
+                        nombre.readOnly = true;
+                        nombre.classList.add('bg-secondary', 'text-white', 'border-0');
+                        
+                        email.value = data.email;
+                        email.readOnly = true;
+                        email.classList.add('bg-secondary', 'text-white', 'border-0');
+                        
+                        telefono.value = data.telefono;
+                        telefono.readOnly = true;
+                        telefono.classList.add('bg-secondary', 'text-white', 'border-0');
+                        
+                        if(passContainer) passContainer.style.display = 'none';
+                        if(passInput) passInput.required = false;
+                    } else {
+                        nombre.readOnly = false;
+                        nombre.classList.remove('bg-secondary', 'text-white', 'border-0');
+                        email.readOnly = false;
+                        email.classList.remove('bg-secondary', 'text-white', 'border-0');
+                        telefono.readOnly = false;
+                        telefono.classList.remove('bg-secondary', 'text-white', 'border-0');
+                        
+                        if(passContainer) passContainer.style.display = 'block';
+                        if(passInput) passInput.required = true;
+                    }
+                })
+                .catch(err => console.error("Error al buscar cliente:", err));
+            } else {
+                const nombre = document.querySelector('input[name="nombre"]');
+                const email = document.querySelector('input[name="email"]');
+                const telefono = document.querySelector('input[name="telefono"]');
+                const passContainer = document.getElementById('password_container');
+                const passInput = document.querySelector('input[name="password_web"]');
+                
+                if(nombre) {
+                    nombre.readOnly = false;
+                    nombre.classList.remove('bg-secondary', 'text-white', 'border-0');
+                    email.readOnly = false;
+                    email.classList.remove('bg-secondary', 'text-white', 'border-0');
+                    telefono.readOnly = false;
+                    telefono.classList.remove('bg-secondary', 'text-white', 'border-0');
+                }
+                
+                if(passContainer) passContainer.style.display = 'block';
+                if(passInput) passInput.required = true;
+            }
+        });
     </script>
 </body>
 </html>

@@ -47,14 +47,15 @@ def procesar_pago_avanzado(id_orden):
     documento = request.form.get('documento_cliente', '')
     
     # validar método de pago contra whitelist
-    metodos_validos = ('Efectivo', 'Tarjeta Débito', 'Tarjeta Crédito', 'Transferencia')
+    metodos_validos = ('Efectivo', 'Tarjeta de Débito', 'Tarjeta de Crédito', 'Transferencia')
     if not metodo or metodo not in metodos_validos:
         flash("Método de pago inválido.", "danger")
         return redirect(url_for('facturacion.facturar_orden', id_orden=id_orden))
     
     # validar tipo de factura
-    if tipo_factura not in ('A', 'B', 'C'):
-        flash("Tipo de factura inválido. Debe ser A, B o C.", "danger")
+    tipos_validos = ('A', 'B', 'C', 'A-CBU', 'A-RET')
+    if tipo_factura not in tipos_validos:
+        flash("Tipo de factura inválido.", "danger")
         return redirect(url_for('facturacion.facturar_orden', id_orden=id_orden))
     
     orden = OrdenTrabajo.buscar_por_id(id_orden)

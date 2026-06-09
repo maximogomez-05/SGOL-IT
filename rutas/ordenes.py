@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash, current_app, jsonify
 from config.database import DB
 import datetime
 import re
@@ -15,6 +15,13 @@ from modelos.inventario import Inventario
 from modelos.control_calidad import ControlCalidad
 
 bp_ordenes = Blueprint('ordenes', __name__)
+
+@bp_ordenes.route('/api/cliente/<dni>')
+def api_cliente(dni):
+    cl = Cliente.buscar_por_dni(dni)
+    if cl:
+        return jsonify({"encontrado": True, "nombre": cl['nombre'], "email": cl['email'], "telefono": cl['telefono']})
+    return jsonify({"encontrado": False}), 404
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
 def allowed_file(filename):
@@ -149,9 +156,13 @@ def ingreso_equipo():
         if not em or not re.match(r"^[\w\.\+-]+@[\w\.-]+\.\w+$", em):
             flash("Formato de email inválido.", "danger")
             return redirect(url_for('ordenes.ingreso_equipo'))
-        if not pw or len(pw) < 6:
-            flash("La clave web debe tener al menos 6 caracteres.", "danger")
+            
+        cl = Cliente.buscar_por_dni(dni)
+        
+        if not cl and (not pw or len(pw) < 6):
+            flash("La clave web debe tener al menos 6 caracteres para clientes nuevos.", "danger")
             return redirect(url_for('ordenes.ingreso_equipo'))
+            
         if not ns or not re.match(r"^[a-zA-Z0-9\-_/\s]+$", ns):
             flash("Número de serie inválido.", "danger")
             return redirect(url_for('ordenes.ingreso_equipo'))
@@ -192,14 +203,9 @@ def ingreso_equipo():
 
         try:
             # busca o registra el cliente en la BD
-            cl = Cliente.buscar_por_dni(dni)
             id_c = cl['id'] if cl else None
             if not id_c:
                 id_c = Cliente(dni, nom, em, tel, pw).registrar()
-            else:
-                # Si el cliente ya existe (ej: por registrar un turno previo), actualizamos su contraseña web
-                # a la nueva contraseña temporal provista en la recepción
-                Cliente.actualizar_password(id_c, pw)
                 
             # busca o registra el equipo
             eq_existente = Equipo.buscar_por_numero_serie(ns)
@@ -267,6 +273,17 @@ def cotizar_orden(id_orden):
     total = sum(d['subtotal'] for d in cursor.fetchall())
     
     if request.method == 'POST':
+        action = request.form.get('action')
+        
+        if action == 'devolver':
+            orden_obj = OrdenTrabajo.obtener_por_id(id_orden)
+            if orden_obj:
+                orden_obj.actualizar_estado('En Diagnóstico')
+            Seguimiento.registrar_hito(id_orden, "En Diagnóstico", "Recepción devolvió la orden a laboratorio porque faltan ítems en el presupuesto.")
+            flash("Orden devuelta a laboratorio exitosamente. El técnico ahora puede agregar los ítems faltantes.", "success")
+            cursor.close()
+            return redirect(url_for('ordenes.presupuestos_pendientes'))
+            
         if total <= 0:
             flash("Error: El total del presupuesto debe ser mayor a $0. Agregue al menos un repuesto o servicio antes de generar la cotización.", "danger")
             cursor.close()
