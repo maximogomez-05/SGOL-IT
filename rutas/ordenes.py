@@ -385,6 +385,9 @@ def gestionar_orden(id_orden):
         elif orden['estado'] in ('Para Revisión', 'En Diagnóstico'):
             diag = request.form.get('diagnostico')
             if diag:
+                if "<" in diag or ">" in diag:
+                    flash("El diagnóstico contiene caracteres HTML no permitidos.", "danger")
+                    return redirect(url_for('ordenes.gestionar_orden', id_orden=id_orden))
                 orden_obj.actualizar_estado('Esperando Aprobación')
                 orden_obj.actualizar_diagnostico(diag)
                 Seguimiento.registrar_hito(id_orden, "Diagnóstico Listo", diag)
@@ -393,12 +396,14 @@ def gestionar_orden(id_orden):
                 flash("El diagnóstico es obligatorio.", "danger")
                 
         elif orden['estado'] in ('En Reparación', 'Esperando Repuestos', 'Reparando', 'En Testing'):
-            t = request.form.get('temperaturas')
-            b = request.form.get('benchmark')
-            o = request.form.get('observaciones')
+            t = request.form.get('temperaturas', '').strip()
+            b = request.form.get('benchmark', '').strip()
+            o = request.form.get('observaciones', '').strip()
             
             if not t or not b or not o:
                 flash("Error: Todos los campos del Control de Calidad son obligatorios para entregar el equipo.", "danger")
+            elif "<" in t or ">" in t or "<" in b or ">" in b or "<" in o or ">" in o:
+                flash("Error: Los campos del Control de Calidad contienen caracteres HTML no permitidos.", "danger")
             else:
                 try:
                     ControlCalidad(id_orden, session['usuario_id'], t, b, o).registrar()

@@ -54,6 +54,9 @@ def enviar_mensaje(id_orden):
 
     if not texto:
         return jsonify({"error": "El mensaje no puede estar vacio"}), 400
+        
+    if "<" in texto or ">" in texto:
+        return jsonify({"error": "El mensaje contiene caracteres no permitidos"}), 400
 
     # construir el mensaje segun quien envie
     if 'cliente_id' in session:

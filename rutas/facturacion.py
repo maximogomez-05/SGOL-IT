@@ -57,6 +57,18 @@ def procesar_pago_avanzado(id_orden):
     if tipo_factura not in tipos_validos:
         flash("Tipo de factura inválido.", "danger")
         return redirect(url_for('facturacion.facturar_orden', id_orden=id_orden))
+        
+    # validar documento del cliente
+    import re
+    if tipo_factura.startswith('A'):
+        if not documento or not re.match(r'^\d{11}$', documento):
+            flash("Para Facturas tipo A, el CUIT es obligatorio y debe tener exactamente 11 números.", "danger")
+            return redirect(url_for('facturacion.facturar_orden', id_orden=id_orden))
+    else:
+        if documento and not re.match(r'^\d+$', documento):
+            flash("El número de documento solo puede contener números.", "danger")
+            return redirect(url_for('facturacion.facturar_orden', id_orden=id_orden))
+    
     
     orden = OrdenTrabajo.buscar_por_id(id_orden)
     if not orden:

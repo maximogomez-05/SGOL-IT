@@ -79,12 +79,11 @@ def dashboard():
 
         # 6. desempeño de tecnicos (solo rol 3 = técnico)
         cursor.execute("""
-            SELECT e.Nombre_Completo as tecnico, COUNT(ot.ID_OT) as cantidad
-            FROM orden_trabajo ot
-            JOIN empleado e ON ot.Empleado_ID_Empleado = e.ID_Empleado
-            JOIN legajo_empleado le ON e.ID_Empleado = le.Empleado_ID_Empleado
-            WHERE ot.Estado_General = 'Finalizado' AND le.Roles_ID_Rol = 3
-            GROUP BY e.Nombre_Completo
+            SELECT e.Nombre_Completo as tecnico, 
+                   (SELECT COUNT(*) FROM orden_trabajo ot WHERE ot.Empleado_ID_Empleado = e.ID_Empleado AND ot.Estado_General = 'Finalizado') as cantidad
+            FROM empleado e
+            RIGHT JOIN legajo_empleado le ON e.ID_Empleado = le.Empleado_ID_Empleado
+            WHERE le.Roles_ID_Rol = 3
             ORDER BY cantidad DESC
         """)
         stats['tecnico_labels'] = []
