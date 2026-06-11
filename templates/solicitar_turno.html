@@ -12,6 +12,13 @@
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card glass-panel p-4">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                      {% if messages %}
+                        {% for category, message in messages %}
+                          <div class="alert alert-{{ category }} shadow-sm fw-bold">{{ message }}</div>
+                        {% endfor %}
+                      {% endif %}
+                    {% endwith %}
                     <form action="/solicitar_turno" method="POST">
                         <h5 class="fw-bold text-info mb-3">1. Diagnóstico Preliminar</h5>
                         <div class="mb-3">
@@ -41,15 +48,15 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label text-muted small">DNI / CUIL</label>
-                                <input type="text" name="dni" class="form-control" required>
+                                <input type="text" name="dni" class="form-control" pattern="\d{7,11}" title="Ingrese solo números (entre 7 y 11 dígitos)" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label text-muted small">Nombre Completo</label>
-                                <input type="text" name="nombre" class="form-control" required>
+                                <input type="text" name="nombre" class="form-control" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" title="El nombre no puede contener números ni símbolos" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label text-muted small">Teléfono</label>
-                                <input type="text" name="telefono" class="form-control" required>
+                                <input type="text" name="telefono" class="form-control" pattern="\d{8,15}" title="Ingrese código de área y número, sin espacios ni guiones" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label text-muted small">Email</label>

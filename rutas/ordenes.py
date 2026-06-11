@@ -166,6 +166,9 @@ def ingreso_equipo():
         if not ns or not re.match(r"^[a-zA-Z0-9\-_/\s]+$", ns):
             flash("Número de serie inválido.", "danger")
             return redirect(url_for('ordenes.ingreso_equipo'))
+        if not marca or "<" in marca or ">" in marca:
+            flash("Marca contiene caracteres inválidos.", "danger")
+            return redirect(url_for('ordenes.ingreso_equipo'))
         if not mod or "<" in mod or ">" in mod:
             flash("Modelo contiene caracteres inválidos.", "danger")
             return redirect(url_for('ordenes.ingreso_equipo'))
@@ -174,6 +177,13 @@ def ingreso_equipo():
             return redirect(url_for('ordenes.ingreso_equipo'))
         if not servicio:
             flash("Debe seleccionar un tipo de servicio.", "danger")
+            return redirect(url_for('ordenes.ingreso_equipo'))
+        servicios_validos = ('Limpieza y Mantenimiento', 'Formateo e Instalación OS', 'No enciende', 'Lentitud extrema', 'Otro')
+        if servicio not in servicios_validos:
+            flash("Servicio seleccionado no válido.", "danger")
+            return redirect(url_for('ordenes.ingreso_equipo'))
+        if garantia not in (0, 1):
+            flash("Valor de garantía no válido.", "danger")
             return redirect(url_for('ordenes.ingreso_equipo'))
         if "<" in detalles_visuales or ">" in detalles_visuales:
             flash("Las observaciones contienen caracteres inválidos.", "danger")

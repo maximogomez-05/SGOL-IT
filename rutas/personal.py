@@ -41,6 +41,9 @@ def gestion_personal():
 def toggle_empleado(id_emp, accion):
     if 'usuario_id' not in session or int(session.get('rol_id', 0) or 0) != 1: 
         return redirect(url_for('auth.inicio'))
+    if accion not in ('activar', 'desactivar'):
+        flash("Acción no válida.", "danger")
+        return redirect(url_for('personal.gestion_personal'))
     if id_emp == session['usuario_id']:
         flash("No puedes modificar tu propia cuenta.", "danger")
     else:

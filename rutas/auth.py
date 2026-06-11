@@ -238,6 +238,19 @@ def solicitar_turno():
         if not servicio:
             flash("Debe seleccionar un servicio.", "danger")
             return render_template('solicitar_turno.html')
+        servicios_validos = ('Limpieza y Mantenimiento', 'Formateo e Instalación OS', 'No enciende', 'Lentitud extrema', 'Otro')
+        if servicio not in servicios_validos:
+            flash("Servicio seleccionado no válido.", "danger")
+            return render_template('solicitar_turno.html')
+        try:
+            presupuesto = float(presupuesto)
+            if presupuesto < 0:
+                presupuesto = 0
+        except (ValueError, TypeError):
+            presupuesto = 0
+        if garantia not in (0, 1):
+            flash("Valor de garantía no válido.", "danger")
+            return render_template('solicitar_turno.html')
             
         try:
             # 1. Buscar o registrar cliente primero
