@@ -39,7 +39,7 @@
                         <tr>
                             <th class="ps-4">Fecha</th>
                             <th>Cliente</th>
-                            <th>DNI / Telefono</th>
+                            <th>DNI / Teléfono</th>
                             <th>Servicio Solicitado</th>
                             <th>Presup. Estimado</th>
                             <th class="text-center pe-4">Acciones</th>
@@ -55,9 +55,9 @@
                                 <td>
                                     {{ t.Servicio }}
                                     {% if t.Garantia %}
-                                        <br><span class="badge bg-success text-white mt-1">Con Garantia</span>
+                                        <br><span class="badge bg-success text-white mt-1">Con Garantía</span>
                                     {% else %}
-                                        <br><span class="badge bg-secondary text-white mt-1">Sin Garantia</span>
+                                        <br><span class="badge bg-secondary text-white mt-1">Sin Garantía</span>
                                     {% endif %}
                                 </td>
                                 <td class="fw-bold text-success">${{ t.Presupuesto_Estimado }}</td>

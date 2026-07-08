@@ -10,7 +10,7 @@
 <body>
     <nav class="navbar navbar-dark mb-4">
         <div class="container">
-            <span class="navbar-brand fw-bold fs-3" style="color: var(--accent-blue);">SGOL-IT | Seguimiento Publico</span>
+            <span class="navbar-brand fw-bold fs-3" style="color: var(--accent-blue);">SGOL-IT | Seguimiento Público</span>
             <a href="/" class="btn btn-outline-primary btn-sm fw-bold">Volver al Inicio</a>
         </div>
     </nav>
@@ -36,17 +36,17 @@
                             {% endif %}
                         <p class="text-muted mb-0"><strong>Tiempo Estimado:</strong> 
                             {% if orden.garantia == 1 or orden.garantia == '1' %}
-                                <span class="fw-bold text-success">En el dia o proximo dia habil en horario de tarde (14-19hs)</span>
+                                <span class="fw-bold text-success">En el día o próximo día hábil en horario de tarde (14-19hs)</span>
                             {% else %}
                                 <span class="fw-bold" style="color: var(--accent-cyan);">
                                     {% if orden.servicio == 'Limpieza y Mantenimiento' or orden.servicio == 'Formateo e Instalacion OS' %}
-                                        2 a 4 dias habiles
+                                        2 a 4 días hábiles
                                     {% elif orden.servicio == 'Lentitud extrema' %}
-                                        3 a 5 dias habiles
+                                        3 a 5 días hábiles
                                     {% elif orden.servicio == 'No enciende' or orden.servicio == 'Otro' %}
-                                        5 a 10 dias habiles
+                                        5 a 10 días hábiles
                                     {% else %}
-                                        Sujeto a diagnostico
+                                        Sujeto a diagnóstico
                                     {% endif %}
                                 </span>
                             {% endif %}

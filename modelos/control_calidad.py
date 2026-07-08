@@ -10,7 +10,6 @@ class ControlCalidad:
 
     def registrar(self):
         cursor = DB.cursor()
-        # Nombres de columnas sincronizados con el SQL de arriba
         sql = """INSERT INTO control_calidad 
                  (Temperaturas_Registradas, Software_Benchmark, Observaciones, Orden_Trabajo_ID_OT, Empleado_ID_Empleado) 
                  VALUES (%s, %s, %s, %s, %s)"""

@@ -35,18 +35,18 @@
                     <span class="fw-bold fs-5">
                         Orden #{{ o.id_orden }} | {{ o.equipo }} (Código de Tracking: {{ o.codigo }})
                         {% if o.garantia %}
-                            <span class="badge bg-success ms-2" style="font-size: 0.75rem;">Con Garantia</span>
-                            <span class="badge bg-success ms-2" style="font-size: 0.75rem;">Tiempo Estimado: En el dia o proximo dia habil (tarde)</span>
+                            <span class="badge bg-success ms-2" style="font-size: 0.75rem;">Con Garantía</span>
+                            <span class="badge bg-success ms-2" style="font-size: 0.75rem;">Tiempo Estimado: En el día o próximo día hábil (tarde)</span>
                         {% else %}
-                            <span class="badge bg-secondary ms-2" style="font-size: 0.75rem;">Sin Garantia</span>
-                            {% if o.servicio == 'Limpieza y Mantenimiento' or o.servicio == 'Formateo e Instalacion OS' %}
-                                <span class="badge bg-info ms-2" style="font-size: 0.75rem;">Tiempo Estimado: 2-4 dias habiles</span>
+                            <span class="badge bg-secondary ms-2" style="font-size: 0.75rem;">Sin Garantía</span>
+                            {% if o.servicio == 'Limpieza y Mantenimiento' or o.servicio == 'Formateo e Instalación OS' %}
+                                <span class="badge bg-info ms-2" style="font-size: 0.75rem;">Tiempo Estimado: 2-4 días hábiles</span>
                             {% elif o.servicio == 'Lentitud extrema' %}
-                                <span class="badge bg-info ms-2" style="font-size: 0.75rem;">Tiempo Estimado: 3-5 dias habiles</span>
+                                <span class="badge bg-info ms-2" style="font-size: 0.75rem;">Tiempo Estimado: 3-5 días hábiles</span>
                             {% elif o.servicio == 'No enciende' or o.servicio == 'Otro' %}
-                                <span class="badge bg-info ms-2" style="font-size: 0.75rem;">Tiempo Estimado: 5-10 dias habiles</span>
+                                <span class="badge bg-info ms-2" style="font-size: 0.75rem;">Tiempo Estimado: 5-10 días hábiles</span>
                             {% else %}
-                                <span class="badge bg-secondary ms-2" style="font-size: 0.75rem;">Tiempo Estimado: Sujeto a diagnostico</span>
+                                <span class="badge bg-secondary ms-2" style="font-size: 0.75rem;">Tiempo Estimado: Sujeto a diagnóstico</span>
                             {% endif %}
                         {% endif %}
                         <span class="badge bg-primary ms-2" style="font-size: 0.75rem;">Servicio: {{ o.servicio | default('No especificado', true) }}</span>
@@ -87,7 +87,7 @@
                     
                     <div class="row">
                         <div class="col-md-7 border-end" style="border-color: var(--border-glass) !important;">
-                            <h5 class="fw-bold text-info mb-3">Linea de Tiempo</h5>
+                            <h5 class="fw-bold text-info mb-3">Línea de Tiempo</h5>
                             <ul class="list-group list-group-flush">
                                 {% for hito in hitos %}
                                     {% if hito.Orden_Trabajo_ID_OT == o.id_orden %}

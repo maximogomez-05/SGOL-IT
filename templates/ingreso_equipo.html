@@ -88,7 +88,7 @@
                                 <option value="Limpieza y Mantenimiento" {% if datos and datos.servicio == 'Limpieza y Mantenimiento' %}selected{% endif %}>Limpieza Física y Cambio de Pasta Térmica</option>
                                 <option value="Formateo e Instalación OS" {% if datos and datos.servicio == 'Formateo e Instalación OS' %}selected{% endif %}>Formateo e Instalación de Windows</option>
                                 <option value="No enciende" {% if datos and datos.servicio == 'No enciende' %}selected{% endif %}>El equipo no enciende (Revisión técnica)</option>
-                                <option value="Lentitud extrema" {% if datos and datos.servicio == 'Lentitud extrema' %}selected{% endif %}>Lentitud extrema (Revisión + Optimizacion)</option>
+                                <option value="Lentitud extrema" {% if datos and datos.servicio == 'Lentitud extrema' %}selected{% endif %}>Lentitud extrema (Revisión + Optimización)</option>
                                 <option value="Otro" {% if datos and datos.servicio == 'Otro' %}selected{% endif %}>Otro problema (A cotizar en local)</option>
                             </select>
                         </div>
@@ -117,7 +117,7 @@
     <script>
         document.getElementById('fotos-input').addEventListener('change', function() {
             if (this.files.length > 4) {
-                alert('Solo se permite subir un maximo de 4 fotos.');
+                alert('Solo se permite subir un máximo de 4 fotos.');
                 this.value = '';
             }
         });
@@ -141,19 +141,19 @@
             var tiempoColor = 'var(--accent-cyan)';
             
             if (garantiaValue === '1') {
-                tiempoTexto = 'En el dia o proximo dia habil en horario de tarde (14-19hs)';
+                tiempoTexto = 'En el día o próximo día hábil en horario de tarde (14-19hs)';
                 tiempoColor = 'var(--accent-emerald)';
             } else {
                 if (servicioValue === 'Limpieza y Mantenimiento' || servicioValue === 'Formateo e Instalación OS') {
-                    tiempoTexto = '2 a 4 dias habiles';
+                    tiempoTexto = '2 a 4 días hábiles';
                 } else if (servicioValue === 'Lentitud extrema') {
-                    tiempoTexto = '3 a 5 dias habiles';
+                    tiempoTexto = '3 a 5 días hábiles';
                 } else if (servicioValue === 'No enciende') {
-                    tiempoTexto = '5 a 10 dias habiles (diagnostico complejo de hardware)';
+                    tiempoTexto = '5 a 10 días hábiles (diagnóstico complejo de hardware)';
                 } else if (servicioValue === 'Otro') {
-                    tiempoTexto = '5 a 10 dias habiles (sujeto a diagnostico en local)';
+                    tiempoTexto = '5 a 10 días hábiles (sujeto a diagnóstico en local)';
                 } else {
-                    tiempoTexto = 'Sujeto a diagnostico tecnico';
+                    tiempoTexto = 'Sujeto a diagnóstico técnico';
                 }
             }
             

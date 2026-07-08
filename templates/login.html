@@ -21,7 +21,7 @@
 <body>
     <div class="login-card glass-panel p-4">
         <div class="brand">SGOL-IT</div>
-        <p class="text-center text-muted mb-4 small">Soporte Tecnico & Gestion de Laboratorio</p>
+        <p class="text-center text-muted mb-4 small">Soporte Técnico & Gestión de Laboratorio</p>
         
         {% if error %}
             <div class="alert alert-danger py-2 text-center fw-bold">{{ error }}</div>
@@ -56,8 +56,8 @@
                         <input type="text" class="form-control" name="usuario" autocomplete="chrome-off" required autofocus>
                     </div>
                     <div class="mb-4">
-                        <label class="form-label fw-bold">Contrasena</label>
-                        <input type="password" class="form-control" name="password" placeholder="Ingrese su contrasena" autocomplete="new-password" required>
+                        <label class="form-label fw-bold">Contraseña</label>
+                        <input type="password" class="form-control" name="password" placeholder="Ingrese su contraseña" autocomplete="new-password" required>
                     </div>
                     <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">INGRESAR AL SISTEMA</button>
                 </form>
@@ -73,22 +73,22 @@
                         <input type="text" name="dni" class="form-control" placeholder="Ingrese su DNI sin puntos" autocomplete="chrome-off" required>
                     </div>
                     <div class="mb-4">
-                        <label class="form-label fw-bold">Contrasena Web</label>
-                        <input type="password" name="password_web" class="form-control" placeholder="Entregada en recepcion" autocomplete="new-password" required>
+                        <label class="form-label fw-bold">Contraseña Web</label>
+                        <input type="password" name="password_web" class="form-control" placeholder="Entregada en recepción" autocomplete="new-password" required>
                     </div>
                     <button type="submit" class="btn btn-success w-100 py-2 fw-bold mb-3">VER MI EQUIPO</button>
                     <hr>
                     <div class="mb-3">
-                        <label class="form-label text-muted small fw-bold">Tienes un codigo de seguimiento?</label>
+                        <label class="form-label text-muted small fw-bold">¿Tienes un código de seguimiento?</label>
                         <div class="input-group">
                             <input type="text" id="tracking_code_input" class="form-control" autocomplete="off">
-                            <button type="button" class="btn btn-primary fw-bold" onclick="var val = document.getElementById('tracking_code_input').value.trim(); if(val){ window.location.href='/seguimiento/' + val; } else { alert('Por favor, ingrese un codigo.'); }">Consultar</button>
+                            <button type="button" class="btn btn-primary fw-bold" onclick="var val = document.getElementById('tracking_code_input').value.trim(); if(val){ window.location.href='/seguimiento/' + val; } else { alert('Por favor, ingrese un código.'); }">Consultar</button>
                         </div>
                     </div>
                     <hr>
                     <a href="/solicitar_turno" class="btn btn-outline-primary w-100 fw-bold">Solicitar Nuevo Turno</a>
                     <div class="text-center mt-3">
-                        <small class="text-muted">Olvidaste tu contrasena? Contacta a recepcion para restablecerla.</small>
+                        <small class="text-muted">¿Olvidaste tu contraseña? Contacta a recepción para restablecerla.</small>
                     </div>
                 </form>
             </div>
