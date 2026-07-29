@@ -33,7 +33,7 @@ def login():
         
         # si la clave es la por defecto, obligar a cambiarla
         if pw in ('admin123', 'recep123', 'tecnico123', '123'):
-            session['force_password_change'] = True
+            session['force_password_change'] = 'empleado'
             return redirect(url_for('auth.cambiar_password_obligatorio'))
             
         return redirect(url_for('dashboard.dashboard'))
@@ -41,11 +41,18 @@ def login():
 
 @bp_auth.route('/logout')
 def logout():
-    session.clear()
+    session.pop('usuario_id', None)
+    session.pop('nombre', None)
+    session.pop('rol_id', None)
+    session.pop('nombre_rol', None)
+    session.pop('force_password_change', None)
     return redirect(url_for('auth.inicio'))
 
 @bp_auth.route('/tracking', methods=['GET', 'POST'])
 def tracking_login():
+    if request.method == 'GET' and 'cliente_id' in session:
+        return redirect(url_for('auth.portal_cliente'))
+        
     if request.method == 'POST':
         dni = request.form.get('dni', '').strip()
         pw = request.form.get('password_web', '').strip()
@@ -58,7 +65,7 @@ def tracking_login():
             session.update({'cliente_id': cl['id'], 'cliente_nombre': cl['nombre']})
             # si el cliente nunca cambió su contraseña provisional, obligar
             if not cl.get('password_cambiada', 1):
-                session['force_password_change'] = True
+                session['force_password_change'] = 'cliente'
                 return redirect(url_for('auth.cambiar_password_obligatorio'))
             return redirect(url_for('auth.portal_cliente'))
         flash("Datos incorrectos.", "danger")
@@ -92,18 +99,25 @@ def cambiar_password_obligatorio():
             return render_template('cambiar_password_obligatorio.html')
 
         exito = False
-        if 'usuario_id' in session:
-            exito = Empleado.actualizar_password(session['usuario_id'], nueva)
-        elif 'cliente_id' in session:
+        quien = session.get('force_password_change', '')
+        if quien == 'cliente' and 'cliente_id' in session:
             exito = Cliente.actualizar_password(session['cliente_id'], nueva)
+        elif quien == 'empleado' and 'usuario_id' in session:
+            exito = Empleado.actualizar_password(session['usuario_id'], nueva)
+        elif 'cliente_id' in session and 'usuario_id' not in session:
+            exito = Cliente.actualizar_password(session['cliente_id'], nueva)
+            quien = 'cliente'
+        elif 'usuario_id' in session:
+            exito = Empleado.actualizar_password(session['usuario_id'], nueva)
+            quien = 'empleado'
 
         if exito:
             session.pop('force_password_change', None)
             flash("Contraseña actualizada exitosamente. ¡Bienvenido/a!", "success")
-            if 'usuario_id' in session:
-                return redirect(url_for('dashboard.dashboard'))
-            else:
+            if quien == 'cliente':
                 return redirect(url_for('auth.portal_cliente'))
+            else:
+                return redirect(url_for('dashboard.dashboard'))
         else:
             flash("Error al actualizar la contraseña.", "danger")
 
@@ -195,7 +209,7 @@ def seguimiento_publico(codigo_tracking):
     orden = OrdenTrabajo.buscar_por_codigo_tracking(codigo_tracking)
     if not orden:
         flash("Código de seguimiento inválido.", "danger")
-        return redirect(url_for('auth.inicio'))
+        return redirect(url_for('auth.tracking_login'))
         
     hitos = Seguimiento.buscar_por_orden(orden['id_orden'])
     detalles = DetalleOrden.buscar_por_orden(orden['id_orden'])
@@ -206,7 +220,7 @@ def seguimiento_publico(codigo_tracking):
 def logout_cliente():
     session.pop('cliente_id', None)
     session.pop('cliente_nombre', None)
-    return redirect(url_for('auth.inicio'))
+    return redirect(url_for('auth.tracking_login'))
 
 @bp_auth.route('/solicitar_turno', methods=['GET', 'POST'])
 def solicitar_turno():
@@ -284,7 +298,7 @@ def solicitar_turno():
             DB.commit()
             cursor.close()
             flash("Turno solicitado con éxito. Nos comunicaremos a la brevedad.", "success")
-            return redirect(url_for('auth.inicio'))
+            return redirect(url_for('auth.solicitar_turno'))
         except Exception as e:
             flash(f"Error al solicitar turno: {e}", "danger")
             return render_template('solicitar_turno.html')

@@ -22,6 +22,12 @@ class ConectorDB:
         # obtiene o crea la conexion especifica de este hilo
         if not hasattr(self._local, 'conexion') or not self._local.conexion.is_connected():
             self._local.conexion = self._conectar()
+        else:
+            # verificar que la conexion siga viva de verdad (evita crash por timeout)
+            try:
+                self._local.conexion.ping(reconnect=True, attempts=2, delay=1)
+            except Exception:
+                self._local.conexion = self._conectar()
         return self._local.conexion
 
     def cursor(self, dictionary=False):

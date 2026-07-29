@@ -22,17 +22,19 @@ def obtener_mensajes(id_orden):
     if 'usuario_id' not in session and 'cliente_id' not in session:
         return jsonify({"error": "No autorizado"}), 401
     
+    # determinar el rol activo segun parametro 'como' o por defecto
+    como = request.args.get('como', '')
+    es_cliente = (como == 'cliente' and 'cliente_id' in session) or ('cliente_id' in session and 'usuario_id' not in session)
+    
     # si es cliente, validar que la orden le pertenezca
-    if 'cliente_id' in session and 'usuario_id' not in session:
+    if es_cliente:
         if not _cliente_tiene_acceso_a_orden(id_orden, session['cliente_id']):
             return jsonify({"error": "No autorizado para esta orden"}), 403
     
     # determina quien lee el mensaje para marcarlo como leido
-    if 'cliente_id' in session:
-        # si es cliente, marcar como leido lo enviado por empleados
+    if es_cliente:
         MensajeChat.marcar_leido_por_orden(id_orden, 'cliente')
     else:
-        # si es empleado, marcar como leido lo enviado por clientes
         MensajeChat.marcar_leido_por_orden(id_orden, 'empleado')
 
     mensajes = MensajeChat.listar_por_orden(id_orden)
@@ -44,13 +46,17 @@ def enviar_mensaje(id_orden):
     if 'usuario_id' not in session and 'cliente_id' not in session:
         return jsonify({"error": "No autorizado"}), 401
 
-    # si es cliente, validar que la orden le pertenezca
-    if 'cliente_id' in session and 'usuario_id' not in session:
-        if not _cliente_tiene_acceso_a_orden(id_orden, session['cliente_id']):
-            return jsonify({"error": "No autorizado para esta orden"}), 403
-
     data = request.get_json() or {}
     texto = data.get('mensaje', '').strip()
+    como = data.get('como', '')
+    
+    # determinar el rol activo segun parametro 'como' o por defecto
+    es_cliente = (como == 'cliente' and 'cliente_id' in session) or ('cliente_id' in session and 'usuario_id' not in session)
+
+    # si es cliente, validar que la orden le pertenezca
+    if es_cliente:
+        if not _cliente_tiene_acceso_a_orden(id_orden, session['cliente_id']):
+            return jsonify({"error": "No autorizado para esta orden"}), 403
 
     if not texto:
         return jsonify({"error": "El mensaje no puede estar vacio"}), 400
@@ -59,7 +65,7 @@ def enviar_mensaje(id_orden):
         return jsonify({"error": "El mensaje contiene caracteres no permitidos"}), 400
 
     # construir el mensaje segun quien envie
-    if 'cliente_id' in session:
+    if es_cliente:
         msg = MensajeChat(
             orden_trabajo_id=id_orden,
             remitente_tipo='cliente',

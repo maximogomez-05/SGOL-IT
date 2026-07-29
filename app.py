@@ -60,12 +60,20 @@ def check_forced_password_change():
         'auth.inicio', 
         'auth.login', 
         'auth.tracking_login', 
+        'auth.solicitar_turno',
+        'auth.seguimiento_publico',
         'static'
     ]
     if request.endpoint and request.endpoint not in allowed_routes:
-        if session.get('force_password_change'):
-            flash("Debes personalizar tu contraseña antes de continuar.", "warning")
-            return redirect(url_for('auth.cambiar_password_obligatorio'))
+        fpc = session.get('force_password_change')
+        if fpc:
+            # solo bloquear las rutas del rol que necesita cambiar contraseña
+            es_ruta_cliente = request.endpoint in ('auth.portal_cliente', 'auth.cambiar_password_cliente', 'auth.responder_presupuesto')
+            es_ruta_admin = not es_ruta_cliente and request.endpoint not in allowed_routes
+            
+            if (fpc == 'cliente' and es_ruta_cliente) or (fpc == 'empleado' and es_ruta_admin):
+                flash("Debes personalizar tu contraseña antes de continuar.", "warning")
+                return redirect(url_for('auth.cambiar_password_obligatorio'))
 
 # error handlers globales
 @app.errorhandler(404)

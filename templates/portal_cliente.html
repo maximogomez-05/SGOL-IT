@@ -229,7 +229,7 @@
             const box = document.getElementById(`chat-box-${idOrden}`);
             if (!box) return;
             
-            fetch(`/chat/${idOrden}`)
+            fetch(`/chat/${idOrden}?como=cliente`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.error) {
@@ -281,7 +281,7 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ mensaje: txt })
+                body: JSON.stringify({ mensaje: txt, como: 'cliente' })
             })
             .then(res => res.json())
             .then(data => {
